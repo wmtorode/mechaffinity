@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using MechAffinity.Data;
 using BattleTech;
+using CustomComponents;
+using CustomSalvage;
 
 namespace MechAffinity
 {
@@ -31,6 +33,20 @@ namespace MechAffinity
         public void setCompanyStats(StatCollection stats)
         {
             companyStats = stats;
+        }
+
+        private string getPrefabId(AbstractActor actor)
+        {
+            Mech mech = actor as Mech;
+            if (mech != null)
+            {
+                if (mech.MechDef.Chassis.Is<AssemblyVariant>(out var a) && !string.IsNullOrEmpty(a.PrefabID))
+                    return a.PrefabID + mech.MechDef.Chassis.Tonnage.ToString();
+
+                return mech.MechDef.Chassis.PrefabIdentifier + mech.MechDef.Chassis.Tonnage.ToString();
+
+            }
+                return null;
         }
     }
 }
