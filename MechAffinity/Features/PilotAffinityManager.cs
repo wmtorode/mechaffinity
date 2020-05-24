@@ -48,5 +48,40 @@ namespace MechAffinity
             }
                 return null;
         }
+
+        private string getAffinityStatName(AbstractActor actor)
+        {
+            Pilot pilot = actor.GetPilot();
+            if (pilot == null)
+            {
+                Main.modLog.DebugMessage("Null Pilot found!");
+                return null;
+            }
+            string statName = $"{MA_Deployment_Stat}_{pilot.GUID}_{getPrefabId(actor)}";
+            return statName;
+        }
+
+        public int getDeploymentCountWithMech(AbstractActor actor)
+        {
+            string statName = getAffinityStatName(actor);
+            if (companyStats.ContainsStatistic(statName))
+            {
+                return companyStats.GetValue<int>(statName);
+            }
+            companyStats.AddStatistic<int>(statName, 0);
+            return 0;
+        }
+
+        public void incrementDeployCountWithMech(AbstractActor actor)
+        {
+            string statName = getAffinityStatName(actor);
+            if (companyStats.ContainsStatistic(statName))
+            {
+                int stat = companyStats.GetValue<int>(statName);
+                stat++;
+                companyStats.Set<int>(statName, stat);
+            }
+            companyStats.AddStatistic<int>(statName, 0);
+        }
     }
 }
