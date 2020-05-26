@@ -5,8 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using MechAffinity.Data;
 using BattleTech;
+
+#if USE_CS_CC
 using CustomComponents;
 using CustomSalvage;
+#endif
 
 namespace MechAffinity
 {
@@ -15,6 +18,7 @@ namespace MechAffinity
         private static readonly string MA_Deployment_Stat = "MA_DeployStat_";
         private static PilotAffinityManager instance;
         private StatCollection companyStats;
+        private Dictionary<string, List<AffinityLevel>> chassisAffinities;
 
         public static PilotAffinityManager Instance
         {
@@ -27,7 +31,11 @@ namespace MechAffinity
 
         public void initialize()
         {
-
+            chassisAffinities = new Dictionary<string, List<AffinityLevel>>();
+            foreach( ChassisSpecificAffinity chassisSpecific in Main.settings.chassisAffinities)
+            {
+                chassisAffinities.Add(chassisSpecific.chassisName, chassisSpecific.affinityLevels);
+            }
         }
 
         public void setCompanyStats(StatCollection stats)
@@ -40,8 +48,10 @@ namespace MechAffinity
             Mech mech = actor as Mech;
             if (mech != null)
             {
+                #if USE_CS_CC
                 if (mech.MechDef.Chassis.Is<AssemblyVariant>(out var a) && !string.IsNullOrEmpty(a.PrefabID))
                     return a.PrefabID + mech.MechDef.Chassis.Tonnage.ToString();
+                #endif
 
                 return mech.MechDef.Chassis.PrefabIdentifier + mech.MechDef.Chassis.Tonnage.ToString();
 
@@ -83,5 +93,91 @@ namespace MechAffinity
             }
             companyStats.AddStatistic<int>(statName, 0);
         }
+
+        private Dictionary<EAffinityType, int> getDeploymentBonus(AbstractActor actor)
+        {
+            Dictionary<EAffinityType, int> bonuses = new Dictionary<EAffinityType, int>();
+            int deployCount = getDeploymentCountWithMech(actor);
+            string chassisPrefab = getPrefabId(actor);
+
+            foreach (AffinityLevel affinityLevel in Main.settings.globalAffinities)
+            {
+                if (deployCount >= affinityLevel.missionsRequired)
+                {
+                    foreach(Affinity affinity in affinityLevel.affinities)
+                    {
+                        if (bonuses.ContainsKey(affinity.type))
+                        {
+                            bonuses[affinity.type] += affinity.bonus;
+                        }
+                        else
+                        {
+                            bonuses.Add(affinity.type, affinity.bonus);
+                        }
+                    }
+                }
+            }
+            if(chassisAffinities.ContainsKey(chassisPrefab))
+            {
+                List<AffinityLevel> affinityLevels = chassisAffinities[chassisPrefab];
+                foreach (AffinityLevel affinityLevel in affinityLevels)
+                {
+                    if (deployCount >= affinityLevel.missionsRequired)
+                    {
+                        foreach (Affinity affinity in affinityLevel.affinities)
+                        {
+                            if (bonuses.ContainsKey(affinity.type))
+                            {
+                                bonuses[affinity.type] += affinity.bonus;
+                            }
+                            else
+                            {
+                                bonuses.Add(affinity.type, affinity.bonus);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return bonuses;
+        }
+
+        private void applyStatBonuses(AbstractActor actor, Dictionary<EAffinityType, int> bonuses)
+        {
+            if (actor.GetPilot() == null)
+            {
+                Main.modLog.LogMessage("Cannot Apply Bonuses to target, no pilot available");
+                return;
+            }
+            StatCollection pilotStats = actor.GetPilot().StatCollection;
+            if (bonuses.ContainsKey(EAffinityType.Tatics))
+            {
+                Statistic stat = pilotStats.GetStatistic("Tactics");
+                pilotStats.Int_Add(stat, bonuses[EAffinityType.Tatics]);
+            }
+            if (bonuses.ContainsKey(EAffinityType.Guts))
+            {
+                Statistic stat = pilotStats.GetStatistic("Guts");
+                pilotStats.Int_Add(stat, bonuses[EAffinityType.Guts]);
+            }
+            if (bonuses.ContainsKey(EAffinityType.Gunnery))
+            {
+                Statistic stat = pilotStats.GetStatistic("Gunnery");
+                pilotStats.Int_Add(stat, bonuses[EAffinityType.Gunnery]);
+            }
+            if (bonuses.ContainsKey(EAffinityType.Piloting))
+            {
+                Statistic stat = pilotStats.GetStatistic("Piloting");
+                pilotStats.Int_Add(stat, bonuses[EAffinityType.Piloting]);
+            }
+        }
+
+        public void applyBonuses(AbstractActor actor)
+        {
+            Dictionary<EAffinityType, int> bonuses = getDeploymentBonus(actor);
+            applyStatBonuses(actor, bonuses);
+        }
+
     }
+
 }
