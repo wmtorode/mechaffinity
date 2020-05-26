@@ -8,6 +8,7 @@ namespace MechAffinity.Data
     {
         public int missionsRequired = 0;
         public string levelName = "sample";
+        public string decription = "";
         public List<Affinity> affinities = new List<Affinity>();
     }
 }

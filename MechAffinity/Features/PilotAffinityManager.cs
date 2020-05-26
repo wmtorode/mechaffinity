@@ -15,7 +15,7 @@ namespace MechAffinity
 {
     class PilotAffinityManager
     {
-        private static readonly string MA_Deployment_Stat = "MA_DeployStat_";
+        private static readonly string MA_Deployment_Stat = "MaDeployStat_";
         private static PilotAffinityManager instance;
         private StatCollection companyStats;
         private Dictionary<string, List<AffinityLevel>> chassisAffinities;
@@ -99,11 +99,13 @@ namespace MechAffinity
             Dictionary<EAffinityType, int> bonuses = new Dictionary<EAffinityType, int>();
             int deployCount = getDeploymentCountWithMech(actor);
             string chassisPrefab = getPrefabId(actor);
+            string statName = getAffinityStatName(actor);
 
             foreach (AffinityLevel affinityLevel in Main.settings.globalAffinities)
             {
                 if (deployCount >= affinityLevel.missionsRequired)
                 {
+                    Main.modLog.LogMessage($"Pilot/Mech Combo {statName} has achieved Global Level {affinityLevel.levelName}");
                     foreach(Affinity affinity in affinityLevel.affinities)
                     {
                         if (bonuses.ContainsKey(affinity.type))
@@ -124,6 +126,7 @@ namespace MechAffinity
                 {
                     if (deployCount >= affinityLevel.missionsRequired)
                     {
+                        Main.modLog.LogMessage($"Pilot/Mech Combo {statName} has achieved Chassis Specific Level {affinityLevel.levelName}");
                         foreach (Affinity affinity in affinityLevel.affinities)
                         {
                             if (bonuses.ContainsKey(affinity.type))
@@ -174,7 +177,20 @@ namespace MechAffinity
 
         public void applyBonuses(AbstractActor actor)
         {
+            if (actor.team == null || !actor.team.IsLocalPlayer)
+            {
+                // actor isnt part of our team, dont record them
+                Main.modLog.DebugMessage($"Skipping actor: {getAffinityStatName(actor)}");
+                return;
+            }
             Dictionary<EAffinityType, int> bonuses = getDeploymentBonus(actor);
+            if (Main.settings.debug)
+            {
+                foreach (KeyValuePair<EAffinityType, int> bonus in bonuses)
+                {
+                    Main.modLog.DebugMessage($"Appling Bonus: {bonus.Key.ToString()} with strength: {bonus.Value}");
+                }
+            }
             applyStatBonuses(actor, bonuses);
         }
 

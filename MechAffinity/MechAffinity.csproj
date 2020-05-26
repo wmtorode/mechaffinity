@@ -74,6 +74,7 @@
     <Compile Include="Data\Settings.cs" />
     <Compile Include="Features\PilotAffinityManager.cs" />
     <Compile Include="Main.cs" />
+    <Compile Include="Patches\SimGameState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
