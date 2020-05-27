@@ -8,7 +8,7 @@ using Harmony;
 
 namespace MechAffinity.Patches
 {
-    [HarmonyPatch(typeof(UnitSpawnPointGameLogic), "initializeActor", typeof(AbstractActor))]
+    [HarmonyPatch(typeof(UnitSpawnPointGameLogic), "initializeActor", typeof(AbstractActor), typeof(Team), typeof(Lance))]
     class UnitSpawnPointGameLogic_initializeActor
     {
         public static void Postfix(SimGameState __instance, AbstractActor actor)

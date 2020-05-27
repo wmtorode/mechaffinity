@@ -50,7 +50,7 @@ namespace MechAffinity
                         return a.PrefabID + mech.MechDef.Chassis.Tonnage.ToString();
                 #endif
 
-            return mech.Chassis.PrefabIdentifier + mech.Chassis.Tonnage.ToString();
+            return $"{mech.Chassis.PrefabIdentifier}_{mech.Chassis.Tonnage}";
         }
 
         private string getPrefabId(AbstractActor actor)
@@ -58,7 +58,7 @@ namespace MechAffinity
             Mech mech = actor as Mech;
             if (mech != null)
             {
-                getPrefabId(mech.MechDef);
+                return getPrefabId(mech.MechDef);
 
             }
                 return null;
@@ -70,15 +70,21 @@ namespace MechAffinity
             if (pilot == null)
             {
                 Main.modLog.DebugMessage("Null Pilot found!");
-                return null;
+                return $"{MA_Deployment_Stat}";
             }
-            string statName = $"{MA_Deployment_Stat}_{pilot.GUID}_{getPrefabId(actor)}";
+            string prefab = getPrefabId(actor);
+            if (String.IsNullOrEmpty(prefab))
+            {
+                Main.modLog.DebugMessage("Null Prefab!");
+                return $"{MA_Deployment_Stat}_{pilot.pilotDef.Description.Id}";
+            }
+            string statName = $"{MA_Deployment_Stat}_{pilot.pilotDef.Description.Id}_{getPrefabId(actor)}";
             return statName;
         }
 
         private string getAffinityStatName(UnitResult result)
         {
-            string statName = $"{MA_Deployment_Stat}_{result.pilot.GUID}_{getPrefabId(result.mech)}";
+            string statName = $"{MA_Deployment_Stat}_{result.pilot.pilotDef.Description.Id}_{getPrefabId(result.mech)}";
             return statName;
         }
 
@@ -123,6 +129,7 @@ namespace MechAffinity
             int deployCount = getDeploymentCountWithMech(actor);
             string chassisPrefab = getPrefabId(actor);
             string statName = getAffinityStatName(actor);
+            Main.modLog.LogMessage($"Processing Pilot/Mech Combo {statName}");
 
             foreach (AffinityLevel affinityLevel in Main.settings.globalAffinities)
             {
@@ -176,10 +183,10 @@ namespace MechAffinity
                 return;
             }
             StatCollection pilotStats = actor.GetPilot().StatCollection;
-            if (bonuses.ContainsKey(EAffinityType.Tatics))
+            if (bonuses.ContainsKey(EAffinityType.Tactics))
             {
                 Statistic stat = pilotStats.GetStatistic("Tactics");
-                pilotStats.Int_Add(stat, bonuses[EAffinityType.Tatics]);
+                pilotStats.Int_Add(stat, bonuses[EAffinityType.Tactics]);
             }
             if (bonuses.ContainsKey(EAffinityType.Guts))
             {

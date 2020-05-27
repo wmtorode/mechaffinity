@@ -7,7 +7,7 @@ namespace MechAffinity.Data
     class Affinity
     {
         [JsonConverter(typeof(StringEnumConverter))]
-        public EAffinityType type = EAffinityType.Tatics;
+        public EAffinityType type = EAffinityType.Tactics;
 
         public int bonus = 0;
     }
