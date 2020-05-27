@@ -38,9 +38,17 @@ namespace MechAffinity.Patches
             if (__instance.CompletedContract != null)
             {
                 List<UnitResult> results = __instance.CompletedContract.PlayerUnitResults;
+                List<Pilot> pilotList = new List<Pilot>((IEnumerable<Pilot>)__instance.PilotRoster);
+                pilotList.Add(__instance.Commander);
                 foreach (UnitResult result in results)
                 {
-                    PilotAffinityManager.Instance.incrementDeployCountWithMech(result);
+                    foreach (Pilot pilot in pilotList)
+                    {
+                        if (result.pilot.pilotDef.Description.Id == pilot.pilotDef.Description.Id)
+                        {
+                            PilotAffinityManager.Instance.incrementDeployCountWithMech(result);
+                        }
+                    }
                 }
             }
         }

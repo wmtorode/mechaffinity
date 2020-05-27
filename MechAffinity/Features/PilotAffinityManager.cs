@@ -15,7 +15,7 @@ namespace MechAffinity
 {
     class PilotAffinityManager
     {
-        private static readonly string MA_Deployment_Stat = "MaDeployStat_";
+        private static readonly string MA_Deployment_Stat = "MaDeployStat=";
         private static PilotAffinityManager instance;
         private StatCollection companyStats;
         private Dictionary<string, List<AffinityLevel>> chassisAffinities;
@@ -76,15 +76,15 @@ namespace MechAffinity
             if (String.IsNullOrEmpty(prefab))
             {
                 Main.modLog.DebugMessage("Null Prefab!");
-                return $"{MA_Deployment_Stat}_{pilot.pilotDef.Description.Id}";
+                return $"{MA_Deployment_Stat}{pilot.pilotDef.Description.Id}";
             }
-            string statName = $"{MA_Deployment_Stat}_{pilot.pilotDef.Description.Id}_{getPrefabId(actor)}";
+            string statName = $"{MA_Deployment_Stat}{pilot.pilotDef.Description.Id}={getPrefabId(actor)}";
             return statName;
         }
 
         private string getAffinityStatName(UnitResult result)
         {
-            string statName = $"{MA_Deployment_Stat}_{result.pilot.pilotDef.Description.Id}_{getPrefabId(result.mech)}";
+            string statName = $"{MA_Deployment_Stat}{result.pilot.pilotDef.Description.Id}={getPrefabId(result.mech)}";
             return statName;
         }
 
@@ -95,7 +95,6 @@ namespace MechAffinity
             {
                 return companyStats.GetValue<int>(statName);
             }
-            companyStats.AddStatistic<int>(statName, 0);
             return 0;
         }
 
@@ -107,8 +106,10 @@ namespace MechAffinity
                 int stat = companyStats.GetValue<int>(statName);
                 stat++;
                 companyStats.Set<int>(statName, stat);
+                return;
             }
-            companyStats.AddStatistic<int>(statName, 0);
+            // we dont have the stat yet so just set it to 1
+            companyStats.AddStatistic<int>(statName, 1);
         }
 
         public void incrementDeployCountWithMech(UnitResult result)
