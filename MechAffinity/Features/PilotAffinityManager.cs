@@ -43,17 +43,22 @@ namespace MechAffinity
             companyStats = stats;
         }
 
+        private string getPrefabId(MechDef mech)
+        {
+                #if USE_CS_CC
+                    if (mech.Chassis.Is<AssemblyVariant>(out var a) && !string.IsNullOrEmpty(a.PrefabID))
+                        return a.PrefabID + mech.MechDef.Chassis.Tonnage.ToString();
+                #endif
+
+            return mech.Chassis.PrefabIdentifier + mech.Chassis.Tonnage.ToString();
+        }
+
         private string getPrefabId(AbstractActor actor)
         {
             Mech mech = actor as Mech;
             if (mech != null)
             {
-                #if USE_CS_CC
-                if (mech.MechDef.Chassis.Is<AssemblyVariant>(out var a) && !string.IsNullOrEmpty(a.PrefabID))
-                    return a.PrefabID + mech.MechDef.Chassis.Tonnage.ToString();
-                #endif
-
-                return mech.MechDef.Chassis.PrefabIdentifier + mech.MechDef.Chassis.Tonnage.ToString();
+                getPrefabId(mech.MechDef);
 
             }
                 return null;
@@ -71,6 +76,12 @@ namespace MechAffinity
             return statName;
         }
 
+        private string getAffinityStatName(UnitResult result)
+        {
+            string statName = $"{MA_Deployment_Stat}_{result.pilot.GUID}_{getPrefabId(result.mech)}";
+            return statName;
+        }
+
         public int getDeploymentCountWithMech(AbstractActor actor)
         {
             string statName = getAffinityStatName(actor);
@@ -82,9 +93,9 @@ namespace MechAffinity
             return 0;
         }
 
-        public void incrementDeployCountWithMech(AbstractActor actor)
+        public void incrementDeployCountWithMech(string statName)
         {
-            string statName = getAffinityStatName(actor);
+            Main.modLog.LogMessage($"Incrementing DeployCount stat {statName}");
             if (companyStats.ContainsStatistic(statName))
             {
                 int stat = companyStats.GetValue<int>(statName);
@@ -92,6 +103,18 @@ namespace MechAffinity
                 companyStats.Set<int>(statName, stat);
             }
             companyStats.AddStatistic<int>(statName, 0);
+        }
+
+        public void incrementDeployCountWithMech(UnitResult result)
+        {
+            string statName = getAffinityStatName(result);
+            incrementDeployCountWithMech(statName);
+        }
+
+        public void incrementDeployCountWithMech(AbstractActor actor)
+        {
+            string statName = getAffinityStatName(actor);
+            incrementDeployCountWithMech(statName);
         }
 
         private Dictionary<EAffinityType, int> getDeploymentBonus(AbstractActor actor)

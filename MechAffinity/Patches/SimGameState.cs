@@ -30,4 +30,20 @@ namespace MechAffinity.Patches
         }
     }
 
+    [HarmonyPatch(typeof(SimGameState), "ResolveCompleteContract")]
+    class SimGameState_ResolveCompleteContract
+    {
+        public static void Prefix(SimGameState __instance)
+        {
+            if (__instance.CompletedContract != null)
+            {
+                List<UnitResult> results = __instance.CompletedContract.PlayerUnitResults;
+                foreach (UnitResult result in results)
+                {
+                    PilotAffinityManager.Instance.incrementDeployCountWithMech(result);
+                }
+            }
+        }
+    }
+
 }
