@@ -19,6 +19,10 @@ namespace MechAffinity
         private static PilotAffinityManager instance;
         private StatCollection companyStats;
         private Dictionary<string, List<AffinityLevel>> chassisAffinities;
+        private Dictionary<string, List<string>> pilotStatMap;
+        private Dictionary<string, string> chassisPrefabLut;
+        private Dictionary<string, string> prefabOverrides;
+        private Dictionary<string, string> levelDescriptors;
 
         public static PilotAffinityManager Instance
         {
@@ -32,23 +36,62 @@ namespace MechAffinity
         public void initialize()
         {
             chassisAffinities = new Dictionary<string, List<AffinityLevel>>();
-            foreach( ChassisSpecificAffinity chassisSpecific in Main.settings.chassisAffinities)
+            prefabOverrides = new Dictionary<string, string>();
+            chassisPrefabLut = new Dictionary<string, string>();
+            levelDescriptors = new Dictionary<string, string>();
+            foreach (ChassisSpecificAffinity chassisSpecific in Main.settings.chassisAffinities)
             {
                 chassisAffinities.Add(chassisSpecific.chassisName, chassisSpecific.affinityLevels);
+                foreach(AffinityLevel affinityLevel in chassisSpecific.affinityLevels)
+                {
+                    levelDescriptors[affinityLevel.levelName] = affinityLevel.decription;
+                }
+            }
+            foreach (PrefabOverride overRide in Main.settings.prefabOverrides)
+            {
+                prefabOverrides[overRide.prefabId] = overRide.overrideName;
+            }
+            foreach (AffinityLevel affinityLevel in Main.settings.globalAffinities)
+            {
+                levelDescriptors[affinityLevel.levelName] = affinityLevel.decription;
             }
         }
 
         public void setCompanyStats(StatCollection stats)
         {
             companyStats = stats;
+            pilotStatMap = new Dictionary<string, List<string>>();
+
+            //find all mechs a given pilot has experience with and cache for later
+            foreach (KeyValuePair<string, Statistic> keypair in companyStats)
+            {
+                if (keypair.Key.StartsWith(MA_Deployment_Stat))
+                {
+                    addtoPilotMap(keypair.Key);
+                }
+            }
+        }
+
+        private void addtoPilotMap(string statName)
+        {
+            string pilotId = statName.Split('=')[1];
+            string chassisId = statName.Split('=')[2];
+            if (!pilotStatMap.ContainsKey(pilotId))
+            {
+                pilotStatMap[pilotId] = new List<string>();
+            }
+            if (!pilotStatMap[pilotId].Contains(chassisId))
+            {
+                pilotStatMap[pilotId].Append<string>(chassisId);
+            }
         }
 
         private string getPrefabId(MechDef mech)
         {
-                #if USE_CS_CC
+#if USE_CS_CC
                     if (mech.Chassis.Is<AssemblyVariant>(out var a) && !string.IsNullOrEmpty(a.PrefabID))
                         return a.PrefabID + mech.MechDef.Chassis.Tonnage.ToString();
-                #endif
+#endif
 
             return $"{mech.Chassis.PrefabIdentifier}_{mech.Chassis.Tonnage}";
         }
@@ -61,7 +104,7 @@ namespace MechAffinity
                 return getPrefabId(mech.MechDef);
 
             }
-                return null;
+            return null;
         }
 
         private string getAffinityStatName(AbstractActor actor)
@@ -84,13 +127,15 @@ namespace MechAffinity
 
         private string getAffinityStatName(UnitResult result)
         {
-            string statName = $"{MA_Deployment_Stat}{result.pilot.pilotDef.Description.Id}={getPrefabId(result.mech)}";
+            string prefabId = getPrefabId(result.mech);
+            // chache the last known chassis name of the prefab in question
+            chassisPrefabLut[prefabId] = result.mech.Chassis.Description.Name;
+            string statName = $"{MA_Deployment_Stat}{result.pilot.pilotDef.Description.Id}={prefabId}";
             return statName;
         }
 
-        public int getDeploymentCountWithMech(AbstractActor actor)
+        public int getDeploymentCountWithMech(string statName)
         {
-            string statName = getAffinityStatName(actor);
             if (companyStats.ContainsStatistic(statName))
             {
                 return companyStats.GetValue<int>(statName);
@@ -98,9 +143,17 @@ namespace MechAffinity
             return 0;
         }
 
+        public int getDeploymentCountWithMech(AbstractActor actor)
+        {
+            string statName = getAffinityStatName(actor);
+            return getDeploymentCountWithMech(statName);
+            
+        }
+
         public void incrementDeployCountWithMech(string statName)
         {
             Main.modLog.LogMessage($"Incrementing DeployCount stat {statName}");
+            addtoPilotMap(statName);
             if (companyStats.ContainsStatistic(statName))
             {
                 int stat = companyStats.GetValue<int>(statName);
@@ -123,6 +176,60 @@ namespace MechAffinity
             string statName = getAffinityStatName(actor);
             incrementDeployCountWithMech(statName);
         }
+
+        private string getHighestLevelName(string statName, string prefab)
+        {
+            string ret = "";
+            int maxSoFar = 0;
+            int deployCount = getDeploymentCountWithMech(statName);
+
+            foreach (AffinityLevel affinityLevel in Main.settings.globalAffinities)
+            {
+                if (deployCount >= affinityLevel.missionsRequired)
+                {
+                    if (affinityLevel.missionsRequired >= maxSoFar)
+                    {
+                        maxSoFar = affinityLevel.missionsRequired;
+                        ret = affinityLevel.levelName;
+                    }
+                }
+
+            }
+            if (chassisAffinities.ContainsKey(prefab))
+            {
+                List<AffinityLevel> affinityLevels = chassisAffinities[prefab];
+                foreach (AffinityLevel affinityLevel in affinityLevels)
+                {
+                    if (deployCount >= affinityLevel.missionsRequired)
+                    {
+                        if (affinityLevel.missionsRequired >= maxSoFar)
+                        {
+                            maxSoFar = affinityLevel.missionsRequired;
+                            ret = affinityLevel.levelName;
+                        }
+                    }
+                }
+            }
+
+            return ret;
+        }
+
+        public string getMechAffinityDescription(Pilot pilot)
+        {
+            string pilotId = pilot.pilotDef.Description.Id;
+            Dictionary<string, List<string>> affinites = new Dictionary<string, List<string>>();
+            if (pilotStatMap.ContainsKey(pilotId))
+            {
+                foreach(string chassisId in pilotStatMap[pilotId])
+                {
+
+                }
+            }
+            string ret = "";
+
+            return ret;
+        }
+
 
         private Dictionary<EAffinityType, int> getDeploymentBonus(AbstractActor actor)
         {

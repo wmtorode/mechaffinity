@@ -11,5 +11,6 @@ namespace MechAffinity.Data
         public bool debug = false;
         public List<AffinityLevel> globalAffinities = new List<AffinityLevel>();
         public List<ChassisSpecificAffinity> chassisAffinities = new List<ChassisSpecificAffinity>();
+        public List<PrefabOverride> prefabOverrides = new List<PrefabOverride>();
     }
 }
