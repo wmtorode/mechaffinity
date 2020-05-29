@@ -77,6 +77,10 @@ namespace MechAffinity
             {
                 chassisPrefabLut = JsonConvert.DeserializeObject<Dictionary<string, string>>(companyStats.GetValue<string>(MA_Lut_Stat));
             }
+            else
+            {
+                companyStats.AddStatistic<string>(MA_Lut_Stat, JsonConvert.SerializeObject(chassisPrefabLut, Formatting.None));
+            }
         }
 
         private void addtoPilotMap(string statName)
@@ -89,16 +93,16 @@ namespace MechAffinity
             }
             if (!pilotStatMap[pilotId].Contains(chassisId))
             {
-                pilotStatMap[pilotId].Append<string>(chassisId);
+                pilotStatMap[pilotId].Add(chassisId);
             }
         }
 
         private string getPrefabId(MechDef mech)
         {
-#if USE_CS_CC
-                    if (mech.Chassis.Is<AssemblyVariant>(out var a) && !string.IsNullOrEmpty(a.PrefabID))
-                        return a.PrefabID + mech.MechDef.Chassis.Tonnage.ToString();
-#endif
+            #if USE_CS_CC
+                if (mech.Chassis.Is<AssemblyVariant>(out var a) && !string.IsNullOrEmpty(a.PrefabID))
+                    return a.PrefabID + mech.MechDef.Chassis.Tonnage.ToString();
+            #endif
 
             return $"{mech.Chassis.PrefabIdentifier}_{mech.Chassis.Tonnage}";
         }
@@ -136,12 +140,15 @@ namespace MechAffinity
         {
             string prefabId = getPrefabId(result.mech);
             // chache the last known chassis name of the prefab in question
-            bool needToUpdate = chassisPrefabLut.ContainsKey(prefabId);
+            bool needToUpdate = !chassisPrefabLut.ContainsKey(prefabId);
             chassisPrefabLut[prefabId] = result.mech.Chassis.Description.Name;
             string statName = $"{MA_Deployment_Stat}{result.pilot.pilotDef.Description.Id}={prefabId}";
             if (needToUpdate)
             {
-                companyStats.Set<string>(MA_Lut_Stat, JsonConvert.SerializeObject(chassisPrefabLut, Formatting.None));
+                if (!prefabOverrides.ContainsKey(prefabId))
+                {
+                    companyStats.Set<string>(MA_Lut_Stat, JsonConvert.SerializeObject(chassisPrefabLut, Formatting.None));
+                }
             }
             return statName;
         }
@@ -194,6 +201,7 @@ namespace MechAffinity
             string ret = "";
             int maxSoFar = 0;
             int deployCount = getDeploymentCountWithMech(statName);
+            Main.modLog.LogMessage($"Deployment Count: {deployCount}");
 
             foreach (AffinityLevel affinityLevel in Main.settings.globalAffinities)
             {
@@ -253,14 +261,14 @@ namespace MechAffinity
                                 chassisName = chassisPrefabLut[chassisId];
                             }
                         }
-                        affinites[level].Append<string>(chassisName);
+                        affinites[level].Add(chassisName);
                     }
                 }
             }
-            string ret = "\n";
+            string ret = "";
             foreach(KeyValuePair<string, List<string>> level in affinites)
             {
-                string descript = $"{level.Key}: {levelDescriptors[level.Key]}, when using mechs:\n";
+                string descript = $"<b>{level.Key}</b>: {levelDescriptors[level.Key]}, when using:\n";
                 string mechs = string.Join("\n", level.Value);
                 descript += mechs;
                 ret += descript + "\n\n";
