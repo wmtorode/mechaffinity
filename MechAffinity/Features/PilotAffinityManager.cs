@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MechAffinity.Data;
 using BattleTech;
+using Newtonsoft.Json;
 
 #if USE_CS_CC
 using CustomComponents;
@@ -16,6 +17,7 @@ namespace MechAffinity
     class PilotAffinityManager
     {
         private static readonly string MA_Deployment_Stat = "MaDeployStat=";
+        private static readonly string MA_Lut_Stat = "MaLutStat";
         private static PilotAffinityManager instance;
         private StatCollection companyStats;
         private Dictionary<string, List<AffinityLevel>> chassisAffinities;
@@ -61,6 +63,7 @@ namespace MechAffinity
         {
             companyStats = stats;
             pilotStatMap = new Dictionary<string, List<string>>();
+            chassisPrefabLut = new Dictionary<string, string>();
 
             //find all mechs a given pilot has experience with and cache for later
             foreach (KeyValuePair<string, Statistic> keypair in companyStats)
@@ -69,6 +72,10 @@ namespace MechAffinity
                 {
                     addtoPilotMap(keypair.Key);
                 }
+            }
+            if (companyStats.ContainsStatistic(MA_Lut_Stat))
+            {
+                chassisPrefabLut = JsonConvert.DeserializeObject<Dictionary<string, string>>(companyStats.GetValue<string>(MA_Lut_Stat));
             }
         }
 
@@ -129,8 +136,13 @@ namespace MechAffinity
         {
             string prefabId = getPrefabId(result.mech);
             // chache the last known chassis name of the prefab in question
+            bool needToUpdate = chassisPrefabLut.ContainsKey(prefabId);
             chassisPrefabLut[prefabId] = result.mech.Chassis.Description.Name;
             string statName = $"{MA_Deployment_Stat}{result.pilot.pilotDef.Description.Id}={prefabId}";
+            if (needToUpdate)
+            {
+                companyStats.Set<string>(MA_Lut_Stat, JsonConvert.SerializeObject(chassisPrefabLut, Formatting.None));
+            }
             return statName;
         }
 
@@ -222,10 +234,37 @@ namespace MechAffinity
             {
                 foreach(string chassisId in pilotStatMap[pilotId])
                 {
-
+                    string level = getHighestLevelName($"{MA_Deployment_Stat}{pilotId}={chassisId}", chassisId);
+                    string chassisName = chassisId;
+                    if (!string.IsNullOrEmpty(level))
+                    {
+                        if(!affinites.ContainsKey(level))
+                        {
+                            affinites[level] = new List<string>();
+                        }
+                        if(prefabOverrides.ContainsKey(chassisId))
+                        {
+                            chassisName = prefabOverrides[chassisId];
+                        }
+                        else
+                        {
+                            if(chassisPrefabLut.ContainsKey(chassisId))
+                            {
+                                chassisName = chassisPrefabLut[chassisId];
+                            }
+                        }
+                        affinites[level].Append<string>(chassisName);
+                    }
                 }
             }
-            string ret = "";
+            string ret = "\n";
+            foreach(KeyValuePair<string, List<string>> level in affinites)
+            {
+                string descript = $"{level.Key}: {levelDescriptors[level.Key]}, when using mechs:\n";
+                string mechs = string.Join("\n", level.Value);
+                descript += mechs;
+                ret += descript + "\n\n";
+            }
 
             return ret;
         }
