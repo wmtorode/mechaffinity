@@ -20,7 +20,7 @@ namespace MechAffinity.Patches
         public static void Postfix(SGBarracksServicePanel __instance, Pilot p)
         {
             string affinityDescriptors = PilotAffinityManager.Instance.getMechAffinityDescription(p);
-            Main.modLog.LogMessage(affinityDescriptors);
+            //Main.modLog.LogMessage(affinityDescriptors);
             LocalizableText bioText = (LocalizableText)finfo.GetValue(__instance);
             bioText.AppendTextAndRefresh(affinityDescriptors, (object[])Array.Empty<object>());
             finfo.SetValue(__instance, bioText);

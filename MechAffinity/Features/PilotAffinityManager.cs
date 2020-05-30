@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MechAffinity.Data;
 using BattleTech;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 #if USE_CS_CC
 using CustomComponents;
@@ -25,6 +26,7 @@ namespace MechAffinity
         private Dictionary<string, string> chassisPrefabLut;
         private Dictionary<string, string> prefabOverrides;
         private Dictionary<string, string> levelDescriptors;
+        private int uid;
 
         public static PilotAffinityManager Instance
         {
@@ -47,6 +49,21 @@ namespace MechAffinity
                 foreach(AffinityLevel affinityLevel in chassisSpecific.affinityLevels)
                 {
                     levelDescriptors[affinityLevel.levelName] = affinityLevel.decription;
+                    foreach (JObject jObject in affinityLevel.effectData)
+                    {
+                        EffectData effectData = new EffectData();
+                        effectData.FromJSON(jObject.ToString());
+                        affinityLevel.effects.Add(effectData);
+                    }
+                }
+            }
+            foreach(AffinityLevel affinity in Main.settings.globalAffinities)
+            {
+                foreach (JObject jObject in affinity.effectData)
+                {
+                    EffectData effectData = new EffectData();
+                    effectData.FromJSON(jObject.ToString());
+                    affinity.effects.Add(effectData);
                 }
             }
             foreach (PrefabOverride overRide in Main.settings.prefabOverrides)
@@ -64,6 +81,7 @@ namespace MechAffinity
             companyStats = stats;
             pilotStatMap = new Dictionary<string, List<string>>();
             chassisPrefabLut = new Dictionary<string, string>();
+            uid = 0;
 
             //find all mechs a given pilot has experience with and cache for later
             foreach (KeyValuePair<string, Statistic> keypair in companyStats)
@@ -101,7 +119,7 @@ namespace MechAffinity
         {
             #if USE_CS_CC
                 if (mech.Chassis.Is<AssemblyVariant>(out var a) && !string.IsNullOrEmpty(a.PrefabID))
-                    return a.PrefabID + mech.MechDef.Chassis.Tonnage.ToString();
+                    return a.PrefabID + "_" + mech.Chassis.Tonnage.ToString();
             #endif
 
             return $"{mech.Chassis.PrefabIdentifier}_{mech.Chassis.Tonnage}";
@@ -201,7 +219,7 @@ namespace MechAffinity
             string ret = "";
             int maxSoFar = 0;
             int deployCount = getDeploymentCountWithMech(statName);
-            Main.modLog.LogMessage($"Deployment Count: {deployCount}");
+            //Main.modLog.LogMessage($"Deployment Count: {deployCount}");
 
             foreach (AffinityLevel affinityLevel in Main.settings.globalAffinities)
             {
@@ -265,10 +283,10 @@ namespace MechAffinity
                     }
                 }
             }
-            string ret = "";
+            string ret = "\n";
             foreach(KeyValuePair<string, List<string>> level in affinites)
             {
-                string descript = $"<b>{level.Key}</b>: {levelDescriptors[level.Key]}, when using:\n";
+                string descript = $"<b>{level.Key}</b>: {levelDescriptors[level.Key]}:\n";
                 string mechs = string.Join("\n", level.Value);
                 descript += mechs;
                 ret += descript + "\n\n";
@@ -278,9 +296,10 @@ namespace MechAffinity
         }
 
 
-        private Dictionary<EAffinityType, int> getDeploymentBonus(AbstractActor actor)
+        private Dictionary<EAffinityType, int> getDeploymentBonus(AbstractActor actor, out List<EffectData> effects)
         {
             Dictionary<EAffinityType, int> bonuses = new Dictionary<EAffinityType, int>();
+            effects = new List<EffectData>();
             int deployCount = getDeploymentCountWithMech(actor);
             string chassisPrefab = getPrefabId(actor);
             string statName = getAffinityStatName(actor);
@@ -302,6 +321,10 @@ namespace MechAffinity
                             bonuses.Add(affinity.type, affinity.bonus);
                         }
                     }
+                    foreach(EffectData effect in affinityLevel.effects)
+                    {
+                        effects.Add(effect);
+                    }
                 }
             }
             if(chassisAffinities.ContainsKey(chassisPrefab))
@@ -322,6 +345,11 @@ namespace MechAffinity
                             {
                                 bonuses.Add(affinity.type, affinity.bonus);
                             }
+                        }
+                        foreach (EffectData effect in affinityLevel.effects)
+                        {
+                            effects.Add(effect);
+                            Main.modLog.LogMessage($"Found effect ID: {effect.Description.Id}, name: {effect.Description.Name}");
                         }
                     }
                 }
@@ -360,6 +388,23 @@ namespace MechAffinity
             }
         }
 
+        private void applyStatusEffects(AbstractActor actor, List<EffectData> effects)
+        {
+            foreach (EffectData statusEffect in effects)
+            {
+                if (statusEffect.targetingData.effectTriggerType == EffectTriggerType.Passive)
+                {
+                    if (statusEffect.targetingData.effectTargetType == EffectTargetType.Creator)
+                    {
+                        string effectId = $"PassiveEffect_{actor.GUID}_{uid}";
+                        uid++;
+                        Main.modLog.LogMessage($"Applying affect {effectId}, effect ID: {statusEffect.Description.Id}, name: {statusEffect.Description.Name}");
+                        actor.Combat.EffectManager.CreateEffect(statusEffect, effectId, -1, (ICombatant)actor, (ICombatant)actor, new WeaponHitInfo(), 0, false);
+                    }
+                }
+            }
+        }
+
         public void applyBonuses(AbstractActor actor)
         {
             if (actor.team == null || !actor.team.IsLocalPlayer)
@@ -368,15 +413,17 @@ namespace MechAffinity
                 Main.modLog.DebugMessage($"Skipping actor: {getAffinityStatName(actor)}");
                 return;
             }
-            Dictionary<EAffinityType, int> bonuses = getDeploymentBonus(actor);
+            List<EffectData> effects;
+            Dictionary<EAffinityType, int> bonuses = getDeploymentBonus(actor, out effects);
             if (Main.settings.debug)
             {
                 foreach (KeyValuePair<EAffinityType, int> bonus in bonuses)
                 {
-                    Main.modLog.DebugMessage($"Appling Bonus: {bonus.Key.ToString()} with strength: {bonus.Value}");
+                    Main.modLog.DebugMessage($"Applying Bonus: {bonus.Key.ToString()} with strength: {bonus.Value}");
                 }
             }
             applyStatBonuses(actor, bonuses);
+            applyStatusEffects(actor, effects);
         }
 
     }
