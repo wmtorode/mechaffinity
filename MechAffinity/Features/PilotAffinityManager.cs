@@ -18,6 +18,7 @@ namespace MechAffinity
     class PilotAffinityManager
     {
         private static readonly string MA_Deployment_Stat = "MaDeployStat=";
+        private static readonly string MA_Decay_Stat = "MaDecayStat=";
         private static readonly string MA_Lut_Stat = "MaLutStat";
         private static PilotAffinityManager instance;
         private StatCollection companyStats;
@@ -26,6 +27,7 @@ namespace MechAffinity
         private Dictionary<string, string> chassisPrefabLut;
         private Dictionary<string, string> prefabOverrides;
         private Dictionary<string, string> levelDescriptors;
+        private Dictionary<string, List<string>> pilotNoDeployStatMap;
         private int uid;
 
         public static PilotAffinityManager Instance
@@ -45,8 +47,11 @@ namespace MechAffinity
             levelDescriptors = new Dictionary<string, string>();
             foreach (ChassisSpecificAffinity chassisSpecific in Main.settings.chassisAffinities)
             {
-                chassisAffinities.Add(chassisSpecific.chassisName, chassisSpecific.affinityLevels);
-                foreach(AffinityLevel affinityLevel in chassisSpecific.affinityLevels)
+                foreach (string chassisName in chassisSpecific.chassisNames)
+                {
+                    chassisAffinities.Add(chassisName, chassisSpecific.affinityLevels);
+                }
+                foreach (AffinityLevel affinityLevel in chassisSpecific.affinityLevels)
                 {
                     levelDescriptors[affinityLevel.levelName] = affinityLevel.decription;
                     foreach (JObject jObject in affinityLevel.effectData)
@@ -81,6 +86,7 @@ namespace MechAffinity
             companyStats = stats;
             pilotStatMap = new Dictionary<string, List<string>>();
             chassisPrefabLut = new Dictionary<string, string>();
+            pilotNoDeployStatMap = new Dictionary<string, List<string>>();
             uid = 0;
 
             //find all mechs a given pilot has experience with and cache for later
@@ -89,6 +95,13 @@ namespace MechAffinity
                 if (keypair.Key.StartsWith(MA_Deployment_Stat))
                 {
                     addtoPilotMap(keypair.Key);
+                }
+                else
+                {
+                    if(keypair.Key.StartsWith(MA_Decay_Stat))
+                    {
+                        addtoPilotDecayMap(keypair.Key);
+                    }
                 }
             }
             if (companyStats.ContainsStatistic(MA_Lut_Stat))
@@ -113,6 +126,29 @@ namespace MechAffinity
             {
                 pilotStatMap[pilotId].Add(chassisId);
             }
+        }
+
+        private void addtoPilotDecayMap(string statName)
+        {
+            string pilotId = statName.Split('=')[1];
+            if (!pilotNoDeployStatMap.ContainsKey(pilotId))
+            {
+                pilotNoDeployStatMap[pilotId] = new List<string>();
+            }
+            if (!pilotNoDeployStatMap[pilotId].Contains(statName))
+            {
+                pilotNoDeployStatMap[pilotId].Add(statName);
+            }
+        }
+
+        private string convertDecayStatToAffinity(string statName)
+        {
+            return statName.Replace(MA_Decay_Stat, MA_Deployment_Stat);
+        }
+
+        private string convertAffinityStatToDecay(string statName)
+        {
+            return statName.Replace(MA_Deployment_Stat, MA_Decay_Stat);
         }
 
         private string getPrefabId(MechDef mech)
@@ -187,19 +223,86 @@ namespace MechAffinity
             
         }
 
+        private void decayAffinties(string decayStat)
+        {
+            if (Main.settings.missionsBeforeDecay != -1 || Main.settings.removeAffinityAfter != -1)
+            {
+                string pilotId = decayStat.Split('=')[1];
+                List<string> decayList = pilotNoDeployStatMap[pilotId];
+                List<string> toPurge = new List<string>();
+                foreach (string decaying in decayList)
+                {
+                    string affinityStat = convertDecayStatToAffinity(decaying);
+                    if (companyStats.ContainsStatistic(decaying))
+                    {
+                        int decayed = companyStats.GetValue<int>(decaying);
+                        if (decaying == decayStat)
+                        {
+                            companyStats.Set<int>(decaying, 0);
+                        }
+                        else
+                        {
+                            decayed++;
+                            if (Main.settings.removeAffinityAfter != -1 && decayed >= Main.settings.removeAffinityAfter)
+                            {
+                                companyStats.RemoveStatistic(decaying);
+                                companyStats.RemoveStatistic(affinityStat);
+                                toPurge.Add(decaying);
+                            }
+                            else
+                            {
+                                if (Main.settings.missionsBeforeDecay != -1 && decayed >= Main.settings.missionsBeforeDecay)
+                                {
+                                    if (companyStats.ContainsStatistic(affinityStat))
+                                    {
+                                        int deployCount = companyStats.GetValue<int>(affinityStat);
+                                        if (deployCount > Main.settings.lowestPossibleDecay)
+                                        {
+                                            deployCount--;
+                                            companyStats.Set<int>(affinityStat, deployCount);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Main.modLog.LogError($"Failed to decay stat {affinityStat}");
+                                    }
+                                }
+                                companyStats.Set<int>(decaying, decayed);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        companyStats.AddStatistic<int>(decaying, 0);
+                    }
+                }
+                foreach (string purge in toPurge)
+                {
+                    pilotNoDeployStatMap[pilotId].Remove(purge);
+                }
+            }
+        }
+
         public void incrementDeployCountWithMech(string statName)
         {
             Main.modLog.LogMessage($"Incrementing DeployCount stat {statName}");
+            string decayStat = convertAffinityStatToDecay(statName);
             addtoPilotMap(statName);
+            addtoPilotDecayMap(decayStat);
             if (companyStats.ContainsStatistic(statName))
             {
                 int stat = companyStats.GetValue<int>(statName);
                 stat++;
                 companyStats.Set<int>(statName, stat);
-                return;
             }
-            // we dont have the stat yet so just set it to 1
-            companyStats.AddStatistic<int>(statName, 1);
+            else
+            {
+                // we dont have the stat yet so just set it to 1
+                companyStats.AddStatistic<int>(statName, 1);
+            }
+            decayAffinties(decayStat);
+            
+            
         }
 
         public void incrementDeployCountWithMech(UnitResult result)

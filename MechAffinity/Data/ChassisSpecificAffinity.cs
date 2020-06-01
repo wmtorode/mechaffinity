@@ -8,7 +8,7 @@ namespace MechAffinity.Data
 {
     class ChassisSpecificAffinity
     {
-        public string chassisName = "sample";
+        public List<string> chassisNames = new List<string> ();
         public List<AffinityLevel> affinityLevels = new List<AffinityLevel>();
     }
 }
