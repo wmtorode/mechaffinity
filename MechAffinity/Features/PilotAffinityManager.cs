@@ -248,6 +248,7 @@ namespace MechAffinity
                                 companyStats.RemoveStatistic(decaying);
                                 companyStats.RemoveStatistic(affinityStat);
                                 toPurge.Add(decaying);
+                                Main.modLog.LogMessage($"Removing Stat: {affinityStat}");
                             }
                             else
                             {
@@ -260,6 +261,7 @@ namespace MechAffinity
                                         {
                                             deployCount--;
                                             companyStats.Set<int>(affinityStat, deployCount);
+                                            Main.modLog.LogMessage($"decaying stat {affinityStat}, new value: {deployCount}");
                                         }
                                     }
                                     else
