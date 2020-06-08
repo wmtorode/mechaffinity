@@ -88,6 +88,7 @@
     <Compile Include="Data\EAffinityType.cs" />
     <Compile Include="Data\Logger.cs" />
     <Compile Include="Data\PrefabOverride.cs" />
+    <Compile Include="Data\QuirkAffinity.cs" />
     <Compile Include="Data\Settings.cs" />
     <Compile Include="Features\PilotAffinityManager.cs" />
     <Compile Include="Main.cs" />

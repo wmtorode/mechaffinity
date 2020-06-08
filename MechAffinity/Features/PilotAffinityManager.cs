@@ -28,6 +28,7 @@ namespace MechAffinity
         private Dictionary<string, string> prefabOverrides;
         private Dictionary<string, string> levelDescriptors;
         private Dictionary<string, List<string>> pilotNoDeployStatMap;
+        private Dictionary<string, List<AffinityLevel>> quirkAffinities;
         private int uid;
 
         public static PilotAffinityManager Instance
@@ -42,6 +43,7 @@ namespace MechAffinity
         public void initialize()
         {
             chassisAffinities = new Dictionary<string, List<AffinityLevel>>();
+            quirkAffinities = new Dictionary<string, List<AffinityLevel>>();
             prefabOverrides = new Dictionary<string, string>();
             chassisPrefabLut = new Dictionary<string, string>();
             levelDescriptors = new Dictionary<string, string>();
@@ -62,7 +64,24 @@ namespace MechAffinity
                     }
                 }
             }
-            foreach(AffinityLevel affinity in Main.settings.globalAffinities)
+            foreach (QuirkAffinity quirkAffinity in Main.settings.quirkAffinities)
+            {
+                foreach (string quirkName in quirkAffinity.quirkNames)
+                {
+                    quirkAffinities.Add(quirkName, quirkAffinity.affinityLevels);
+                }
+                foreach (AffinityLevel affinityLevel in quirkAffinity.affinityLevels)
+                {
+                    levelDescriptors[affinityLevel.levelName] = affinityLevel.decription;
+                    foreach (JObject jObject in affinityLevel.effectData)
+                    {
+                        EffectData effectData = new EffectData();
+                        effectData.FromJSON(jObject.ToString());
+                        affinityLevel.effects.Add(effectData);
+                    }
+                }
+            }
+            foreach (AffinityLevel affinity in Main.settings.globalAffinities)
             {
                 foreach (JObject jObject in affinity.effectData)
                 {
@@ -172,6 +191,25 @@ namespace MechAffinity
             return null;
         }
 
+        private List<string> getPossibleQuirkAffinites(AbstractActor actor)
+        {
+            List<string> quirks = new List<string>();
+            Mech mech = actor as Mech;
+            if (mech != null)
+            {
+                foreach (MechComponentRef fixedEquip in mech.MechDef.Chassis.FixedEquipment)
+                {
+                    if (quirkAffinities.ContainsKey(fixedEquip.ComponentDefID))
+                    {
+                        quirks.Add(fixedEquip.ComponentDefID);
+                    }
+                }
+
+            }
+
+            return quirks;
+        }
+
         private string getAffinityStatName(AbstractActor actor)
         {
             Pilot pilot = actor.GetPilot();
@@ -222,6 +260,28 @@ namespace MechAffinity
             return getDeploymentCountWithMech(statName);
             
         }
+        private bool shouldDecay(int decayCount)
+        {
+            if (Main.settings.missionsBeforeDecay != -1)
+            {
+                if (Main.settings.decayByModulo)
+                {
+                    if (decayCount != 0 && ((decayCount % Main.settings.missionsBeforeDecay) == 0))
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    if(decayCount >= Main.settings.missionsBeforeDecay)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+            
+        }
 
         private void decayAffinties(string decayStat)
         {
@@ -252,7 +312,7 @@ namespace MechAffinity
                             }
                             else
                             {
-                                if (Main.settings.missionsBeforeDecay != -1 && decayed >= Main.settings.missionsBeforeDecay)
+                                if (shouldDecay(decayed))
                                 {
                                     if (companyStats.ContainsStatistic(affinityStat))
                                     {
@@ -408,6 +468,7 @@ namespace MechAffinity
             int deployCount = getDeploymentCountWithMech(actor);
             string chassisPrefab = getPrefabId(actor);
             string statName = getAffinityStatName(actor);
+            List<string> possibleQuirks = getPossibleQuirkAffinites(actor);
             Main.modLog.LogMessage($"Processing Pilot/Mech Combo {statName}");
 
             foreach (AffinityLevel affinityLevel in Main.settings.globalAffinities)
@@ -440,6 +501,33 @@ namespace MechAffinity
                     if (deployCount >= affinityLevel.missionsRequired)
                     {
                         Main.modLog.LogMessage($"Pilot/Mech Combo {statName} has achieved Chassis Specific Level {affinityLevel.levelName}");
+                        foreach (Affinity affinity in affinityLevel.affinities)
+                        {
+                            if (bonuses.ContainsKey(affinity.type))
+                            {
+                                bonuses[affinity.type] += affinity.bonus;
+                            }
+                            else
+                            {
+                                bonuses.Add(affinity.type, affinity.bonus);
+                            }
+                        }
+                        foreach (EffectData effect in affinityLevel.effects)
+                        {
+                            effects.Add(effect);
+                            Main.modLog.LogMessage($"Found effect ID: {effect.Description.Id}, name: {effect.Description.Name}");
+                        }
+                    }
+                }
+            }
+            foreach(string quirk in possibleQuirks)
+            {
+                List<AffinityLevel> affinityLevels = quirkAffinities[quirk];
+                foreach (AffinityLevel affinityLevel in affinityLevels)
+                {
+                    if (deployCount >= affinityLevel.missionsRequired)
+                    {
+                        Main.modLog.LogMessage($"Pilot/Mech Combo {statName} has achieved Quirk Specific Level {affinityLevel.levelName}");
                         foreach (Affinity affinity in affinityLevel.affinities)
                         {
                             if (bonuses.ContainsKey(affinity.type))
