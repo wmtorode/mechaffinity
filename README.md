@@ -12,8 +12,10 @@ example:
     "missionsBeforeDecay" : -1,
     "removeAffinityAfter" : 100,
     "lowestPossibleDecay" : 0,
+    "decayByModulo" : false,
     "globalAffinities" : [],
-    "chassisAffinities" : []
+    "chassisAffinities" : [],
+    "quirkAffinities" : []
 }
 ```
 
@@ -25,9 +27,13 @@ example:
 
 `lowestPossibleDecay` : the lowest amount of a pilots experience with a chassis can decay to `removeAffinityAfter` overrides this value. this is counted in deployements
 
+`decayByModulo` : when set to true, decay is changed to 1 point for every `missionsBeforeDecay` instead of 1 point for every mission after `missionsBeforeDecay` missions
+
 `globalAffinities` : a list of `affinityLevel` objects. these will aplly to all pilot-chassis combos. Note that affinity levels are additive
 
 `chassisAffinities` : a list of `ChassisAfinity` objects. These apply only to pilots-chassis combos that are called out by the affinity. Note these are additive with global affinities.
+
+`quirkAffinities` : a list of `QuirkAffinity` objects. These apply only to pilots-chassis combos equiped with the defined gear that are called out by the affinity. Note these are additive with all other affinities.
 
 ### affinityLevel objects
 
@@ -81,3 +87,23 @@ example:
 `chassisNames` : a list of chassis this affinity is available to. the chassis name is the prefab name followed by a `-` and the tonnage of the mech. In the event a the chassis has an assembly variant (from custom salvage), this will be used instead of the prefab. example chassis name for the assassin `chrPrfMech_assassinBase-001_40`
 
 `affinityLevels` : a list of `affinityLevel` objects to be considered for this affinity
+
+
+### QuirkAffinity objects
+
+```json
+{
+    "quirkNames" : [],
+    "affinityLevels" : []
+}
+```
+
+`quirkNames` : a list of fixed equipment on a chassis that this affinity should be applied to. use the items ComponentDefID for this field. a pilot can qualify for multiple quirk affinities, ideally this is used for mech quirks, but other fixed gear can also be used
+
+`affinityLevels` : a list of `affinityLevel` objects to be considered for this affinity
+
+
+## Giving AI Pilots Affinities
+
+non player pilots can also be setup to recieve affinities. to do this add a pliot tag of `affinityLevel_X` where X is the number of deployments that should be granted to the pilot. pilots with this tag will be 
+able to recieve all affinites (Global, Chassis & Quirk) that a player pilot of equal deployments is applicable for

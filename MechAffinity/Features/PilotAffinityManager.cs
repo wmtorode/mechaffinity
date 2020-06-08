@@ -20,6 +20,9 @@ namespace MechAffinity
         private static readonly string MA_Deployment_Stat = "MaDeployStat=";
         private static readonly string MA_Decay_Stat = "MaDecayStat=";
         private static readonly string MA_Lut_Stat = "MaLutStat";
+        private static readonly string MA_DaysElapsedMod_Stat = "MaDaysSinceDecay";
+        private static readonly string MA_DaysBeforeDecay_Stat = "MaDaysBeforeDecay";
+        private static readonly string MA_PilotDeployCountTag = "affinityLevel_";
         private static PilotAffinityManager instance;
         private StatCollection companyStats;
         private Dictionary<string, List<AffinityLevel>> chassisAffinities;
@@ -201,7 +204,10 @@ namespace MechAffinity
                 {
                     if (quirkAffinities.ContainsKey(fixedEquip.ComponentDefID))
                     {
-                        quirks.Add(fixedEquip.ComponentDefID);
+                        if (!quirks.Contains(fixedEquip.ComponentDefID))
+                        {
+                            quirks.Add(fixedEquip.ComponentDefID);
+                        }
                     }
                 }
 
@@ -460,15 +466,10 @@ namespace MechAffinity
             return ret;
         }
 
-
-        private Dictionary<EAffinityType, int> getDeploymentBonus(AbstractActor actor, out List<EffectData> effects)
+        private void getDeploymentBonus(int deployCount, string chassisPrefab, string statName, List<string> possibleQuirks, out Dictionary<EAffinityType, int> bonuses, out List<EffectData> effects)
         {
-            Dictionary<EAffinityType, int> bonuses = new Dictionary<EAffinityType, int>();
+            bonuses = new Dictionary<EAffinityType, int>();
             effects = new List<EffectData>();
-            int deployCount = getDeploymentCountWithMech(actor);
-            string chassisPrefab = getPrefabId(actor);
-            string statName = getAffinityStatName(actor);
-            List<string> possibleQuirks = getPossibleQuirkAffinites(actor);
             Main.modLog.LogMessage($"Processing Pilot/Mech Combo {statName}");
 
             foreach (AffinityLevel affinityLevel in Main.settings.globalAffinities)
@@ -476,7 +477,7 @@ namespace MechAffinity
                 if (deployCount >= affinityLevel.missionsRequired)
                 {
                     Main.modLog.LogMessage($"Pilot/Mech Combo {statName} has achieved Global Level {affinityLevel.levelName}");
-                    foreach(Affinity affinity in affinityLevel.affinities)
+                    foreach (Affinity affinity in affinityLevel.affinities)
                     {
                         if (bonuses.ContainsKey(affinity.type))
                         {
@@ -487,40 +488,43 @@ namespace MechAffinity
                             bonuses.Add(affinity.type, affinity.bonus);
                         }
                     }
-                    foreach(EffectData effect in affinityLevel.effects)
+                    foreach (EffectData effect in affinityLevel.effects)
                     {
                         effects.Add(effect);
                     }
                 }
             }
-            if(chassisAffinities.ContainsKey(chassisPrefab))
+            if (!String.IsNullOrEmpty(chassisPrefab))
             {
-                List<AffinityLevel> affinityLevels = chassisAffinities[chassisPrefab];
-                foreach (AffinityLevel affinityLevel in affinityLevels)
+                if (chassisAffinities.ContainsKey(chassisPrefab))
                 {
-                    if (deployCount >= affinityLevel.missionsRequired)
+                    List<AffinityLevel> affinityLevels = chassisAffinities[chassisPrefab];
+                    foreach (AffinityLevel affinityLevel in affinityLevels)
                     {
-                        Main.modLog.LogMessage($"Pilot/Mech Combo {statName} has achieved Chassis Specific Level {affinityLevel.levelName}");
-                        foreach (Affinity affinity in affinityLevel.affinities)
+                        if (deployCount >= affinityLevel.missionsRequired)
                         {
-                            if (bonuses.ContainsKey(affinity.type))
+                            Main.modLog.LogMessage($"Pilot/Mech Combo {statName} has achieved Chassis Specific Level {affinityLevel.levelName}");
+                            foreach (Affinity affinity in affinityLevel.affinities)
                             {
-                                bonuses[affinity.type] += affinity.bonus;
+                                if (bonuses.ContainsKey(affinity.type))
+                                {
+                                    bonuses[affinity.type] += affinity.bonus;
+                                }
+                                else
+                                {
+                                    bonuses.Add(affinity.type, affinity.bonus);
+                                }
                             }
-                            else
+                            foreach (EffectData effect in affinityLevel.effects)
                             {
-                                bonuses.Add(affinity.type, affinity.bonus);
+                                effects.Add(effect);
+                                Main.modLog.LogMessage($"Found effect ID: {effect.Description.Id}, name: {effect.Description.Name}");
                             }
-                        }
-                        foreach (EffectData effect in affinityLevel.effects)
-                        {
-                            effects.Add(effect);
-                            Main.modLog.LogMessage($"Found effect ID: {effect.Description.Id}, name: {effect.Description.Name}");
                         }
                     }
                 }
             }
-            foreach(string quirk in possibleQuirks)
+            foreach (string quirk in possibleQuirks)
             {
                 List<AffinityLevel> affinityLevels = quirkAffinities[quirk];
                 foreach (AffinityLevel affinityLevel in affinityLevels)
@@ -547,8 +551,48 @@ namespace MechAffinity
                     }
                 }
             }
+        }
 
-            return bonuses;
+
+        private void getDeploymentBonus(AbstractActor actor, out Dictionary<EAffinityType, int> bonuses, out List<EffectData> effects)
+        {
+            int deployCount = getDeploymentCountWithMech(actor);
+            string chassisPrefab = getPrefabId(actor);
+            string statName = getAffinityStatName(actor);
+            List<string> possibleQuirks = getPossibleQuirkAffinites(actor);
+            getDeploymentBonus(deployCount, chassisPrefab, statName, possibleQuirks, out bonuses, out effects);
+        }
+
+        public int getPilotDeployBonusByTag(AbstractActor actor)
+        {
+            int deployCount = 0;
+            Pilot pilot = actor.GetPilot();
+            if (pilot != null)
+            {
+                List<string> tags = pilot.pilotDef.PilotTags.ToArray().ToList();
+                foreach(string tag in tags)
+                {
+                    if (tag.StartsWith(MA_PilotDeployCountTag))
+                    {
+                        string count = tag.Replace(MA_PilotDeployCountTag, "");
+                        if (!int.TryParse(count, out deployCount))
+                        {
+                            deployCount = 0;
+                        }
+                        break;
+                    }
+                }
+            }
+            return deployCount;
+        }
+
+        private void getAIBonuses(AbstractActor actor, out Dictionary<EAffinityType, int> bonuses, out List<EffectData> effects)
+        {
+            int deployCount = getPilotDeployBonusByTag(actor);
+            string chassisPrefab = getPrefabId(actor);
+            string statName = getAffinityStatName(actor);
+            List<string> possibleQuirks = getPossibleQuirkAffinites(actor);
+            getDeploymentBonus(deployCount, chassisPrefab, statName, possibleQuirks, out bonuses, out effects);
         }
 
         private void applyStatBonuses(AbstractActor actor, Dictionary<EAffinityType, int> bonuses)
@@ -600,14 +644,18 @@ namespace MechAffinity
 
         public void applyBonuses(AbstractActor actor)
         {
+            List<EffectData> effects;
+            Dictionary<EAffinityType, int> bonuses;
             if (actor.team == null || !actor.team.IsLocalPlayer)
             {
-                // actor isnt part of our team, dont record them
-                Main.modLog.DebugMessage($"Skipping actor: {getAffinityStatName(actor)}");
-                return;
+                // actor isnt part of our team, check if their pilot defines a bonus
+                Main.modLog.DebugMessage($"Processing AI actor: {getAffinityStatName(actor)}");
+                getAIBonuses(actor, out bonuses, out effects);
             }
-            List<EffectData> effects;
-            Dictionary<EAffinityType, int> bonuses = getDeploymentBonus(actor, out effects);
+            else
+            {
+                getDeploymentBonus(actor, out bonuses, out effects);
+            }
             if (Main.settings.debug)
             {
                 foreach (KeyValuePair<EAffinityType, int> bonus in bonuses)
