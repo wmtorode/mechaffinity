@@ -13,6 +13,7 @@ example:
     "removeAffinityAfter" : 100,
     "lowestPossibleDecay" : 0,
     "decayByModulo" : false,
+    "defaultDaysBeforeSimDecay" : -1,
     "globalAffinities" : [],
     "chassisAffinities" : [],
     "quirkAffinities" : []
@@ -28,6 +29,9 @@ example:
 `lowestPossibleDecay` : the lowest amount of a pilots experience with a chassis can decay to `removeAffinityAfter` overrides this value. this is counted in deployements
 
 `decayByModulo` : when set to true, decay is changed to 1 point for every `missionsBeforeDecay` instead of 1 point for every mission after `missionsBeforeDecay` missions
+
+`defaultDaysBeforeSimDecay` : the default number of days that can elapse before a pilot's affinities begin to decay. this number becomes part of the save and cannot be changed from settings later. events or argo upgrades can
+manipulate this value by changing the company stat `MaSimDaysDecayModulator`. setting this stat to -1 will stop decay from occuring when a day passes. deploying a pilot into a mission will reset that pilots counter.
 
 `globalAffinities` : a list of `affinityLevel` objects. these will aplly to all pilot-chassis combos. Note that affinity levels are additive
 

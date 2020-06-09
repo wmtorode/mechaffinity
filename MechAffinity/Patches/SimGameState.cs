@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Harmony;
 using BattleTech;
 using BattleTech.Save;
+using Localize;
 using MechAffinity;
 
 namespace MechAffinity.Patches
@@ -49,6 +50,24 @@ namespace MechAffinity.Patches
                             PilotAffinityManager.Instance.incrementDeployCountWithMech(result);
                         }
                     }
+                }
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(SimGameState), "OnDayPassed")]
+    class SimGameState_OnDayPassed
+    {
+        public static void Postfix(SimGameState __instance)
+        {
+            List<Pilot> pilotList = new List<Pilot>((IEnumerable<Pilot>)__instance.PilotRoster);
+            pilotList.Add(__instance.Commander);
+            foreach (Pilot pilot in pilotList)
+            {
+                bool decayed = PilotAffinityManager.Instance.onSimDayElapsed(pilot);
+                if (decayed)
+                {                 
+                    __instance.RoomManager.ShipRoom.AddEventToast(new Text(string.Format("{0} affinities decayed!", (object)pilot.Callsign), (object[])Array.Empty<object>()));
                 }
             }
         }

@@ -20,8 +20,8 @@ namespace MechAffinity
         private static readonly string MA_Deployment_Stat = "MaDeployStat=";
         private static readonly string MA_Decay_Stat = "MaDecayStat=";
         private static readonly string MA_Lut_Stat = "MaLutStat";
-        private static readonly string MA_DaysElapsedMod_Stat = "MaDaysSinceDecay";
-        private static readonly string MA_DaysBeforeDecay_Stat = "MaDaysBeforeDecay";
+        private static readonly string MA_DaysElapsedMod_Stat = "MaDaysSinceLastDecay=";
+        private static readonly string MA_SimDaysDecayModulator_Stat = "MaSimDaysDecayModulator";
         private static readonly string MA_PilotDeployCountTag = "affinityLevel_";
         private static PilotAffinityManager instance;
         private StatCollection companyStats;
@@ -117,6 +117,7 @@ namespace MechAffinity
                 if (keypair.Key.StartsWith(MA_Deployment_Stat))
                 {
                     addtoPilotMap(keypair.Key);
+                    addtoPilotDecayMap(convertAffinityStatToDecay(keypair.Key));
                 }
                 else
                 {
@@ -133,6 +134,10 @@ namespace MechAffinity
             else
             {
                 companyStats.AddStatistic<string>(MA_Lut_Stat, JsonConvert.SerializeObject(chassisPrefabLut, Formatting.None));
+            }
+            if (!companyStats.ContainsStatistic(MA_SimDaysDecayModulator_Stat))
+            {
+                companyStats.AddStatistic<int>(MA_SimDaysDecayModulator_Stat, Main.settings.defaultDaysBeforeSimDecay);
             }
         }
 
@@ -171,6 +176,12 @@ namespace MechAffinity
         private string convertAffinityStatToDecay(string statName)
         {
             return statName.Replace(MA_Deployment_Stat, MA_Decay_Stat);
+        }
+
+        private string convertAffinityStatToSimDecay(string statName)
+        {
+            string pilotId = statName.Split('=')[1];
+            return $"{MA_DaysElapsedMod_Stat}{pilotId}";
         }
 
         private string getPrefabId(MechDef mech)
@@ -354,10 +365,34 @@ namespace MechAffinity
             }
         }
 
+        private void simDayDecay(string pilotId)
+        {
+            List<string> decayList = pilotNoDeployStatMap[pilotId];
+            foreach (string decaying in decayList)
+            {
+                string affinityStat = convertDecayStatToAffinity(decaying);
+                if (companyStats.ContainsStatistic(affinityStat))
+                {
+                    int deployCount = companyStats.GetValue<int>(affinityStat);
+                    if (deployCount > Main.settings.lowestPossibleDecay)
+                    {
+                        deployCount--;
+                        companyStats.Set<int>(affinityStat, deployCount);
+                        Main.modLog.LogMessage($"decaying stat {affinityStat}, due to no deployment, new value: {deployCount}");
+                    }
+                }
+                else
+                {
+                    Main.modLog.LogError($"Failed to decay stat {affinityStat}");
+                }
+            }
+        }
+
         public void incrementDeployCountWithMech(string statName)
         {
             Main.modLog.LogMessage($"Incrementing DeployCount stat {statName}");
             string decayStat = convertAffinityStatToDecay(statName);
+            string simDecaystat = convertAffinityStatToSimDecay(statName);
             addtoPilotMap(statName);
             addtoPilotDecayMap(decayStat);
             if (companyStats.ContainsStatistic(statName))
@@ -372,8 +407,13 @@ namespace MechAffinity
                 companyStats.AddStatistic<int>(statName, 1);
             }
             decayAffinties(decayStat);
-            
-            
+            if (companyStats.ContainsStatistic(simDecaystat))
+            {
+                // pilot has deployed, reset their no deployment tracker
+                companyStats.Set<int>(simDecaystat, 0);
+            }
+
+
         }
 
         public void incrementDeployCountWithMech(UnitResult result)
@@ -672,6 +712,35 @@ namespace MechAffinity
             }
             applyStatBonuses(actor, bonuses);
             applyStatusEffects(actor, effects);
+        }
+
+        public bool onSimDayElapsed(Pilot pilot)
+        {
+            int modulator = companyStats.GetValue<int>(MA_SimDaysDecayModulator_Stat);
+            if (modulator == -1)
+            {
+                return false;
+            }
+            string pilotId = pilot.pilotDef.Description.Id;
+            string statName = $"{MA_DaysElapsedMod_Stat}{pilotId}";
+            if (!companyStats.ContainsStatistic(statName))
+            {
+                companyStats.AddStatistic<int>(statName, 1);
+                Main.modLog.LogMessage($"Adding Sim Decay stat {statName}");
+                return false;
+            }
+            int daysSinceLastDecay = companyStats.GetValue<int>(statName);
+            
+            daysSinceLastDecay++;
+            daysSinceLastDecay %= modulator;
+            companyStats.Set<int>(statName, daysSinceLastDecay);
+            if (daysSinceLastDecay == 0)
+            {
+                Main.modLog.LogMessage($"Sim Decay detected for {statName}");
+                simDayDecay(pilotId);
+                return true;
+            }
+            return false;
         }
 
     }
