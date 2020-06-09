@@ -200,13 +200,16 @@ namespace MechAffinity
             Mech mech = actor as Mech;
             if (mech != null)
             {
-                foreach (MechComponentRef fixedEquip in mech.MechDef.Chassis.FixedEquipment)
+                if (mech.MechDef.Chassis.FixedEquipment != null)
                 {
-                    if (quirkAffinities.ContainsKey(fixedEquip.ComponentDefID))
+                    foreach (MechComponentRef fixedEquip in mech.MechDef.Chassis.FixedEquipment)
                     {
-                        if (!quirks.Contains(fixedEquip.ComponentDefID))
+                        if (quirkAffinities.ContainsKey(fixedEquip.ComponentDefID))
                         {
-                            quirks.Add(fixedEquip.ComponentDefID);
+                            if (!quirks.Contains(fixedEquip.ComponentDefID))
+                            {
+                                quirks.Add(fixedEquip.ComponentDefID);
+                            }
                         }
                     }
                 }
@@ -570,6 +573,10 @@ namespace MechAffinity
             if (pilot != null)
             {
                 List<string> tags = pilot.pilotDef.PilotTags.ToArray().ToList();
+                if (!String.IsNullOrEmpty(Main.settings.debugForceTag))
+                {
+                    tags.Add(Main.settings.debugForceTag);
+                }
                 foreach(string tag in tags)
                 {
                     if (tag.StartsWith(MA_PilotDeployCountTag))

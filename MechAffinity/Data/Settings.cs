@@ -17,5 +17,6 @@ namespace MechAffinity.Data
         public int lowestPossibleDecay = 0;
         public int removeAffinityAfter = 100;
         public bool decayByModulo = false;
+        public string debugForceTag = "";
     }
 }
