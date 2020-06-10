@@ -92,6 +92,7 @@
     <Compile Include="Data\Settings.cs" />
     <Compile Include="Features\PilotAffinityManager.cs" />
     <Compile Include="Main.cs" />
+    <Compile Include="Patches\MechDetails.cs" />
     <Compile Include="Patches\SGBarracksServicePanel.cs" />
     <Compile Include="Patches\SimGameState.cs" />
     <Compile Include="Patches\UnitSpawnPointGameLogic.cs" />

@@ -205,26 +205,32 @@ namespace MechAffinity
             return null;
         }
 
+        private List<string> getPossibleQuirkAffinites(MechDef mech)
+        {
+            List<string> quirks = new List<string>();
+            if (mech.Chassis.FixedEquipment != null)
+            {
+                foreach (MechComponentRef fixedEquip in mech.Chassis.FixedEquipment)
+                {
+                    if (quirkAffinities.ContainsKey(fixedEquip.ComponentDefID))
+                    {
+                        if (!quirks.Contains(fixedEquip.ComponentDefID))
+                        {
+                            quirks.Add(fixedEquip.ComponentDefID);
+                        }
+                    }
+                }
+            }
+            return quirks;
+        }
+
         private List<string> getPossibleQuirkAffinites(AbstractActor actor)
         {
             List<string> quirks = new List<string>();
             Mech mech = actor as Mech;
             if (mech != null)
             {
-                if (mech.MechDef.Chassis.FixedEquipment != null)
-                {
-                    foreach (MechComponentRef fixedEquip in mech.MechDef.Chassis.FixedEquipment)
-                    {
-                        if (quirkAffinities.ContainsKey(fixedEquip.ComponentDefID))
-                        {
-                            if (!quirks.Contains(fixedEquip.ComponentDefID))
-                            {
-                                quirks.Add(fixedEquip.ComponentDefID);
-                            }
-                        }
-                    }
-                }
-
+                return getPossibleQuirkAffinites(mech.MechDef);
             }
 
             return quirks;
@@ -741,6 +747,50 @@ namespace MechAffinity
                 return true;
             }
             return false;
+        }
+
+        public string getMechChassisAffinityDescription(MechDef mech)
+        {
+            string prefab = getPrefabId(mech);
+            string ret = "\n";
+            List<string> levels = new List<string>();
+            if (chassisAffinities.ContainsKey(prefab))
+            {
+                List<AffinityLevel> affinityLevels = chassisAffinities[prefab];
+                foreach (AffinityLevel affinityLevel in affinityLevels)
+                {
+                    if(!levels.Contains(affinityLevel.levelName))
+                    {
+                        levels.Add(affinityLevel.levelName);
+                    }
+                }
+            }
+            if (Main.settings.showQuirks)
+            {
+                List<string> quirks = getPossibleQuirkAffinites(mech);
+                foreach(string quirk in quirks)
+                {
+                    List<AffinityLevel> affinityLevels = quirkAffinities[quirk];
+                    foreach (AffinityLevel affinityLevel in affinityLevels)
+                    {
+                        if (!levels.Contains(affinityLevel.levelName))
+                        {
+                            levels.Add(affinityLevel.levelName);
+                        }
+                    }
+                }
+            }
+            if(levels.Count() > 0)
+            {
+                ret = "<b> Unlockable Affinities: </b>\n\n";
+            }
+            foreach (string level in levels)
+            {
+                string descript = $"<b>{level}</b>: {levelDescriptors[level]}:\n\n";
+                ret += descript;
+            }
+
+            return ret;
         }
 
     }

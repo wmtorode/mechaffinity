@@ -14,6 +14,7 @@ example:
     "lowestPossibleDecay" : 0,
     "decayByModulo" : false,
     "defaultDaysBeforeSimDecay" : -1,
+    "showQuirks" : false,
     "globalAffinities" : [],
     "chassisAffinities" : [],
     "quirkAffinities" : []
@@ -32,6 +33,8 @@ example:
 
 `defaultDaysBeforeSimDecay` : the default number of days that can elapse before a pilot's affinities begin to decay. this number becomes part of the save and cannot be changed from settings later. events or argo upgrades can
 manipulate this value by changing the company stat `MaSimDaysDecayModulator`. setting this stat to -1 will stop decay from occuring when a day passes. deploying a pilot into a mission will reset that pilots counter.
+
+`showQuirks` : when true, quirk affinities that are assiocated with a mech will be shown in the mechbay description of the mech in addition to any chassis specific affinities
 
 `globalAffinities` : a list of `affinityLevel` objects. these will aplly to all pilot-chassis combos. Note that affinity levels are additive
 
