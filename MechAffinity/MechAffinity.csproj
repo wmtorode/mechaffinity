@@ -93,10 +93,14 @@
     <Compile Include="Features\PilotAffinityManager.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Patches\MechDetails.cs" />
+    <Compile Include="Patches\MechLabStockInfoPopup.cs" />
     <Compile Include="Patches\SGBarracksServicePanel.cs" />
     <Compile Include="Patches\SimGameState.cs" />
     <Compile Include="Patches\UnitSpawnPointGameLogic.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Patches\TooltipPrefab_Mech.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

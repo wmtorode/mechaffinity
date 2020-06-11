@@ -782,7 +782,7 @@ namespace MechAffinity
             }
             if(levels.Count() > 0)
             {
-                ret = "<b> Unlockable Affinities: </b>\n\n";
+                ret = "\n<b> Unlockable Affinities: </b>\n\n";
             }
             foreach (string level in levels)
             {

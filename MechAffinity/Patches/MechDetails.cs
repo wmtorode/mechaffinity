@@ -22,11 +22,16 @@ namespace MechAffinity.Patches
             MechDef mech = (MechDef)mechdef.GetValue(__instance);
             if (mech != null)
             {
+                Main.modLog.LogMessage($"finding mechdef affinity descriptor for {mech.Description.UIName}");
                 string affinityDescriptors = PilotAffinityManager.Instance.getMechChassisAffinityDescription(mech);
                 //Main.modLog.LogMessage(affinityDescriptors);
                 LocalizableText bioText = (LocalizableText)descriptor.GetValue(__instance);
                 bioText.AppendTextAndRefresh(affinityDescriptors, (object[])Array.Empty<object>());
                 descriptor.SetValue(__instance, bioText);           
+            }
+            else
+            {
+                Main.modLog.LogMessage("mechdef is null!");
             }
         }
     }
