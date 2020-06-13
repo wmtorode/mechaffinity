@@ -241,13 +241,13 @@ namespace MechAffinity
             Pilot pilot = actor.GetPilot();
             if (pilot == null)
             {
-                Main.modLog.DebugMessage("Null Pilot found!");
+                Main.modLog.LogMessage("Null Pilot found!");
                 return $"{MA_Deployment_Stat}";
             }
             string prefab = getPrefabId(actor);
             if (String.IsNullOrEmpty(prefab))
             {
-                Main.modLog.DebugMessage("Null Prefab!");
+                Main.modLog.LogMessage("Null Prefab!");
                 return $"{MA_Deployment_Stat}{pilot.pilotDef.Description.Id}";
             }
             string statName = $"{MA_Deployment_Stat}{pilot.pilotDef.Description.Id}={getPrefabId(actor)}";
@@ -702,7 +702,7 @@ namespace MechAffinity
             if (actor.team == null || !actor.team.IsLocalPlayer)
             {
                 // actor isnt part of our team, check if their pilot defines a bonus
-                Main.modLog.DebugMessage($"Processing AI actor: {getAffinityStatName(actor)}");
+                Main.modLog.LogMessage($"Processing AI actor: {getAffinityStatName(actor)}");
                 getAIBonuses(actor, out bonuses, out effects);
             }
             else
@@ -713,7 +713,7 @@ namespace MechAffinity
             {
                 foreach (KeyValuePair<EAffinityType, int> bonus in bonuses)
                 {
-                    Main.modLog.DebugMessage($"Applying Bonus: {bonus.Key.ToString()} with strength: {bonus.Value}");
+                    Main.modLog.LogMessage($"Applying Bonus: {bonus.Key.ToString()} with strength: {bonus.Value}");
                 }
             }
             applyStatBonuses(actor, bonuses);
@@ -754,6 +754,7 @@ namespace MechAffinity
             string prefab = getPrefabId(mech);
             string ret = "\n";
             List<string> levels = new List<string>();
+            Main.modLog.DebugMessage($"Found prefab: {prefab}");
             if (chassisAffinities.ContainsKey(prefab))
             {
                 List<AffinityLevel> affinityLevels = chassisAffinities[prefab];
@@ -762,6 +763,7 @@ namespace MechAffinity
                     if(!levels.Contains(affinityLevel.levelName))
                     {
                         levels.Add(affinityLevel.levelName);
+                        Main.modLog.DebugMessage($"adding chassis affinity descriptor for {affinityLevel.levelName}");
                     }
                 }
             }
@@ -770,12 +772,14 @@ namespace MechAffinity
                 List<string> quirks = getPossibleQuirkAffinites(mech);
                 foreach(string quirk in quirks)
                 {
+                    Main.modLog.DebugMessage($"checking for a quirk affinity descriptor for {quirk}");
                     List<AffinityLevel> affinityLevels = quirkAffinities[quirk];
                     foreach (AffinityLevel affinityLevel in affinityLevels)
                     {
                         if (!levels.Contains(affinityLevel.levelName))
                         {
                             levels.Add(affinityLevel.levelName);
+                            Main.modLog.DebugMessage($"adding qurik affinity descriptor for {affinityLevel.levelName}");
                         }
                     }
                 }
