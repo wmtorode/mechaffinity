@@ -29,7 +29,7 @@ namespace MechAffinity
         private Dictionary<string, List<string>> pilotStatMap;
         private Dictionary<string, string> chassisPrefabLut;
         private Dictionary<string, string> prefabOverrides;
-        private Dictionary<string, string> levelDescriptors;
+        private Dictionary<string, DescriptionHolder> levelDescriptors;
         private Dictionary<string, List<string>> pilotNoDeployStatMap;
         private Dictionary<string, List<AffinityLevel>> quirkAffinities;
         private int uid;
@@ -49,7 +49,7 @@ namespace MechAffinity
             quirkAffinities = new Dictionary<string, List<AffinityLevel>>();
             prefabOverrides = new Dictionary<string, string>();
             chassisPrefabLut = new Dictionary<string, string>();
-            levelDescriptors = new Dictionary<string, string>();
+            levelDescriptors = new Dictionary<string, DescriptionHolder>();
             foreach (ChassisSpecificAffinity chassisSpecific in Main.settings.chassisAffinities)
             {
                 foreach (string chassisName in chassisSpecific.chassisNames)
@@ -58,7 +58,7 @@ namespace MechAffinity
                 }
                 foreach (AffinityLevel affinityLevel in chassisSpecific.affinityLevels)
                 {
-                    levelDescriptors[affinityLevel.levelName] = affinityLevel.decription;
+                    levelDescriptors[affinityLevel.levelName] = new DescriptionHolder(affinityLevel.levelName, affinityLevel.decription, affinityLevel.missionsRequired);
                     foreach (JObject jObject in affinityLevel.effectData)
                     {
                         EffectData effectData = new EffectData();
@@ -75,7 +75,7 @@ namespace MechAffinity
                 }
                 foreach (AffinityLevel affinityLevel in quirkAffinity.affinityLevels)
                 {
-                    levelDescriptors[affinityLevel.levelName] = affinityLevel.decription;
+                    levelDescriptors[affinityLevel.levelName] = new DescriptionHolder(affinityLevel.levelName, affinityLevel.decription, affinityLevel.missionsRequired);
                     foreach (JObject jObject in affinityLevel.effectData)
                     {
                         EffectData effectData = new EffectData();
@@ -99,7 +99,7 @@ namespace MechAffinity
             }
             foreach (AffinityLevel affinityLevel in Main.settings.globalAffinities)
             {
-                levelDescriptors[affinityLevel.levelName] = affinityLevel.decription;
+                levelDescriptors[affinityLevel.levelName] = new DescriptionHolder(affinityLevel.levelName, affinityLevel.decription, affinityLevel.missionsRequired);
             }
         }
 
@@ -506,7 +506,7 @@ namespace MechAffinity
             string ret = "\n";
             foreach(KeyValuePair<string, List<string>> level in affinites)
             {
-                string descript = $"<b>{level.Key}</b>: {levelDescriptors[level.Key]}:\n";
+                string descript = levelDescriptors[level.Key].toString(false);
                 string mechs = string.Join("\n", level.Value);
                 descript += mechs;
                 ret += descript + "\n\n";
@@ -788,10 +788,15 @@ namespace MechAffinity
             {
                 ret = "\n<b> Unlockable Affinities: </b>\n\n";
             }
+            List<DescriptionHolder> descriptors = new List<DescriptionHolder>();
             foreach (string level in levels)
             {
-                string descript = $"<b>{level}</b>: {levelDescriptors[level]}:\n\n";
-                ret += descript;
+                descriptors.Add(levelDescriptors[level]);
+            }
+            descriptors.Sort();
+            foreach (DescriptionHolder descriptor in descriptors)
+            {
+                ret += descriptor.toString(true);
             }
 
             return ret;

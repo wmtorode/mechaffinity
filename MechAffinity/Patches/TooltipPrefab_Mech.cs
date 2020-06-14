@@ -16,7 +16,7 @@ namespace MechAffinity.Patches
     [HarmonyPatch(typeof(TooltipPrefab_Mech), "SetData", typeof(object))]
     class TooltipPrefab_Mech_SetData
     {
-        public static void Postfix(MechDetails __instance, object data, LocalizableText ___DetailsField)
+        public static void Postfix(TooltipPrefab_Mech __instance, object data, LocalizableText ___DetailsField)
         {
             
             if(data is MechDef mechDef)

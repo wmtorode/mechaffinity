@@ -85,6 +85,7 @@
     <Compile Include="Data\Affinity.cs" />
     <Compile Include="Data\AffinityLevel.cs" />
     <Compile Include="Data\ChassisSpecificAffinity.cs" />
+    <Compile Include="Data\DescriptionHolder.cs" />
     <Compile Include="Data\EAffinityType.cs" />
     <Compile Include="Data\Logger.cs" />
     <Compile Include="Data\PrefabOverride.cs" />
