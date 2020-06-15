@@ -20,5 +20,6 @@ namespace MechAffinity.Data
         public string debugForceTag = "";
         public int defaultDaysBeforeSimDecay = -1;
         public bool showQuirks = false;
+        public bool showDescriptionsOnChassis = false;
     }
 }

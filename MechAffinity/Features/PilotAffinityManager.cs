@@ -184,14 +184,19 @@ namespace MechAffinity
             return $"{MA_DaysElapsedMod_Stat}{pilotId}";
         }
 
-        private string getPrefabId(MechDef mech)
+        private string getPrefabId(ChassisDef chassis)
         {
             #if USE_CS_CC
-                if (mech.Chassis.Is<AssemblyVariant>(out var a) && !string.IsNullOrEmpty(a.PrefabID))
-                    return a.PrefabID + "_" + mech.Chassis.Tonnage.ToString();
+                if (chassis.Is<AssemblyVariant>(out var a) && !string.IsNullOrEmpty(a.PrefabID))
+                    return a.PrefabID + "_" + chassis.Tonnage.ToString();
             #endif
 
-            return $"{mech.Chassis.PrefabIdentifier}_{mech.Chassis.Tonnage}";
+            return $"{chassis.PrefabIdentifier}_{chassis.Tonnage}";
+        }
+
+        private string getPrefabId(MechDef mech)
+        {
+            return getPrefabId(mech.Chassis);
         }
 
         private string getPrefabId(AbstractActor actor)
@@ -205,12 +210,12 @@ namespace MechAffinity
             return null;
         }
 
-        private List<string> getPossibleQuirkAffinites(MechDef mech)
+        private List<string> getPossibleQuirkAffinites(ChassisDef chassis)
         {
             List<string> quirks = new List<string>();
-            if (mech.Chassis.FixedEquipment != null)
+            if (chassis.FixedEquipment != null)
             {
-                foreach (MechComponentRef fixedEquip in mech.Chassis.FixedEquipment)
+                foreach (MechComponentRef fixedEquip in chassis.FixedEquipment)
                 {
                     if (quirkAffinities.ContainsKey(fixedEquip.ComponentDefID))
                     {
@@ -222,6 +227,11 @@ namespace MechAffinity
                 }
             }
             return quirks;
+        }
+
+        private List<string> getPossibleQuirkAffinites(MechDef mech)
+        {
+            return getPossibleQuirkAffinites(mech.Chassis);
         }
 
         private List<string> getPossibleQuirkAffinites(AbstractActor actor)
@@ -749,9 +759,16 @@ namespace MechAffinity
             return false;
         }
 
+        
         public string getMechChassisAffinityDescription(MechDef mech)
         {
-            string prefab = getPrefabId(mech);
+            return getMechChassisAffinityDescription(mech.Chassis);
+        }
+
+
+        public string getMechChassisAffinityDescription(ChassisDef chassis)
+        {
+            string prefab = getPrefabId(chassis);
             string ret = "\n";
             List<string> levels = new List<string>();
             Main.modLog.DebugMessage($"Found prefab: {prefab}");
@@ -769,7 +786,7 @@ namespace MechAffinity
             }
             if (Main.settings.showQuirks)
             {
-                List<string> quirks = getPossibleQuirkAffinites(mech);
+                List<string> quirks = getPossibleQuirkAffinites(chassis);
                 foreach(string quirk in quirks)
                 {
                     Main.modLog.DebugMessage($"checking for a quirk affinity descriptor for {quirk}");
@@ -779,7 +796,7 @@ namespace MechAffinity
                         if (!levels.Contains(affinityLevel.levelName))
                         {
                             levels.Add(affinityLevel.levelName);
-                            Main.modLog.DebugMessage($"adding qurik affinity descriptor for {affinityLevel.levelName}");
+                            Main.modLog.DebugMessage($"adding quirk affinity descriptor for {affinityLevel.levelName}");
                         }
                     }
                 }
