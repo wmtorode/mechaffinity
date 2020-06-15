@@ -104,8 +104,5 @@
   <ItemGroup>
     <Compile Include="Patches\TooltipPrefab_Mech.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Patches\MechBayChassisInfoWidget.cs" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -15,6 +15,7 @@ example:
     "decayByModulo" : false,
     "defaultDaysBeforeSimDecay" : -1,
     "showQuirks" : false,
+    "showDescriptionsOnChassis" : false,
     "globalAffinities" : [],
     "chassisAffinities" : [],
     "quirkAffinities" : []
@@ -35,6 +36,8 @@ example:
 manipulate this value by changing the company stat `MaSimDaysDecayModulator`. setting this stat to -1 will stop decay from occuring when a day passes. deploying a pilot into a mission will reset that pilots counter.
 
 `showQuirks` : when true, quirk affinities that are assiocated with a mech will be shown in the mechbay description of the mech in addition to any chassis specific affinities
+
+`showDescriptionsOnChassis` : when true, affinitys will be shown for chassis in the on hover chassis description in the mechbay storage screen
 
 `globalAffinities` : a list of `affinityLevel` objects. these will aplly to all pilot-chassis combos. Note that affinity levels are additive
 
