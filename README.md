@@ -16,6 +16,8 @@ example:
     "defaultDaysBeforeSimDecay" : -1,
     "showQuirks" : false,
     "showDescriptionsOnChassis" : false,
+    "trackSimDecayByStat" : true,
+    "trackLowestDecayByStat": false,
     "globalAffinities" : [],
     "chassisAffinities" : [],
     "quirkAffinities" : []
@@ -28,12 +30,15 @@ example:
 
 `removeAffinityAfter` : the number of deployments a pilot can not use a chassis before all experience on that chassis is lost, this is used to clean up save data tracking, set to `-1` to disable
 
-`lowestPossibleDecay` : the lowest amount of a pilots experience with a chassis can decay to `removeAffinityAfter` overrides this value. this is counted in deployements
+`lowestPossibleDecay` : the lowest amount of a pilots experience with a chassis can decay to `removeAffinityAfter` overrides this value. this is counted in deployements when `trackLowestDecayByStat` is `false` the number in this settings will always be used. 
+if `trackLowestDecayByStat` is `true` this number becomes part of the save and cannot be changed from settings later. events or argo upgrades can
+manipulate this value by changing the company stat `MaLowestDecay`
 
 `decayByModulo` : when set to true, decay is changed to 1 point for every `missionsBeforeDecay` instead of 1 point for every mission after `missionsBeforeDecay` missions
 
-`defaultDaysBeforeSimDecay` : the default number of days that can elapse before a pilot's affinities begin to decay. this number becomes part of the save and cannot be changed from settings later. events or argo upgrades can
-manipulate this value by changing the company stat `MaSimDaysDecayModulator`. setting this stat to -1 will stop decay from occuring when a day passes. deploying a pilot into a mission will reset that pilots counter.
+`defaultDaysBeforeSimDecay` : the default number of days that can elapse before a pilot's affinities begin to decay. when `trackSimDecayByStat` is `true` this number becomes part of the save and cannot be changed from settings later. events or argo upgrades can
+manipulate this value by changing the company stat `MaSimDaysDecayModulator`. setting this stat to -1 will stop decay from occuring when a day passes. deploying a pilot into a mission will reset that pilots counter. when `trackSimDecayByStat` is `false` this 
+setting value will always be used
 
 `showQuirks` : when true, quirk affinities that are assiocated with a mech will be shown in the mechbay description of the mech in addition to any chassis specific affinities
 

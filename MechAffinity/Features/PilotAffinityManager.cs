@@ -22,6 +22,7 @@ namespace MechAffinity
         private static readonly string MA_Lut_Stat = "MaLutStat";
         private static readonly string MA_DaysElapsedMod_Stat = "MaDaysSinceLastDecay=";
         private static readonly string MA_SimDaysDecayModulator_Stat = "MaSimDaysDecayModulator";
+        private static readonly string MA_LowestDecayStat = "MaLowestDecay";
         private static readonly string MA_PilotDeployCountTag = "affinityLevel_";
         private static PilotAffinityManager instance;
         private StatCollection companyStats;
@@ -135,9 +136,13 @@ namespace MechAffinity
             {
                 companyStats.AddStatistic<string>(MA_Lut_Stat, JsonConvert.SerializeObject(chassisPrefabLut, Formatting.None));
             }
-            if (!companyStats.ContainsStatistic(MA_SimDaysDecayModulator_Stat))
+            if (!companyStats.ContainsStatistic(MA_SimDaysDecayModulator_Stat) && Main.settings.trackSimDecayByStat)
             {
                 companyStats.AddStatistic<int>(MA_SimDaysDecayModulator_Stat, Main.settings.defaultDaysBeforeSimDecay);
+            }
+            if (!companyStats.ContainsStatistic(MA_LowestDecayStat) && Main.settings.trackLowestDecayByStat)
+            {
+                companyStats.AddStatistic<int>(MA_LowestDecayStat, Main.settings.lowestPossibleDecay);
             }
         }
 
@@ -208,6 +213,24 @@ namespace MechAffinity
 
             }
             return null;
+        }
+
+        private int getLowestDecay()
+        {
+            if (Main.settings.trackLowestDecayByStat)
+            {
+                return companyStats.GetValue<int>(MA_LowestDecayStat);
+            }
+            return Main.settings.lowestPossibleDecay;
+        }
+
+        private int getSimDecayDays()
+        {
+            if (Main.settings.trackSimDecayByStat)
+            {
+                return companyStats.GetValue<int>(MA_SimDaysDecayModulator_Stat);
+            }
+            return Main.settings.defaultDaysBeforeSimDecay;
         }
 
         private List<string> getPossibleQuirkAffinites(ChassisDef chassis)
@@ -353,7 +376,7 @@ namespace MechAffinity
                                     if (companyStats.ContainsStatistic(affinityStat))
                                     {
                                         int deployCount = companyStats.GetValue<int>(affinityStat);
-                                        if (deployCount > Main.settings.lowestPossibleDecay)
+                                        if (deployCount > getLowestDecay())
                                         {
                                             deployCount--;
                                             companyStats.Set<int>(affinityStat, deployCount);
@@ -390,7 +413,7 @@ namespace MechAffinity
                 if (companyStats.ContainsStatistic(affinityStat))
                 {
                     int deployCount = companyStats.GetValue<int>(affinityStat);
-                    if (deployCount > Main.settings.lowestPossibleDecay)
+                    if (deployCount > getLowestDecay())
                     {
                         deployCount--;
                         companyStats.Set<int>(affinityStat, deployCount);
@@ -732,7 +755,7 @@ namespace MechAffinity
 
         public bool onSimDayElapsed(Pilot pilot)
         {
-            int modulator = companyStats.GetValue<int>(MA_SimDaysDecayModulator_Stat);
+            int modulator = getSimDecayDays();
             if (modulator == -1)
             {
                 return false;

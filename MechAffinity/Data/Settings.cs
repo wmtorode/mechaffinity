@@ -21,5 +21,7 @@ namespace MechAffinity.Data
         public int defaultDaysBeforeSimDecay = -1;
         public bool showQuirks = false;
         public bool showDescriptionsOnChassis = false;
+        public bool trackSimDecayByStat = true;
+        public bool trackLowestDecayByStat = false;
     }
 }
