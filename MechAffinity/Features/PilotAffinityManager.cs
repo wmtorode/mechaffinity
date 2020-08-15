@@ -406,23 +406,27 @@ namespace MechAffinity
 
         private void simDayDecay(string pilotId)
         {
-            List<string> decayList = pilotNoDeployStatMap[pilotId];
-            foreach (string decaying in decayList)
+            if (pilotNoDeployStatMap.ContainsKey(pilotId))
             {
-                string affinityStat = convertDecayStatToAffinity(decaying);
-                if (companyStats.ContainsStatistic(affinityStat))
+                List<string> decayList = pilotNoDeployStatMap[pilotId];
+                foreach (string decaying in decayList)
                 {
-                    int deployCount = companyStats.GetValue<int>(affinityStat);
-                    if (deployCount > getLowestDecay())
+                    string affinityStat = convertDecayStatToAffinity(decaying);
+                    if (companyStats.ContainsStatistic(affinityStat))
                     {
-                        deployCount--;
-                        companyStats.Set<int>(affinityStat, deployCount);
-                        Main.modLog.LogMessage($"decaying stat {affinityStat}, due to no deployment, new value: {deployCount}");
+                        int deployCount = companyStats.GetValue<int>(affinityStat);
+                        if (deployCount > getLowestDecay())
+                        {
+                            deployCount--;
+                            companyStats.Set<int>(affinityStat, deployCount);
+                            Main.modLog.LogMessage(
+                                $"decaying stat {affinityStat}, due to no deployment, new value: {deployCount}");
+                        }
                     }
-                }
-                else
-                {
-                    Main.modLog.LogError($"Failed to decay stat {affinityStat}");
+                    else
+                    {
+                        Main.modLog.LogError($"Failed to decay stat {affinityStat}");
+                    }
                 }
             }
         }
