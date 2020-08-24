@@ -23,5 +23,6 @@ namespace MechAffinity.Data
         public bool showDescriptionsOnChassis = false;
         public bool trackSimDecayByStat = true;
         public bool trackLowestDecayByStat = false;
+        public bool showAllPilotAffinities = true;
     }
 }

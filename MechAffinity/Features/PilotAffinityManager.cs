@@ -24,6 +24,7 @@ namespace MechAffinity
         private static readonly string MA_SimDaysDecayModulator_Stat = "MaSimDaysDecayModulator";
         private static readonly string MA_LowestDecayStat = "MaLowestDecay";
         private static readonly string MA_PilotDeployCountTag = "affinityLevel_";
+        private static readonly string MA_NoAffinity = "No Affinity";
         private static PilotAffinityManager instance;
         private StatCollection companyStats;
         private Dictionary<string, List<AffinityLevel>> chassisAffinities;
@@ -102,6 +103,15 @@ namespace MechAffinity
             {
                 levelDescriptors[affinityLevel.levelName] = new DescriptionHolder(affinityLevel.levelName, affinityLevel.decription, affinityLevel.missionsRequired);
             }
+            levelDescriptors[MA_NoAffinity] = new DescriptionHolder(MA_NoAffinity, "", 0);
+        }
+
+        public void addToChassisPrefabLut(MechDef mech)
+        {
+            
+            string prefabId = getPrefabId(mech);
+            chassisPrefabLut[prefabId] = mech.Chassis.Description.Name;
+            Main.modLog.LogMessage($"adding to lut {prefabId} => {mech.Chassis.Description.Name}");
         }
 
         public void setCompanyStats(StatCollection stats)
@@ -130,11 +140,7 @@ namespace MechAffinity
             }
             if (companyStats.ContainsStatistic(MA_Lut_Stat))
             {
-                chassisPrefabLut = JsonConvert.DeserializeObject<Dictionary<string, string>>(companyStats.GetValue<string>(MA_Lut_Stat));
-            }
-            else
-            {
-                companyStats.AddStatistic<string>(MA_Lut_Stat, JsonConvert.SerializeObject(chassisPrefabLut, Formatting.None));
+                companyStats.RemoveStatistic(MA_Lut_Stat);
             }
             if (!companyStats.ContainsStatistic(MA_SimDaysDecayModulator_Stat) && Main.settings.trackSimDecayByStat)
             {
@@ -404,7 +410,7 @@ namespace MechAffinity
             }
         }
 
-        private void simDayDecay(string pilotId)
+        private bool simDayDecay(string pilotId)
         {
             if (pilotNoDeployStatMap.ContainsKey(pilotId))
             {
@@ -421,6 +427,7 @@ namespace MechAffinity
                             companyStats.Set<int>(affinityStat, deployCount);
                             Main.modLog.LogMessage(
                                 $"decaying stat {affinityStat}, due to no deployment, new value: {deployCount}");
+                            return true;
                         }
                     }
                     else
@@ -429,6 +436,8 @@ namespace MechAffinity
                     }
                 }
             }
+
+            return false;
         }
 
         public void incrementDeployCountWithMech(string statName)
@@ -471,7 +480,7 @@ namespace MechAffinity
             incrementDeployCountWithMech(statName);
         }
 
-        private string getHighestLevelName(string statName, string prefab)
+        private List<string> getHighestLevelName(string statName, string prefab)
         {
             string ret = "";
             int maxSoFar = 0;
@@ -505,7 +514,41 @@ namespace MechAffinity
                     }
                 }
             }
+            List<string> highest = new List<string>();
+            highest.Add(ret);
+            return highest;
+        }
 
+        private List<string> getAllLevels(string statName, string prefab)
+        {
+            List<string> ret = new List<string>();
+            int deployCount = getDeploymentCountWithMech(statName);
+            //Main.modLog.LogMessage($"Deployment Count: {deployCount}");
+
+            foreach (AffinityLevel affinityLevel in Main.settings.globalAffinities)
+            {
+                if (deployCount >= affinityLevel.missionsRequired)
+                {
+                    ret.Add(affinityLevel.levelName);
+                }
+
+            }
+            if (chassisAffinities.ContainsKey(prefab))
+            {
+                List<AffinityLevel> affinityLevels = chassisAffinities[prefab];
+                foreach (AffinityLevel affinityLevel in affinityLevels)
+                {
+                    if (deployCount >= affinityLevel.missionsRequired)
+                    {
+                        ret.Add(affinityLevel.levelName);
+                    }
+                }
+            }
+
+            if (ret.Count == 0)
+            {
+                ret.Add(MA_NoAffinity);
+            }
             return ret;
         }
 
@@ -517,26 +560,40 @@ namespace MechAffinity
             {
                 foreach(string chassisId in pilotStatMap[pilotId])
                 {
-                    string level = getHighestLevelName($"{MA_Deployment_Stat}{pilotId}={chassisId}", chassisId);
-                    string chassisName = chassisId;
-                    if (!string.IsNullOrEmpty(level))
+                    List<string> levels;
+                    if (Main.settings.showAllPilotAffinities)
                     {
-                        if(!affinites.ContainsKey(level))
+                        levels = getAllLevels($"{MA_Deployment_Stat}{pilotId}={chassisId}", chassisId);
+                    }
+                    else
+                    {
+                        levels = getHighestLevelName($"{MA_Deployment_Stat}{pilotId}={chassisId}", chassisId);
+                    }
+
+                    foreach (string level in levels)
+                    {
+                        string chassisName = chassisId;
+                        if (!string.IsNullOrEmpty(level))
                         {
-                            affinites[level] = new List<string>();
-                        }
-                        if(prefabOverrides.ContainsKey(chassisId))
-                        {
-                            chassisName = prefabOverrides[chassisId];
-                        }
-                        else
-                        {
-                            if(chassisPrefabLut.ContainsKey(chassisId))
+                            if (!affinites.ContainsKey(level))
                             {
-                                chassisName = chassisPrefabLut[chassisId];
+                                affinites[level] = new List<string>();
                             }
+
+                            if (prefabOverrides.ContainsKey(chassisId))
+                            {
+                                chassisName = prefabOverrides[chassisId];
+                            }
+                            else
+                            {
+                                if (chassisPrefabLut.ContainsKey(chassisId))
+                                {
+                                    chassisName = chassisPrefabLut[chassisId];
+                                }
+                            }
+
+                            affinites[level].Add(chassisName);
                         }
-                        affinites[level].Add(chassisName);
                     }
                 }
             }
@@ -550,6 +607,11 @@ namespace MechAffinity
             }
 
             return ret;
+        }
+
+        public string getPilotToolTip(Pilot pilot)
+        {
+            return "";
         }
 
         private void getDeploymentBonus(int deployCount, string chassisPrefab, string statName, List<string> possibleQuirks, out Dictionary<EAffinityType, int> bonuses, out List<EffectData> effects)
@@ -780,8 +842,7 @@ namespace MechAffinity
             if (daysSinceLastDecay == 0)
             {
                 Main.modLog.LogMessage($"Sim Decay detected for {statName}");
-                simDayDecay(pilotId);
-                return true;
+                return simDayDecay(pilotId);
             }
             return false;
         }
