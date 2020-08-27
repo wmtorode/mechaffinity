@@ -554,6 +554,42 @@ namespace MechAffinity
             return ret;
         }
 
+        private List<string> getAllLevelsToolTip(Pilot pilot, string prefab)
+        {
+            List<string> ret = new List<string>();
+            int deployCount = getDeploymentCountWithMech(pilot, prefab);
+            //Main.modLog.LogMessage($"Deployment Count: {deployCount}");
+            List<AffinityLevel> levels = new List<AffinityLevel>();
+
+            foreach (AffinityLevel affinityLevel in Main.settings.globalAffinities)
+            {
+                levels.Add(affinityLevel);
+            }
+            if (chassisAffinities.ContainsKey(prefab))
+            {
+                List<AffinityLevel> affinityLevels = chassisAffinities[prefab];
+                foreach (AffinityLevel affinityLevel in affinityLevels)
+                {
+                    levels.Add(affinityLevel);
+                }
+            }
+
+            levels = levels.OrderBy(d => d.missionsRequired).ToList();
+            foreach (AffinityLevel level in levels)
+            {
+                if (deployCount >= level.missionsRequired)
+                {
+                    ret.Add($"- <color=#1bab05>{level.levelName}</color> ({level.missionsRequired}/{level.missionsRequired})");
+                }
+                else
+                {
+                    ret.Add($"- <color=#de0202>{level.levelName}</color> ({deployCount}/{level.missionsRequired})");
+                }
+            }
+            
+            return ret;
+        }
+
         public string getMechAffinityDescription(Pilot pilot)
         {
             string pilotId = pilot.pilotDef.Description.Id;
@@ -625,12 +661,12 @@ namespace MechAffinity
                 }
 
                 int toShow = Math.Min(chassisValues.Count, Main.settings.TopAffinitiesInTooltipCount);
-                List<KeyValuePair<string, int>> sortedCounts = chassisValues.OrderBy(d => d.Value).ToList();
+                List<KeyValuePair<string, int>> sortedCounts = chassisValues.OrderByDescending(d => d.Value).ToList();
                 for(int i=0; i < toShow; i++)
                 {
                     List<string> levels;
 
-                    levels = getAllLevels(pilot, sortedCounts[i].Key, true);
+                    levels = getAllLevelsToolTip(pilot, sortedCounts[i].Key);
                     affinites[sortedCounts[i].Key] = levels;
 
                 }
