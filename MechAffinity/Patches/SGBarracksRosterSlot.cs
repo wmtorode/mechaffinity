@@ -38,7 +38,7 @@ namespace MechAffinity.Patches
                 Desc += "<b>***PILOT LIGHT INJURY***</b>\nPilot cannot drop into combat. This pilot requires rest after dropping too frequently while fatigued.\n\n";
 
             Desc += "<b>Pilot Affinities:</b>\n\n";
-            Desc += PilotAffinityManager.Instance.getMechAffinityDescription(pilot);
+            Desc += PilotAffinityManager.Instance.getPilotToolTip(pilot);
 
             var descriptionDef = new BaseDescriptionDef("Tags", pilot.Callsign, Desc, null);
             tooltip.SetDefaultStateData(TooltipUtilities.GetStateDataFromObject(descriptionDef));
