@@ -25,6 +25,8 @@ namespace MechAffinity
         private static readonly string MA_LowestDecayStat = "MaLowestDecay";
         private static readonly string MA_PilotDeployCountTag = "affinityLevel_";
         private static readonly string MA_NoAffinity = "No Affinity";
+        private static readonly string MA_ConsumableTag = "MaConsumableAffinity_";
+        private static readonly string MA_PermaTag = "MaPermAffinity_";
         private static PilotAffinityManager instance;
         private StatCollection companyStats;
         private Dictionary<string, List<AffinityLevel>> chassisAffinities;
@@ -301,6 +303,11 @@ namespace MechAffinity
             return statName;
         }
 
+        private string getAffinityStatName(Pilot pilot, string prefabId)
+        {
+            return $"{MA_Deployment_Stat}{pilot.pilotDef.Description.Id}={prefabId}";
+        }
+
         public int getDeploymentCountWithMech(string statName)
         {
             if (companyStats.ContainsStatistic(statName))
@@ -319,7 +326,7 @@ namespace MechAffinity
 
         public int getDeploymentCountWithMech(Pilot pilot, string prefabId)
         {
-            string statName = $"{MA_Deployment_Stat}{pilot.pilotDef.Description.Id}={prefabId}";
+            string statName = getAffinityStatName(pilot, prefabId);
             return getDeploymentCountWithMech(statName);
 
         }
@@ -438,7 +445,7 @@ namespace MechAffinity
             return false;
         }
 
-        public void incrementDeployCountWithMech(string statName)
+        public void incrementDeployCountWithMech(string statName ,int incrementBy=1, bool decay=true)
         {
             Main.modLog.LogMessage($"Incrementing DeployCount stat {statName}");
             string decayStat = convertAffinityStatToDecay(statName);
@@ -448,15 +455,15 @@ namespace MechAffinity
             if (companyStats.ContainsStatistic(statName))
             {
                 int stat = companyStats.GetValue<int>(statName);
-                stat++;
+                stat+= incrementBy;
                 companyStats.Set<int>(statName, stat);
             }
             else
             {
                 // we dont have the stat yet so just set it to 1
-                companyStats.AddStatistic<int>(statName, 1);
+                companyStats.AddStatistic<int>(statName, incrementBy);
             }
-            decayAffinties(decayStat);
+            if (decay) decayAffinties(decayStat);
             if (companyStats.ContainsStatistic(simDecaystat))
             {
                 // pilot has deployed, reset their no deployment tracker
@@ -899,6 +906,28 @@ namespace MechAffinity
             }
             applyStatBonuses(actor, bonuses);
             applyStatusEffects(actor, effects);
+        }
+
+        private void consumeAffinityTags(ref Pilot pilot)
+        {
+            List<string> tags = pilot.pilotDef.PilotTags.ToList();
+            foreach (string tag in tags)
+            {
+                if (tag.StartsWith(MA_ConsumableTag))
+                {
+                    int deployCount;
+                    string prefabId = tag.Split('=')[1];
+                    string count = tag.Split('=')[0].Replace(MA_ConsumableTag, "");
+                    if (!int.TryParse(count, out deployCount))
+                    {
+                        deployCount = 0;
+                    }
+                    string statName = getAffinityStatName(pilot, prefabId);
+                    incrementDeployCountWithMech(statName, deployCount, false);
+                    Main.modLog.LogMessage($"Consuming affinity tag for pilot: {pilot.pilotDef.Description.Id}, unit: {prefabId}, modifier: {deployCount}");
+                    pilot.pilotDef.PilotTags.Remove(tag);
+                }
+            }
         }
 
         public bool onSimDayElapsed(Pilot pilot)
