@@ -12,15 +12,19 @@ example:
     "missionsBeforeDecay" : -1,
     "removeAffinityAfter" : 100,
     "lowestPossibleDecay" : 0,
+    "maxAffinityPoints" : 1000,
     "decayByModulo" : false,
     "defaultDaysBeforeSimDecay" : -1,
+    "topAffinitiesInTooltipCount" : 3,
     "showQuirks" : false,
     "showDescriptionsOnChassis" : false,
     "trackSimDecayByStat" : true,
     "trackLowestDecayByStat": false,
+    "showAllPilotAffinities" : true,
     "globalAffinities" : [],
     "chassisAffinities" : [],
-    "quirkAffinities" : []
+    "quirkAffinities" : [],
+    "taggedAffinities" : [],
 }
 ```
 
@@ -34,21 +38,29 @@ example:
 if `trackLowestDecayByStat` is `true` this number becomes part of the save and cannot be changed from settings later. events or argo upgrades can
 manipulate this value by changing the company stat `MaLowestDecay`
 
+`maxAffinityPoints` : the max amount of affinity that can be obtained for a unit once a pilot reaches this number with a chassis, further points will not be obtained
+
 `decayByModulo` : when set to true, decay is changed to 1 point for every `missionsBeforeDecay` instead of 1 point for every mission after `missionsBeforeDecay` missions
 
 `defaultDaysBeforeSimDecay` : the default number of days that can elapse before a pilot's affinities begin to decay. when `trackSimDecayByStat` is `true` this number becomes part of the save and cannot be changed from settings later. events or argo upgrades can
 manipulate this value by changing the company stat `MaSimDaysDecayModulator`. setting this stat to -1 will stop decay from occuring when a day passes. deploying a pilot into a mission will reset that pilots counter. when `trackSimDecayByStat` is `false` this 
 setting value will always be used
 
+`topAffinitiesInTooltipCount` : the number of mechs to show affinity about in the pilot tooltip, if the pilot has affinities with more mechs than this, mechs with the fewest affinities will be dropped from display
+
 `showQuirks` : when true, quirk affinities that are assiocated with a mech will be shown in the mechbay description of the mech in addition to any chassis specific affinities
 
 `showDescriptionsOnChassis` : when true, affinitys will be shown for chassis in the on hover chassis description in the mechbay storage screen
 
+`showAllPilotAffinities` : when true, the pilot dossier will show every affinity the pilot has with every chassis, when false only the highest level affininty will be show for a given chassis
+
 `globalAffinities` : a list of `affinityLevel` objects. these will aplly to all pilot-chassis combos. Note that affinity levels are additive
 
-`chassisAffinities` : a list of `ChassisAfinity` objects. These apply only to pilots-chassis combos that are called out by the affinity. Note these are additive with global affinities.
+`chassisAffinities` : a list of `ChassisAfinity` objects. These apply only to pilots-chassis combos that are called out by the affinity. Note these are additive with all other affinities.
 
 `quirkAffinities` : a list of `QuirkAffinity` objects. These apply only to pilots-chassis combos equiped with the defined gear that are called out by the affinity. Note these are additive with all other affinities.
+
+`taggedAffinities` : a list of `TaggedAffinity` objects. These will only apply to pilot-chassis combos that are called out by the affinity, when the pilot has the specificed tag. Note these are additive with all other affinities.
 
 ### affinityLevel objects
 
@@ -103,7 +115,6 @@ setting value will always be used
 
 `affinityLevels` : a list of `affinityLevel` objects to be considered for this affinity
 
-
 ### QuirkAffinity objects
 
 ```json
@@ -117,8 +128,39 @@ setting value will always be used
 
 `affinityLevels` : a list of `affinityLevel` objects to be considered for this affinity
 
+### TaggedAffinity objects
+
+```json
+{
+    "tag" : "",
+    "chassisNames" : [],
+    "affinityLevels" : []
+}
+```
+
+`tag` : a tag that the pilot must have for this affinity to be considered
+
+`chassisNames` : a list of chassis this affinity is available to. the chassis name is the prefab name followed by a `-` and the tonnage of the mech. In the event a the chassis has an assembly variant (from custom salvage), this will be used instead of the prefab. example chassis name for the assassin `chrPrfMech_assassinBase-001_40`
+
+`affinityLevels` : a list of `affinityLevel` objects to be considered for this affinity
 
 ## Giving AI Pilots Affinities
 
-non player pilots can also be setup to recieve affinities. to do this add a pliot tag of `affinityLevel_X` where X is the number of deployments that should be granted to the pilot. pilots with this tag will be 
-able to recieve all affinites (Global, Chassis & Quirk) that a player pilot of equal deployments is applicable for
+non player pilots can also be setup to recieve affinities. to do this add a pliot tag of `affinityLevel_X` where X is the number of deployments that should be granted to the pilot. pilots with this tag will be able to recieve all affinites (Global, Chassis, Quirk & Tagged) that a player pilot of equal deployments is applicable for
+
+## Affinities By Tags
+
+pilots may be granted experience towards affinities (of all types) by having special tags. there are 2 variants Permanent tags and Consumable tags. These tags can be part of a pilotdef when a pilot is generated
+or added by events.
+
+Permanent Tags: These tags provide the pilot with a permanent boost to their affinity count for a given chassis (unless they lose the tag).
+permanant tags follow this scheme `MaPermAffinity_X=prefabId` where X is the number of deployments to be given, and prefabId is the chassis that this boost should be given to.
+
+Example: Pilot Raza has been given the tag `MaPermAffinity_6=chrPrfMech_urbanmechBase-001_30` this means Raza has a permanent 6 points added when using the chassis `chrPrfMech_urbanmechBase-001_30` (the UrbanMech)
+
+Consumable Tags: These tags provide the pilot with a boost to their affinity count for a given chassis. when a day passes this tag will be removed and the number of points will be added to the tracking stat.
+these boosts are therefore subject to decay as normal affinity points are.
+Consumable tags follow this scheme `MaConsumableAffinity_X=prefabId` where X is the number of deployments to be given, and prefabId is the chassis that this boost should be given to.
+
+Example: Pilot Raza has been given the tag `MaConsumableAffinity_5=chrPrfMech_urbanmechBase-001_30` this means Raza has a 5 point boost added when using the chassis `chrPrfMech_urbanmechBase-001_30` (the UrbanMech),
+overtime this may decay if Raza decides to pilot another mech.

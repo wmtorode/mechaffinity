@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using MechAffinity.Data;
 using BattleTech;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 #if USE_CS_CC
@@ -13,21 +10,22 @@ using CustomComponents;
 using CustomSalvage;
 #endif
 
+// ReSharper disable once CheckNamespace
 namespace MechAffinity
 {
-    class PilotAffinityManager
+    public class PilotAffinityManager
     {
-        private static readonly string MA_Deployment_Stat = "MaDeployStat=";
-        private static readonly string MA_Decay_Stat = "MaDecayStat=";
-        private static readonly string MA_Lut_Stat = "MaLutStat";
-        private static readonly string MA_DaysElapsedMod_Stat = "MaDaysSinceLastDecay=";
-        private static readonly string MA_SimDaysDecayModulator_Stat = "MaSimDaysDecayModulator";
-        private static readonly string MA_LowestDecayStat = "MaLowestDecay";
-        private static readonly string MA_PilotDeployCountTag = "affinityLevel_";
-        private static readonly string MA_NoAffinity = "No Affinity";
-        private static readonly string MA_ConsumableTag = "MaConsumableAffinity_";
-        private static readonly string MA_PermaTag = "MaPermAffinity_";
-        private static PilotAffinityManager instance;
+        private const string MaDeploymentStat = "MaDeployStat=";
+        private const string MaDecayStat = "MaDecayStat=";
+        private const string MaLutStat = "MaLutStat";
+        private const string MaDaysElapsedModStat = "MaDaysSinceLastDecay=";
+        private const string MaSimDaysDecayModulatorStat = "MaSimDaysDecayModulator";
+        private const string MaLowestDecayStat = "MaLowestDecay";
+        private const string MaPilotDeployCountTag = "affinityLevel_";
+        private const string MaNoAffinity = "No Affinity";
+        private const string MaConsumableTag = "MaConsumableAffinity_";
+        private const string MaPermaTag = "MaPermAffinity_";
+        private static PilotAffinityManager _instance;
         private StatCollection companyStats;
         private Dictionary<string, List<AffinityLevel>> chassisAffinities;
         private Dictionary<string, List<string>> pilotStatMap;
@@ -37,7 +35,6 @@ namespace MechAffinity
         private Dictionary<string, List<string>> pilotNoDeployStatMap;
         private Dictionary<string, List<AffinityLevel>> quirkAffinities;
         private Dictionary<string, List<AffinityLevel>> taggedAffinities;
-        private Dictionary<string, List<string>> quirksLookup;
         private List<string> tagsWithAffinities;
         private int uid;
 
@@ -45,8 +42,8 @@ namespace MechAffinity
         {
             get
             {
-                if (instance == null) instance = new PilotAffinityManager();
-                return instance;
+                if (_instance == null) _instance = new PilotAffinityManager();
+                return _instance;
             }
         }
 
@@ -85,8 +82,6 @@ namespace MechAffinity
                 }
                 foreach (AffinityLevel affinityLevel in tagged.affinityLevels)
                 {
-                    // tagged affinities are granted by tags, not deployment counts
-                    affinityLevel.missionsRequired = 0;
                     levelDescriptors[affinityLevel.levelName] = new DescriptionHolder(affinityLevel.levelName, affinityLevel.decription, affinityLevel.missionsRequired);
                     foreach (JObject jObject in affinityLevel.effectData)
                     {
@@ -130,7 +125,7 @@ namespace MechAffinity
             {
                 levelDescriptors[affinityLevel.levelName] = new DescriptionHolder(affinityLevel.levelName, affinityLevel.decription, affinityLevel.missionsRequired);
             }
-            levelDescriptors[MA_NoAffinity] = new DescriptionHolder(MA_NoAffinity, "", 0);
+            levelDescriptors[MaNoAffinity] = new DescriptionHolder(MaNoAffinity, "", 0);
         }
 
         public void addToChassisPrefabLut(MechDef mech)
@@ -138,7 +133,7 @@ namespace MechAffinity
             
             string prefabId = getPrefabId(mech);
             chassisPrefabLut[prefabId] = mech.Chassis.Description.Name;
-            Main.modLog.LogMessage($"adding to lut {prefabId} => {mech.Chassis.Description.Name}");
+            //Main.modLog.LogMessage($"adding to lut {prefabId} => {mech.Chassis.Description.Name}");
         }
 
         public void setCompanyStats(StatCollection stats)
@@ -152,30 +147,30 @@ namespace MechAffinity
             //find all mechs a given pilot has experience with and cache for later
             foreach (KeyValuePair<string, Statistic> keypair in companyStats)
             {
-                if (keypair.Key.StartsWith(MA_Deployment_Stat))
+                if (keypair.Key.StartsWith(MaDeploymentStat))
                 {
                     addtoPilotMap(keypair.Key);
                     addtoPilotDecayMap(convertAffinityStatToDecay(keypair.Key));
                 }
                 else
                 {
-                    if(keypair.Key.StartsWith(MA_Decay_Stat))
+                    if(keypair.Key.StartsWith(MaDecayStat))
                     {
                         addtoPilotDecayMap(keypair.Key);
                     }
                 }
             }
-            if (companyStats.ContainsStatistic(MA_Lut_Stat))
+            if (companyStats.ContainsStatistic(MaLutStat))
             {
-                companyStats.RemoveStatistic(MA_Lut_Stat);
+                companyStats.RemoveStatistic(MaLutStat);
             }
-            if (!companyStats.ContainsStatistic(MA_SimDaysDecayModulator_Stat) && Main.settings.trackSimDecayByStat)
+            if (!companyStats.ContainsStatistic(MaSimDaysDecayModulatorStat) && Main.settings.trackSimDecayByStat)
             {
-                companyStats.AddStatistic<int>(MA_SimDaysDecayModulator_Stat, Main.settings.defaultDaysBeforeSimDecay);
+                companyStats.AddStatistic<int>(MaSimDaysDecayModulatorStat, Main.settings.defaultDaysBeforeSimDecay);
             }
-            if (!companyStats.ContainsStatistic(MA_LowestDecayStat) && Main.settings.trackLowestDecayByStat)
+            if (!companyStats.ContainsStatistic(MaLowestDecayStat) && Main.settings.trackLowestDecayByStat)
             {
-                companyStats.AddStatistic<int>(MA_LowestDecayStat, Main.settings.lowestPossibleDecay);
+                companyStats.AddStatistic<int>(MaLowestDecayStat, Main.settings.lowestPossibleDecay);
             }
         }
 
@@ -208,18 +203,18 @@ namespace MechAffinity
 
         private string convertDecayStatToAffinity(string statName)
         {
-            return statName.Replace(MA_Decay_Stat, MA_Deployment_Stat);
+            return statName.Replace(MaDecayStat, MaDeploymentStat);
         }
 
         private string convertAffinityStatToDecay(string statName)
         {
-            return statName.Replace(MA_Deployment_Stat, MA_Decay_Stat);
+            return statName.Replace(MaDeploymentStat, MaDecayStat);
         }
 
         private string convertAffinityStatToSimDecay(string statName)
         {
             string pilotId = statName.Split('=')[1];
-            return $"{MA_DaysElapsedMod_Stat}{pilotId}";
+            return $"{MaDaysElapsedModStat}{pilotId}";
         }
 
         private string getPrefabId(ChassisDef chassis)
@@ -252,7 +247,7 @@ namespace MechAffinity
         {
             if (Main.settings.trackLowestDecayByStat)
             {
-                return companyStats.GetValue<int>(MA_LowestDecayStat);
+                return companyStats.GetValue<int>(MaLowestDecayStat);
             }
             return Main.settings.lowestPossibleDecay;
         }
@@ -261,7 +256,7 @@ namespace MechAffinity
         {
             if (Main.settings.trackSimDecayByStat)
             {
-                return companyStats.GetValue<int>(MA_SimDaysDecayModulator_Stat);
+                return companyStats.GetValue<int>(MaSimDaysDecayModulatorStat);
             }
             return Main.settings.defaultDaysBeforeSimDecay;
         }
@@ -337,7 +332,7 @@ namespace MechAffinity
                 foreach (string tag in tags)
                 {
                     //Main.modLog.LogMessage($"Processing tag: {tag}");
-                    if (tag.StartsWith(MA_PermaTag))
+                    if (tag.StartsWith(MaPermaTag))
                     {
                         string tagPrefab = tag.Split('=')[1];
                         string statName = getAffinityStatName(pilot, tagPrefab);
@@ -355,15 +350,15 @@ namespace MechAffinity
             if (pilot == null)
             {
                 Main.modLog.LogMessage("Null Pilot found!");
-                return $"{MA_Deployment_Stat}";
+                return $"{MaDeploymentStat}";
             }
             string prefab = getPrefabId(actor);
             if (String.IsNullOrEmpty(prefab))
             {
                 Main.modLog.LogMessage("Null Prefab!");
-                return $"{MA_Deployment_Stat}{pilot.pilotDef.Description.Id}";
+                return $"{MaDeploymentStat}{pilot.pilotDef.Description.Id}";
             }
-            string statName = $"{MA_Deployment_Stat}{pilot.pilotDef.Description.Id}={getPrefabId(actor)}";
+            string statName = $"{MaDeploymentStat}{pilot.pilotDef.Description.Id}={getPrefabId(actor)}";
             return statName;
         }
 
@@ -371,13 +366,13 @@ namespace MechAffinity
         {
             string prefabId = getPrefabId(result.mech);
             chassisPrefabLut[prefabId] = result.mech.Chassis.Description.Name;
-            string statName = $"{MA_Deployment_Stat}{result.pilot.pilotDef.Description.Id}={prefabId}";
+            string statName = $"{MaDeploymentStat}{result.pilot.pilotDef.Description.Id}={prefabId}";
             return statName;
         }
 
         private string getAffinityStatName(Pilot pilot, string prefabId)
         {
-            return $"{MA_Deployment_Stat}{pilot.pilotDef.Description.Id}={prefabId}";
+            return $"{MaDeploymentStat}{pilot.pilotDef.Description.Id}={prefabId}";
         }
 
         public int getStatDeploymentCountWithMech(string statName)
@@ -397,13 +392,13 @@ namespace MechAffinity
                 foreach (string tag in tags)
                 {
                     //Main.modLog.LogMessage($"Processing tag: {tag}");
-                    if (tag.StartsWith(MA_PermaTag))
+                    if (tag.StartsWith(MaPermaTag))
                     {
                         int deployCount;
                         string tagPrefab = tag.Split('=')[1];
                         if (prefabId == tagPrefab)
                         {
-                            string count = tag.Split('=')[0].Replace(MA_PermaTag, "");
+                            string count = tag.Split('=')[0].Replace(MaPermaTag, "");
                             if (!int.TryParse(count, out deployCount))
                             {
                                 deployCount = 0;
@@ -667,16 +662,19 @@ namespace MechAffinity
                     List<AffinityLevel> affinityLevels = taggedAffinities[lookup];
                     foreach (AffinityLevel affinityLevel in affinityLevels)
                     {
-                        string toAdd = affinityLevel.levelName;
-                        if (withCounts) toAdd += " (0/0)";
-                        ret.Add(toAdd);
+                        if (deployCount >= affinityLevel.missionsRequired)
+                        {
+                            string toAdd = affinityLevel.levelName;
+                            if (withCounts) toAdd += $" ({deployCount}/{affinityLevel.missionsRequired})";
+                            ret.Add(toAdd);
+                        }
                     }
                 }
             }
 
             if (ret.Count == 0)
             {
-                ret.Add(MA_NoAffinity);
+                ret.Add(MaNoAffinity);
             }
             return ret;
         }
@@ -800,7 +798,7 @@ namespace MechAffinity
                     chassisValues[chassisId] = getDeploymentCountWithMech(pilot, chassisId);
                 }
 
-                int toShow = Math.Min(chassisValues.Count, Main.settings.TopAffinitiesInTooltipCount);
+                int toShow = Math.Min(chassisValues.Count, Main.settings.topAffinitiesInTooltipCount);
                 List<KeyValuePair<string, int>> sortedCounts = chassisValues.OrderByDescending(d => d.Value).ToList();
                 for(int i=0; i < toShow; i++)
                 {
@@ -901,22 +899,28 @@ namespace MechAffinity
                         List<AffinityLevel> affinityLevels = taggedAffinities[lookup];
                         foreach (AffinityLevel affinityLevel in affinityLevels)
                         {
-                            Main.modLog.LogMessage($"Pilot/Mech Combo {statName} has achieved Tagged Level {affinityLevel.levelName}");
-                            foreach (Affinity affinity in affinityLevel.affinities)
+                            if (deployCount >= affinityLevel.missionsRequired)
                             {
-                                if (bonuses.ContainsKey(affinity.type))
+                                Main.modLog.LogMessage(
+                                    $"Pilot/Mech Combo {statName} has achieved Tagged Level {affinityLevel.levelName}");
+                                foreach (Affinity affinity in affinityLevel.affinities)
                                 {
-                                    bonuses[affinity.type] += affinity.bonus;
+                                    if (bonuses.ContainsKey(affinity.type))
+                                    {
+                                        bonuses[affinity.type] += affinity.bonus;
+                                    }
+                                    else
+                                    {
+                                        bonuses.Add(affinity.type, affinity.bonus);
+                                    }
                                 }
-                                else
+
+                                foreach (EffectData effect in affinityLevel.effects)
                                 {
-                                    bonuses.Add(affinity.type, affinity.bonus);
+                                    effects.Add(effect);
+                                    Main.modLog.LogMessage(
+                                        $"Found effect ID: {effect.Description.Id}, name: {effect.Description.Name}");
                                 }
-                            }
-                            foreach (EffectData effect in affinityLevel.effects)
-                            {
-                                effects.Add(effect);
-                                Main.modLog.LogMessage($"Found effect ID: {effect.Description.Id}, name: {effect.Description.Name}");
                             }
                         }
                     }
@@ -976,9 +980,9 @@ namespace MechAffinity
                 }
                 foreach(string tag in tags)
                 {
-                    if (tag.StartsWith(MA_PilotDeployCountTag))
+                    if (tag.StartsWith(MaPilotDeployCountTag))
                     {
-                        string count = tag.Replace(MA_PilotDeployCountTag, "");
+                        string count = tag.Replace(MaPilotDeployCountTag, "");
                         if (!int.TryParse(count, out deployCount))
                         {
                             deployCount = 0;
@@ -1078,11 +1082,11 @@ namespace MechAffinity
             foreach (string tag in tags)
             {
                 //Main.modLog.LogMessage($"Processing tag: {tag}");
-                if (tag.StartsWith(MA_ConsumableTag))
+                if (tag.StartsWith(MaConsumableTag))
                 {
                     int deployCount;
                     string prefabId = tag.Split('=')[1];
-                    string count = tag.Split('=')[0].Replace(MA_ConsumableTag, "");
+                    string count = tag.Split('=')[0].Replace(MaConsumableTag, "");
                     if (!int.TryParse(count, out deployCount))
                     {
                         deployCount = 0;
@@ -1104,7 +1108,7 @@ namespace MechAffinity
                 return false;
             }
             string pilotId = pilot.pilotDef.Description.Id;
-            string statName = $"{MA_DaysElapsedMod_Stat}{pilotId}";
+            string statName = $"{MaDaysElapsedModStat}{pilotId}";
             if (!companyStats.ContainsStatistic(statName))
             {
                 companyStats.AddStatistic<int>(statName, 1);

@@ -26,6 +26,6 @@ namespace MechAffinity.Data
         public bool trackSimDecayByStat = true;
         public bool trackLowestDecayByStat = false;
         public bool showAllPilotAffinities = true;
-        public int TopAffinitiesInTooltipCount = 3;
+        public int topAffinitiesInTooltipCount = 3;
     }
 }
