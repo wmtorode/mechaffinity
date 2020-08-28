@@ -91,6 +91,7 @@
     <Compile Include="Data\PrefabOverride.cs" />
     <Compile Include="Data\QuirkAffinity.cs" />
     <Compile Include="Data\Settings.cs" />
+    <Compile Include="Data\TaggedAffinity.cs" />
     <Compile Include="Features\PilotAffinityManager.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Patches\MechDetails.cs" />

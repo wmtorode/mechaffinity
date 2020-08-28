@@ -36,6 +36,9 @@ namespace MechAffinity
         private Dictionary<string, DescriptionHolder> levelDescriptors;
         private Dictionary<string, List<string>> pilotNoDeployStatMap;
         private Dictionary<string, List<AffinityLevel>> quirkAffinities;
+        private Dictionary<string, List<AffinityLevel>> taggedAffinities;
+        private Dictionary<string, List<string>> quirksLookup;
+        private List<string> tagsWithAffinities;
         private int uid;
 
         public static PilotAffinityManager Instance
@@ -51,9 +54,11 @@ namespace MechAffinity
         {
             chassisAffinities = new Dictionary<string, List<AffinityLevel>>();
             quirkAffinities = new Dictionary<string, List<AffinityLevel>>();
+            taggedAffinities = new Dictionary<string, List<AffinityLevel>>();
             prefabOverrides = new Dictionary<string, string>();
             chassisPrefabLut = new Dictionary<string, string>();
             levelDescriptors = new Dictionary<string, DescriptionHolder>();
+            tagsWithAffinities = new List<string>();
             foreach (ChassisSpecificAffinity chassisSpecific in Main.settings.chassisAffinities)
             {
                 foreach (string chassisName in chassisSpecific.chassisNames)
@@ -62,6 +67,26 @@ namespace MechAffinity
                 }
                 foreach (AffinityLevel affinityLevel in chassisSpecific.affinityLevels)
                 {
+                    levelDescriptors[affinityLevel.levelName] = new DescriptionHolder(affinityLevel.levelName, affinityLevel.decription, affinityLevel.missionsRequired);
+                    foreach (JObject jObject in affinityLevel.effectData)
+                    {
+                        EffectData effectData = new EffectData();
+                        effectData.FromJSON(jObject.ToString());
+                        affinityLevel.effects.Add(effectData);
+                    }
+                }
+            }
+            foreach (TaggedAffinity tagged in Main.settings.taggedAffinities)
+            {
+                tagsWithAffinities.Add(tagged.tag);
+                foreach (string chassisName in tagged.chassisNames)
+                {
+                    taggedAffinities.Add($"{tagged.tag}={chassisName}", tagged.affinityLevels);
+                }
+                foreach (AffinityLevel affinityLevel in tagged.affinityLevels)
+                {
+                    // tagged affinities are granted by tags, not deployment counts
+                    affinityLevel.missionsRequired = 0;
                     levelDescriptors[affinityLevel.levelName] = new DescriptionHolder(affinityLevel.levelName, affinityLevel.decription, affinityLevel.missionsRequired);
                     foreach (JObject jObject in affinityLevel.effectData)
                     {
@@ -275,6 +300,53 @@ namespace MechAffinity
             }
 
             return quirks;
+        }
+
+        private List<string> getPossibleTaggedAffinities(Pilot pilot)
+        {
+            List<string> possibleTags = new List<string>();
+            if (pilot != null)
+            {
+                List<string> tags = pilot.pilotDef.PilotTags.ToList();
+                foreach (string tag in tags)
+                {
+                    if (tagsWithAffinities.Contains(tag))
+                    {
+                        possibleTags.Add(tag);
+                    }
+                }
+            }
+            return possibleTags;
+        }
+
+        private List<string> getPossibleTaggedAffinities(AbstractActor actor)
+        {
+            return getPossibleTaggedAffinities(actor.GetPilot());
+        }
+
+        private string getTaggedAffinityLookup(string tag, string prefabId)
+        {
+            return $"{tag}={prefabId}";
+        }
+
+        private void addToMapIfNeeded(Pilot pilot)
+        {
+            if (pilot != null)
+            {
+                List<string> tags = pilot.pilotDef.PilotTags.ToList();
+                foreach (string tag in tags)
+                {
+                    //Main.modLog.LogMessage($"Processing tag: {tag}");
+                    if (tag.StartsWith(MA_PermaTag))
+                    {
+                        string tagPrefab = tag.Split('=')[1];
+                        string statName = getAffinityStatName(pilot, tagPrefab);
+                        addtoPilotMap(statName);
+
+                    }
+                }
+            }
+
         }
 
         private string getAffinityStatName(AbstractActor actor)
@@ -551,6 +623,7 @@ namespace MechAffinity
                     }
                 }
             }
+
             List<string> highest = new List<string>();
             highest.Add(ret);
             return highest;
@@ -561,6 +634,7 @@ namespace MechAffinity
             List<string> ret = new List<string>();
             int deployCount = getDeploymentCountWithMech(pilot, prefab);
             //Main.modLog.LogMessage($"Deployment Count: {deployCount}");
+            List<string> tags = getPossibleTaggedAffinities(pilot);
 
             foreach (AffinityLevel affinityLevel in Main.settings.globalAffinities)
             {
@@ -581,6 +655,20 @@ namespace MechAffinity
                     {
                         string toAdd = affinityLevel.levelName;
                         if (withCounts) toAdd += $" ({deployCount}/{affinityLevel.missionsRequired})";
+                        ret.Add(toAdd);
+                    }
+                }
+            }
+            foreach (string tag in tags)
+            {
+                string lookup = getTaggedAffinityLookup(tag, prefab);
+                if (taggedAffinities.ContainsKey(lookup))
+                {
+                    List<AffinityLevel> affinityLevels = taggedAffinities[lookup];
+                    foreach (AffinityLevel affinityLevel in affinityLevels)
+                    {
+                        string toAdd = affinityLevel.levelName;
+                        if (withCounts) toAdd += " (0/0)";
                         ret.Add(toAdd);
                     }
                 }
@@ -610,6 +698,19 @@ namespace MechAffinity
                 foreach (AffinityLevel affinityLevel in affinityLevels)
                 {
                     levels.Add(affinityLevel);
+                }
+            }
+            List<string> tags = getPossibleTaggedAffinities(pilot);
+            foreach (string tag in tags)
+            {
+                string lookup = getTaggedAffinityLookup(tag, prefab);
+                if (taggedAffinities.ContainsKey(lookup))
+                {
+                    List<AffinityLevel> affinityLevels = taggedAffinities[lookup];
+                    foreach (AffinityLevel affinityLevel in affinityLevels)
+                    {
+                        levels.Add(affinityLevel);
+                    }
                 }
             }
 
@@ -688,7 +789,7 @@ namespace MechAffinity
 
         public string getPilotToolTip(Pilot pilot)
         {
-
+            addToMapIfNeeded(pilot);
             string pilotId = pilot.pilotDef.Description.Id;
             Dictionary<string, List<string>> affinites = new Dictionary<string, List<string>>();
             if (pilotStatMap.ContainsKey(pilotId))
@@ -735,7 +836,7 @@ namespace MechAffinity
             return ret;
         }
 
-        private void getDeploymentBonus(int deployCount, string chassisPrefab, string statName, List<string> possibleQuirks, out Dictionary<EAffinityType, int> bonuses, out List<EffectData> effects)
+        private void getDeploymentBonus(int deployCount, string chassisPrefab, string statName, List<string> possibleQuirks, List<string> possibleTags, out Dictionary<EAffinityType, int> bonuses, out List<EffectData> effects)
         {
             bonuses = new Dictionary<EAffinityType, int>();
             effects = new List<EffectData>();
@@ -792,6 +893,34 @@ namespace MechAffinity
                         }
                     }
                 }
+                foreach (string tag in possibleTags)
+                {
+                    string lookup = getTaggedAffinityLookup(tag, chassisPrefab);
+                    if (taggedAffinities.ContainsKey(lookup))
+                    {
+                        List<AffinityLevel> affinityLevels = taggedAffinities[lookup];
+                        foreach (AffinityLevel affinityLevel in affinityLevels)
+                        {
+                            Main.modLog.LogMessage($"Pilot/Mech Combo {statName} has achieved Tagged Level {affinityLevel.levelName}");
+                            foreach (Affinity affinity in affinityLevel.affinities)
+                            {
+                                if (bonuses.ContainsKey(affinity.type))
+                                {
+                                    bonuses[affinity.type] += affinity.bonus;
+                                }
+                                else
+                                {
+                                    bonuses.Add(affinity.type, affinity.bonus);
+                                }
+                            }
+                            foreach (EffectData effect in affinityLevel.effects)
+                            {
+                                effects.Add(effect);
+                                Main.modLog.LogMessage($"Found effect ID: {effect.Description.Id}, name: {effect.Description.Name}");
+                            }
+                        }
+                    }
+                }
             }
             foreach (string quirk in possibleQuirks)
             {
@@ -820,6 +949,7 @@ namespace MechAffinity
                     }
                 }
             }
+
         }
 
 
@@ -829,7 +959,8 @@ namespace MechAffinity
             string chassisPrefab = getPrefabId(actor);
             string statName = getAffinityStatName(actor);
             List<string> possibleQuirks = getPossibleQuirkAffinites(actor);
-            getDeploymentBonus(deployCount, chassisPrefab, statName, possibleQuirks, out bonuses, out effects);
+            List<string> possibleTags = getPossibleTaggedAffinities(actor);
+            getDeploymentBonus(deployCount, chassisPrefab, statName, possibleQuirks, possibleTags, out bonuses, out effects);
         }
 
         public int getPilotDeployBonusByTag(AbstractActor actor)
@@ -865,7 +996,8 @@ namespace MechAffinity
             string chassisPrefab = getPrefabId(actor);
             string statName = getAffinityStatName(actor);
             List<string> possibleQuirks = getPossibleQuirkAffinites(actor);
-            getDeploymentBonus(deployCount, chassisPrefab, statName, possibleQuirks, out bonuses, out effects);
+            List<string> possibleTags = getPossibleTaggedAffinities(actor);
+            getDeploymentBonus(deployCount, chassisPrefab, statName, possibleQuirks, possibleTags, out bonuses, out effects);
         }
 
         private void applyStatBonuses(AbstractActor actor, Dictionary<EAffinityType, int> bonuses)
