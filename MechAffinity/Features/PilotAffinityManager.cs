@@ -308,7 +308,7 @@ namespace MechAffinity
             return $"{MA_Deployment_Stat}{pilot.pilotDef.Description.Id}={prefabId}";
         }
 
-        public int getDeploymentCountWithMech(string statName)
+        public int getStatDeploymentCountWithMech(string statName)
         {
             if (companyStats.ContainsStatistic(statName))
             {
@@ -317,19 +317,50 @@ namespace MechAffinity
             return 0;
         }
 
+        public int getTaggedDeploymentCountWithMech(Pilot pilot, string prefabId)
+        {
+            if (pilot != null)
+            {
+                List<string> tags = pilot.pilotDef.PilotTags.ToList();
+                foreach (string tag in tags)
+                {
+                    //Main.modLog.LogMessage($"Processing tag: {tag}");
+                    if (tag.StartsWith(MA_PermaTag))
+                    {
+                        int deployCount;
+                        string tagPrefab = tag.Split('=')[1];
+                        if (prefabId == tagPrefab)
+                        {
+                            string count = tag.Split('=')[0].Replace(MA_PermaTag, "");
+                            if (!int.TryParse(count, out deployCount))
+                            {
+                                deployCount = 0;
+                            }
+
+                            return deployCount;
+                        }
+                    }
+                }
+            }
+
+            return 0;
+        }
+
         public int getDeploymentCountWithMech(AbstractActor actor)
         {
             string statName = getAffinityStatName(actor);
-            return getDeploymentCountWithMech(statName);
+            string prefab = getPrefabId(actor);
+            return getStatDeploymentCountWithMech(statName) + getTaggedDeploymentCountWithMech(actor.GetPilot(), prefab);
             
         }
 
         public int getDeploymentCountWithMech(Pilot pilot, string prefabId)
         {
             string statName = getAffinityStatName(pilot, prefabId);
-            return getDeploymentCountWithMech(statName);
+            return getStatDeploymentCountWithMech(statName) + getTaggedDeploymentCountWithMech(pilot, prefabId);
 
         }
+
         private bool shouldDecay(int decayCount)
         {
             if (Main.settings.missionsBeforeDecay != -1)
@@ -456,6 +487,7 @@ namespace MechAffinity
             {
                 int stat = companyStats.GetValue<int>(statName);
                 stat+= incrementBy;
+                stat = Math.Min(stat, Main.settings.maxAffinityPoints);
                 companyStats.Set<int>(statName, stat);
             }
             else
@@ -485,11 +517,11 @@ namespace MechAffinity
             incrementDeployCountWithMech(statName);
         }
 
-        private List<string> getHighestLevelName(string statName, string prefab)
+        private List<string> getHighestLevelName(string prefab, Pilot pilot)
         {
             string ret = "";
             int maxSoFar = 0;
-            int deployCount = getDeploymentCountWithMech(statName);
+            int deployCount = getDeploymentCountWithMech(pilot, prefab);
             //Main.modLog.LogMessage($"Deployment Count: {deployCount}");
 
             foreach (AffinityLevel affinityLevel in Main.settings.globalAffinities)
@@ -612,7 +644,7 @@ namespace MechAffinity
                     }
                     else
                     {
-                        levels = getHighestLevelName($"{MA_Deployment_Stat}{pilotId}={chassisId}", chassisId);
+                        levels = getHighestLevelName(chassisId, pilot);
                     }
 
                     foreach (string level in levels)
@@ -908,11 +940,12 @@ namespace MechAffinity
             applyStatusEffects(actor, effects);
         }
 
-        private void consumeAffinityTags(ref Pilot pilot)
+        private void consumeAffinityTags(Pilot pilot)
         {
             List<string> tags = pilot.pilotDef.PilotTags.ToList();
             foreach (string tag in tags)
             {
+                //Main.modLog.LogMessage($"Processing tag: {tag}");
                 if (tag.StartsWith(MA_ConsumableTag))
                 {
                     int deployCount;
@@ -932,6 +965,7 @@ namespace MechAffinity
 
         public bool onSimDayElapsed(Pilot pilot)
         {
+            consumeAffinityTags(pilot);
             int modulator = getSimDecayDays();
             if (modulator == -1)
             {

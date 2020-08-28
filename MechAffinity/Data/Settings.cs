@@ -16,6 +16,7 @@ namespace MechAffinity.Data
         public int missionsBeforeDecay = -1;
         public int lowestPossibleDecay = 0;
         public int removeAffinityAfter = 100;
+        public int maxAffinityPoints = 1000;
         public bool decayByModulo = false;
         public string debugForceTag = "";
         public int defaultDaysBeforeSimDecay = -1;
