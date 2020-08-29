@@ -27,5 +27,8 @@ namespace MechAffinity.Data
         public bool trackLowestDecayByStat = false;
         public bool showAllPilotAffinities = true;
         public int topAffinitiesInTooltipCount = 3;
+
+        public bool enablePilotQuirks = false;
+        public List<PilotQuirk> pilotQuirks = new List<PilotQuirk>();
     }
 }
