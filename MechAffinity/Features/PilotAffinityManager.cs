@@ -56,6 +56,8 @@ namespace MechAffinity
             chassisPrefabLut = new Dictionary<string, string>();
             levelDescriptors = new Dictionary<string, DescriptionHolder>();
             tagsWithAffinities = new List<string>();
+            pilotStatMap = new Dictionary<string, List<string>>();
+            pilotNoDeployStatMap = new Dictionary<string, List<string>>();
             foreach (ChassisSpecificAffinity chassisSpecific in Main.settings.chassisAffinities)
             {
                 foreach (string chassisName in chassisSpecific.chassisNames)
@@ -247,7 +249,10 @@ namespace MechAffinity
         {
             if (Main.settings.trackLowestDecayByStat)
             {
-                return companyStats.GetValue<int>(MaLowestDecayStat);
+                if (companyStats != null)
+                {
+                    return companyStats.GetValue<int>(MaLowestDecayStat);
+                }
             }
             return Main.settings.lowestPossibleDecay;
         }
@@ -256,7 +261,10 @@ namespace MechAffinity
         {
             if (Main.settings.trackSimDecayByStat)
             {
-                return companyStats.GetValue<int>(MaSimDaysDecayModulatorStat);
+                if (companyStats != null)
+                {
+                    return companyStats.GetValue<int>(MaSimDaysDecayModulatorStat);
+                }
             }
             return Main.settings.defaultDaysBeforeSimDecay;
         }
@@ -377,9 +385,12 @@ namespace MechAffinity
 
         public int getStatDeploymentCountWithMech(string statName)
         {
-            if (companyStats.ContainsStatistic(statName))
+            if (companyStats != null)
             {
-                return companyStats.GetValue<int>(statName);
+                if (companyStats.ContainsStatistic(statName))
+                {
+                    return companyStats.GetValue<int>(statName);
+                }
             }
             return 0;
         }
@@ -453,7 +464,11 @@ namespace MechAffinity
 
         private void decayAffinties(string decayStat)
         {
-            if (Main.settings.missionsBeforeDecay != -1 || Main.settings.removeAffinityAfter != -1)
+            if (companyStats == null)
+            {
+                return;
+            }
+                if (Main.settings.missionsBeforeDecay != -1 || Main.settings.removeAffinityAfter != -1)
             {
                 string pilotId = decayStat.Split('=')[1];
                 List<string> decayList = pilotNoDeployStatMap[pilotId];
@@ -545,6 +560,10 @@ namespace MechAffinity
 
         public void incrementDeployCountWithMech(string statName ,int incrementBy=1, bool decay=true)
         {
+            if (companyStats == null)
+            {
+                return;
+            }
             Main.modLog.LogMessage($"Incrementing DeployCount stat {statName}");
             string decayStat = convertAffinityStatToDecay(statName);
             string simDecaystat = convertAffinityStatToSimDecay(statName);
@@ -787,51 +806,53 @@ namespace MechAffinity
 
         public string getPilotToolTip(Pilot pilot)
         {
-            addToMapIfNeeded(pilot);
-            string pilotId = pilot.pilotDef.Description.Id;
-            Dictionary<string, List<string>> affinites = new Dictionary<string, List<string>>();
-            if (pilotStatMap.ContainsKey(pilotId))
+            if (pilot != null)
             {
-                Dictionary<string, int> chassisValues = new Dictionary<string, int>();
-                foreach (string chassisId in pilotStatMap[pilotId])
+                addToMapIfNeeded(pilot);
+                string pilotId = pilot.pilotDef.Description.Id;
+                Dictionary<string, List<string>> affinites = new Dictionary<string, List<string>>();
+                if (pilotStatMap.ContainsKey(pilotId))
                 {
-                    chassisValues[chassisId] = getDeploymentCountWithMech(pilot, chassisId);
-                }
-
-                int toShow = Math.Min(chassisValues.Count, Main.settings.topAffinitiesInTooltipCount);
-                List<KeyValuePair<string, int>> sortedCounts = chassisValues.OrderByDescending(d => d.Value).ToList();
-                for(int i=0; i < toShow; i++)
-                {
-                    List<string> levels;
-
-                    levels = getAllLevelsToolTip(pilot, sortedCounts[i].Key);
-                    affinites[sortedCounts[i].Key] = levels;
-
-                }
-            }
-
-            string ret = "\n";
-            foreach (KeyValuePair<string, List<string>> level in affinites)
-            {
-                string chassisName = level.Key;
-                if (prefabOverrides.ContainsKey(level.Key))
-                {
-                    chassisName = prefabOverrides[level.Key];
-                }
-                else
-                {
-                    if (chassisPrefabLut.ContainsKey(level.Key))
+                    Dictionary<string, int> chassisValues = new Dictionary<string, int>();
+                    foreach (string chassisId in pilotStatMap[pilotId])
                     {
-                        chassisName = chassisPrefabLut[level.Key];
+                        chassisValues[chassisId] = getDeploymentCountWithMech(pilot, chassisId);
+                    }
+
+                    int toShow = Math.Min(chassisValues.Count, Main.settings.topAffinitiesInTooltipCount);
+                    List<KeyValuePair<string, int>> sortedCounts = chassisValues.OrderByDescending(d => d.Value).ToList();
+                    for (int i = 0; i < toShow; i++)
+                    {
+                        List<string> levels;
+
+                        levels = getAllLevelsToolTip(pilot, sortedCounts[i].Key);
+                        affinites[sortedCounts[i].Key] = levels;
+
                     }
                 }
-                string unit = $"<b>{chassisName}</b>\n";
-                string levels = string.Join("\n", level.Value);
-                unit += levels;
-                ret += unit + "\n\n";
+                string ret = "\n";
+                foreach (KeyValuePair<string, List<string>> level in affinites)
+                {
+                    string chassisName = level.Key;
+                    if (prefabOverrides.ContainsKey(level.Key))
+                    {
+                        chassisName = prefabOverrides[level.Key];
+                    }
+                    else
+                    {
+                        if (chassisPrefabLut.ContainsKey(level.Key))
+                        {
+                            chassisName = chassisPrefabLut[level.Key];
+                        }
+                    }
+                    string unit = $"<b>{chassisName}</b>\n";
+                    string levels = string.Join("\n", level.Value);
+                    unit += levels;
+                    ret += unit + "\n\n";
+                }
+                return ret;
             }
-
-            return ret;
+            return "";
         }
 
         private void getDeploymentBonus(int deployCount, string chassisPrefab, string statName, List<string> possibleQuirks, List<string> possibleTags, out Dictionary<EAffinityType, int> bonuses, out List<EffectData> effects)
