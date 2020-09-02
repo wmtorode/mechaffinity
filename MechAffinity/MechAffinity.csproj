@@ -95,6 +95,7 @@
     <Compile Include="Data\QuirkEffect.cs" />
     <Compile Include="Data\Settings.cs" />
     <Compile Include="Data\TaggedAffinity.cs" />
+    <Compile Include="Features\BaseEffectManager.cs" />
     <Compile Include="Features\PilotAffinityManager.cs" />
     <Compile Include="Features\PilotQuirkManager.cs" />
     <Compile Include="Features\UidManager.cs" />

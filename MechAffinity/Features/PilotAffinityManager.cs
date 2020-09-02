@@ -13,7 +13,7 @@ using CustomSalvage;
 // ReSharper disable once CheckNamespace
 namespace MechAffinity
 {
-    public class PilotAffinityManager
+    public class PilotAffinityManager: BaseEffectManager
     {
         private const string MaDeploymentStat = "MaDeployStat=";
         private const string MaDecayStat = "MaDecayStat=";
@@ -36,7 +36,6 @@ namespace MechAffinity
         private Dictionary<string, List<AffinityLevel>> quirkAffinities;
         private Dictionary<string, List<AffinityLevel>> taggedAffinities;
         private List<string> tagsWithAffinities;
-        private int uid;
 
         public static PilotAffinityManager Instance
         {
@@ -144,7 +143,7 @@ namespace MechAffinity
             pilotStatMap = new Dictionary<string, List<string>>();
             chassisPrefabLut = new Dictionary<string, string>();
             pilotNoDeployStatMap = new Dictionary<string, List<string>>();
-            uid = 0;
+            UidManager.reset();
 
             //find all mechs a given pilot has experience with and cache for later
             foreach (KeyValuePair<string, Statistic> keypair in companyStats)
@@ -468,7 +467,7 @@ namespace MechAffinity
             {
                 return;
             }
-                if (Main.settings.missionsBeforeDecay != -1 || Main.settings.removeAffinityAfter != -1)
+            if (Main.settings.missionsBeforeDecay != -1 || Main.settings.removeAffinityAfter != -1)
             {
                 string pilotId = decayStat.Split('=')[1];
                 List<string> decayList = pilotNoDeployStatMap[pilotId];
@@ -587,8 +586,6 @@ namespace MechAffinity
                 // pilot has deployed, reset their no deployment tracker
                 companyStats.Set<int>(simDecaystat, 0);
             }
-
-
         }
 
         public void incrementDeployCountWithMech(UnitResult result)
@@ -977,7 +974,6 @@ namespace MechAffinity
 
         }
 
-
         private void getDeploymentBonus(AbstractActor actor, out Dictionary<EAffinityType, int> bonuses, out List<EffectData> effects)
         {
             int deployCount = getDeploymentCountWithMech(actor);
@@ -1052,23 +1048,6 @@ namespace MechAffinity
             {
                 Statistic stat = pilotStats.GetStatistic("Piloting");
                 pilotStats.Int_Add(stat, bonuses[EAffinityType.Piloting]);
-            }
-        }
-
-        private void applyStatusEffects(AbstractActor actor, List<EffectData> effects)
-        {
-            foreach (EffectData statusEffect in effects)
-            {
-                if (statusEffect.targetingData.effectTriggerType == EffectTriggerType.Passive)
-                {
-                    if (statusEffect.targetingData.effectTargetType == EffectTargetType.Creator)
-                    {
-                        string effectId = $"PassiveEffect_{actor.GUID}_{uid}";
-                        uid++;
-                        Main.modLog.LogMessage($"Applying affect {effectId}, effect ID: {statusEffect.Description.Id}, name: {statusEffect.Description.Name}");
-                        actor.Combat.EffectManager.CreateEffect(statusEffect, effectId, -1, (ICombatant)actor, (ICombatant)actor, new WeaponHitInfo(), 0, false);
-                    }
-                }
             }
         }
 
