@@ -80,7 +80,39 @@ namespace MechAffinity
                 ret = "\n";
                 foreach (PilotQuirk quirk in pilotQuirks)
                 {
-                    ret += $"<b>{quirk.tag}</b>\n{quirk.description}\n\n";
+                    ret += $"<b>{quirk.quirkName}</b>:\n{quirk.description}\n\n";
+                }
+            }
+
+            return ret;
+        }
+
+        public string getRoninHiringHallDescription(Pilot pilot)
+        {
+            string ret = "\n\n";
+
+            if (pilot != null && Main.settings.enablePilotQuirks)
+            {
+                List<PilotQuirk> pilotQuirks = getQuirks(pilot);
+                foreach (PilotQuirk quirk in pilotQuirks)
+                {
+                    ret += $"<b>{quirk.quirkName}:</b>{quirk.description}\n\n";
+                }
+            }
+
+            return ret;
+        }
+
+        public string getRegularHiringHallDescription(Pilot pilot)
+        {
+            string ret = "";
+
+            if (pilot != null && Main.settings.enablePilotQuirks)
+            {
+                List<PilotQuirk> pilotQuirks = getQuirks(pilot);
+                foreach (PilotQuirk quirk in pilotQuirks)
+                {
+                    ret += $"{quirk.quirkName}\n\n{quirk.description}\n\n";
                 }
             }
 

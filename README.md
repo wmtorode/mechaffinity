@@ -21,10 +21,12 @@ example:
     "trackSimDecayByStat" : true,
     "trackLowestDecayByStat": false,
     "showAllPilotAffinities" : true,
+    "enablePilotQuirks" : false, 
     "globalAffinities" : [],
     "chassisAffinities" : [],
     "quirkAffinities" : [],
     "taggedAffinities" : [],
+    "pilotQuirks" : []
 }
 ```
 
@@ -54,6 +56,8 @@ setting value will always be used
 
 `showAllPilotAffinities` : when true, the pilot dossier will show every affinity the pilot has with every chassis, when false only the highest level affininty will be show for a given chassis
 
+`enablePilotQuirks` : when true, pilot quirk patches will be enabled **Warning: This will conflict with Pilot Quirks mod**
+
 `globalAffinities` : a list of `affinityLevel` objects. these will aplly to all pilot-chassis combos. Note that affinity levels are additive
 
 `chassisAffinities` : a list of `ChassisAfinity` objects. These apply only to pilots-chassis combos that are called out by the affinity. Note these are additive with all other affinities.
@@ -61,6 +65,8 @@ setting value will always be used
 `quirkAffinities` : a list of `QuirkAffinity` objects. These apply only to pilots-chassis combos equiped with the defined gear that are called out by the affinity. Note these are additive with all other affinities.
 
 `taggedAffinities` : a list of `TaggedAffinity` objects. These will only apply to pilot-chassis combos that are called out by the affinity, when the pilot has the specificed tag. Note these are additive with all other affinities.
+
+`pilotQuirks` : a list of `PilotQuirk` objects. These will only be used if `enablePilotQuirks` is set to `true`
 
 ### affinityLevel objects
 
@@ -143,6 +149,26 @@ setting value will always be used
 `chassisNames` : a list of chassis this affinity is available to. the chassis name is the prefab name followed by a `-` and the tonnage of the mech. In the event a the chassis has an assembly variant (from custom salvage), this will be used instead of the prefab. example chassis name for the assassin `chrPrfMech_assassinBase-001_40`
 
 `affinityLevels` : a list of `affinityLevel` objects to be considered for this affinity
+
+### PilotQuirk objects
+
+```json
+{
+    "tag" : "",
+    "quirkName" : "",
+    "description" : "",
+    "effectData" : []
+}
+```
+
+`tag` : a tag that the pilot must have for to be awarded this quirk
+
+`quirkName` : a human-readable name for this quirk, will be used in tooltips
+
+`description` : a description about what this quirk does
+
+`effectData` : a list of status effects that this level applies
+
 
 ## Giving AI Pilots Affinities
 

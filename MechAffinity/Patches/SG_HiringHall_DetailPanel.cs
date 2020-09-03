@@ -19,15 +19,15 @@ namespace MechAffinity.Patches
         {
             origDesc = p.pilotDef.Description.Details;
 
-            string toAdd = "";
+            //because, #HBSWhy
             if (p.pilotDef.Description.Id.StartsWith("pilot_ronin") || p.pilotDef.Description.Id.StartsWith("pilot_backer"))
             {
-                toAdd += "\n\n";
+                Traverse.Create(p.pilotDef.Description).Property("Details").SetValue(origDesc + PilotQuirkManager.Instance.getRoninHiringHallDescription(p));
             }
-
-            toAdd += PilotQuirkManager.Instance.getPilotToolTip(p);
-
-            Traverse.Create(p.pilotDef.Description).Property("Details").SetValue(origDesc + toAdd);
+            else
+            {
+                Traverse.Create(p.pilotDef.Description).Property("Details").SetValue(origDesc + PilotQuirkManager.Instance.getRegularHiringHallDescription(p));
+            }
 
         }
 
