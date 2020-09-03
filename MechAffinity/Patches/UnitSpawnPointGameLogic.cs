@@ -14,6 +14,7 @@ namespace MechAffinity.Patches
         public static void Postfix(SimGameState __instance, AbstractActor actor)
         {
             PilotAffinityManager.Instance.applyBonuses(actor);
+            PilotQuirkManager.Instance.applyBonuses(actor);
         }
     }
 }

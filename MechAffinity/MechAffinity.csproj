@@ -105,6 +105,7 @@
     <Compile Include="Patches\SGBarracksRosterSlot.cs" />
     <Compile Include="Patches\SGBarracksServicePanel.cs" />
     <Compile Include="Patches\SimGameState.cs" />
+    <Compile Include="Patches\TagDataStructFetcher.cs" />
     <Compile Include="Patches\TooltipPrefab_Chassis.cs" />
     <Compile Include="Patches\UnitSpawnPointGameLogic.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

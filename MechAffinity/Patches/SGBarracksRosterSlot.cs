@@ -30,13 +30,19 @@ namespace MechAffinity.Patches
                 Desc = "";
             }
 
-            if (pilot.pilotDef.PilotTags.Contains("pilot_fatigued"))
+            if (Main.settings.enablePilotQuirks)
             {
-                Desc += "<b>***PILOT FATIGUED***</b>\nPilot will suffer from Low Spirits if used in combat. The lance will also experience reduced Resolve per turn during combat.\n\n";
+                if (pilot.pilotDef.PilotTags.Contains("pilot_fatigued"))
+                {
+                    Desc +=
+                        "<b>***PILOT FATIGUED***</b>\nPilot will suffer from Low Spirits if used in combat. The lance will also experience reduced Resolve per turn during combat.\n\n";
+                }
+                else if (pilot.pilotDef.PilotTags.Contains("pilot_lightinjury"))
+                    Desc +=
+                        "<b>***PILOT LIGHT INJURY***</b>\nPilot cannot drop into combat. This pilot requires rest after dropping too frequently while fatigued.\n\n";
             }
-            else if (pilot.pilotDef.PilotTags.Contains("pilot_lightinjury"))
-                Desc += "<b>***PILOT LIGHT INJURY***</b>\nPilot cannot drop into combat. This pilot requires rest after dropping too frequently while fatigued.\n\n";
 
+            Desc += PilotQuirkManager.Instance.getPilotToolTip(pilot);
             Desc += "<b>Pilot Affinities:</b>\n\n";
             Desc += PilotAffinityManager.Instance.getPilotToolTip(pilot);
 

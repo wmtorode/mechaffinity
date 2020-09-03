@@ -70,6 +70,36 @@ namespace MechAffinity
             return getQuirks(actor.GetPilot());
         }
 
+        public string getPilotToolTip(Pilot pilot)
+        {
+            string ret = "";
+
+            if (pilot != null && Main.settings.enablePilotQuirks)
+            {
+                List<PilotQuirk> pilotQuirks = getQuirks(pilot);
+                ret = "\n";
+                foreach (PilotQuirk quirk in pilotQuirks)
+                {
+                    ret += $"<b>{quirk.tag}</b>\n{quirk.description}\n\n";
+                }
+            }
+
+            return ret;
+        }
+
+        public bool lookUpQuirkDescription(string tag, out string desc)
+        {
+            PilotQuirk quirk;
+            desc = "";
+            if (quirks.TryGetValue(tag, out quirk))
+            {
+                desc = quirk.description;
+                return true;
+            }
+
+            return false;
+        }
+
         private void getEffectBonuses(AbstractActor actor, out List<EffectData> effects)
         {
             effects = new List<EffectData>();
@@ -86,9 +116,12 @@ namespace MechAffinity
 
         public void applyBonuses(AbstractActor actor)
         {
-            List<EffectData> effects;
-            getEffectBonuses(actor, out effects);
-            applyStatusEffects(actor, effects);
+            if (Main.settings.enablePilotQuirks)
+            {
+                List<EffectData> effects;
+                getEffectBonuses(actor, out effects);
+                applyStatusEffects(actor, effects);
+            }
 
         }
     }

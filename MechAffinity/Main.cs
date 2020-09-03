@@ -31,6 +31,7 @@ namespace MechAffinity
                     settings = JsonConvert.DeserializeObject<Settings>(jdata);
                 }
                 PilotAffinityManager.Instance.initialize();
+                PilotQuirkManager.Instance.initialize();
 
             }
 
