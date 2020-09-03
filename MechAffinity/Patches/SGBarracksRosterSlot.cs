@@ -20,10 +20,9 @@ namespace MechAffinity.Patches
             if (__instance.Pilot == null)
                 return;
 
-            var tooltip = __instance.gameObject.GetComponent<HBSTooltip>()
-                          ?? __instance.gameObject.AddComponent<HBSTooltip>();
+            HBSTooltip tooltip = __instance.gameObject.GetComponent<HBSTooltip>() ?? __instance.gameObject.AddComponent<HBSTooltip>();
 
-            var pilot = __instance.Pilot;
+            Pilot pilot = __instance.Pilot;
             string Desc = tooltip.GetText();
             if (String.IsNullOrEmpty(Desc))
             {

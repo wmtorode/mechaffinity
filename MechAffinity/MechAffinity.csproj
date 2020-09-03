@@ -104,6 +104,7 @@
     <Compile Include="Patches\MechLabStockInfoPopup.cs" />
     <Compile Include="Patches\SGBarracksRosterSlot.cs" />
     <Compile Include="Patches\SGBarracksServicePanel.cs" />
+    <Compile Include="Patches\SG_HiringHall_DetailPanel.cs" />
     <Compile Include="Patches\SimGameState.cs" />
     <Compile Include="Patches\TagDataStructFetcher.cs" />
     <Compile Include="Patches\TooltipPrefab_Chassis.cs" />

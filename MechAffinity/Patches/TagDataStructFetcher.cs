@@ -9,7 +9,7 @@ using BattleTech;
 namespace MechAffinity.Patches
 {
     [HarmonyPatch(typeof(TagDataStructFetcher), "GetItem")]
-    class TagDataStructFetcher_getItem_Patch
+    public static class TagDataStructFetcher_getItem_Patch
     {
         public static bool Prepare()
         {
