@@ -8,6 +8,6 @@ namespace MechAffinity.Data
     {
         [JsonConverter(typeof(StringEnumConverter))]
         public EQuirkEffectType type = EQuirkEffectType.MedTech;
-        public int modifier = 0;
+        public float modifier = 0;
     }
 }

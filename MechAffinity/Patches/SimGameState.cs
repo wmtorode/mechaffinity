@@ -83,4 +83,35 @@ namespace MechAffinity.Patches
         }
     }
 
+    [HarmonyPatch(typeof(SimGameState), "GetMechWarriorValue")]
+    class SimGameState_GetMechWarriorValue
+    {
+        public static bool Prepare()
+        {
+            return Main.settings.enablePilotQuirks;
+        }
+        public static void Postfix(SimGameState __instance, PilotDef def, ref int __result)
+        {
+            float multiplier = PilotQuirkManager.Instance.getPilotCostMulitplier(def);
+
+            __result = (int)(__result * multiplier);
+        }
+    }
+
+
+    [HarmonyPatch(typeof(SimGameState), "GetMechWarriorHiringCost")]
+    class SimGameState_GetMechWarriorHiringCost
+    {
+        public static bool Prepare()
+        {
+            return Main.settings.enablePilotQuirks;
+        }
+        public static void Postfix(SimGameState __instance, PilotDef def, ref int __result)
+        {
+            float multiplier = PilotQuirkManager.Instance.getPilotCostMulitplier(def);
+
+            __result = (int)(__result * multiplier);
+        }
+    }
+
 }

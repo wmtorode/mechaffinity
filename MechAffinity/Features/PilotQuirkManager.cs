@@ -39,13 +39,12 @@ namespace MechAffinity
             }
         }
 
-        private List<PilotQuirk> getQuirks(Pilot pilot)
+        private List<PilotQuirk> getQuirks(PilotDef pilotDef)
         {
             List<PilotQuirk> pilotQuirks = new List<PilotQuirk>();
-
-            if (pilot != null)
+            if (pilotDef != null)
             {
-                List<string> tags = pilot.pilotDef.PilotTags.ToList();
+                List<string> tags = pilotDef.PilotTags.ToList();
                 foreach (string tag in tags)
                 {
                     //Main.modLog.LogMessage($"Processing tag: {tag}");
@@ -56,8 +55,17 @@ namespace MechAffinity
                     }
                 }
             }
-
             return pilotQuirks;
+        }
+
+        private List<PilotQuirk> getQuirks(Pilot pilot)
+        {
+            if (pilot == null)
+            {
+                return new List<PilotQuirk>();
+            }
+
+            return getQuirks(pilot.pilotDef);
         }
 
         private List<PilotQuirk> getQuirks(AbstractActor actor)
@@ -155,6 +163,25 @@ namespace MechAffinity
                 applyStatusEffects(actor, effects);
             }
 
+        }
+
+        public float getPilotCostMulitplier(PilotDef pilotDef)
+        {
+            float ret = 1.0f;
+
+            List<PilotQuirk> pilotQuirks = getQuirks(pilotDef);
+            foreach (PilotQuirk quirk in pilotQuirks)
+            {
+                foreach(QuirkEffect effect in quirk.quirkEffects)
+                {
+                    if(effect.type == EQuirkEffectType.PilotCostFactor)
+                    {
+                        ret += effect.modifier;
+                    }
+                }
+            }
+
+            return ret;
         }
     }
 }

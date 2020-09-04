@@ -9,6 +9,8 @@ namespace MechAffinity.Data
     enum EQuirkEffectType
     {
         MedTech = 0,
-        MechTech = 1
+        MechTech = 1,
+        CriminalEffect = 2,
+        PilotCostFactor = 3
     }
 }
