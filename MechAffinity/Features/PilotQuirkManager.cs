@@ -9,6 +9,12 @@ namespace MechAffinity
 {
     public class PilotQuirkManager : BaseEffectManager
     {
+        private const string MechTechSkill = "MechTechSkill";
+        private const string MedTechSkill = "MedTechSkill";
+        private const string Morale = "Morale";
+        private const string PqMechSkillTracker = "PqMechSkillTracker";
+        private const string PqMedSkillTracker = "PqMedSkillTracker";
+        private const string PqMoraleTracker = "PqMoraleTracker";
         private static PilotQuirkManager _instance;
         private StatCollection companyStats;
         private Dictionary<string, PilotQuirk> quirks;
@@ -36,6 +42,24 @@ namespace MechAffinity
                 }
 
                 quirks.Add(pilotQuirk.tag, pilotQuirk);
+            }
+        }
+        
+        public void setCompanyStats(StatCollection stats)
+        {
+            companyStats = stats;
+            
+            if (!companyStats.ContainsStatistic(PqMechSkillTracker))
+            {
+                companyStats.AddStatistic<float>(PqMechSkillTracker, 0.0f);
+            }
+            if (!companyStats.ContainsStatistic(PqMedSkillTracker))
+            {
+                companyStats.AddStatistic<float>(PqMedSkillTracker, 0.0f);
+            }
+            if (!companyStats.ContainsStatistic(PqMoraleTracker))
+            {
+                companyStats.AddStatistic<float>(PqMoraleTracker, 0.0f);
             }
         }
 
@@ -182,6 +206,96 @@ namespace MechAffinity
             }
 
             return ret;
+        }
+
+        private void updateStat(string trackerStat, string cStat, float trackerValue)
+        {
+            int cValue = companyStats.GetValue<int>(cStat);
+            Main.modLog.LogMessage($"possible update to {cStat}, current {cValue}, tracker: {trackerValue}");
+            int trackerInt = (int) trackerValue;
+            trackerValue -= trackerInt;
+            if (trackerInt != 0)
+            {
+                cValue += trackerInt;
+            }
+            if (trackerValue < 0)
+            {
+                cValue -= 1;
+                trackerValue = Math.Abs(trackerValue);
+            }
+            Main.modLog.LogMessage($"Updating: {cStat} => {cValue}, tracker => {trackerValue}");
+            companyStats.Set<int>(cStat, cValue);
+            companyStats.Set<float>(trackerStat, trackerValue);
+        }
+
+        public void proccessPilot(PilotDef def, bool isNew)
+        {
+            float currentMechTek = companyStats.GetValue<float>(PqMechSkillTracker);
+            float currentMedTek = companyStats.GetValue<float>(PqMedSkillTracker);
+            float currentMoraleTek = companyStats.GetValue<float>(PqMoraleTracker);
+            bool updateMech = false;
+            bool updateMed = false;
+            bool updateMorale = false;
+
+            List<PilotQuirk> pilotQuirks = getQuirks(def);
+            foreach (PilotQuirk quirk in pilotQuirks)
+            {
+                foreach (QuirkEffect effect in quirk.quirkEffects)
+                {
+                    if (effect.type == EQuirkEffectType.MechTech)
+                    {
+                        if (isNew)
+                        {
+                            currentMechTek += effect.modifier;
+                        }
+                        else
+                        {
+                            currentMechTek -= effect.modifier;
+                        }
+
+                        updateMech = true;
+                    }
+                    else if (effect.type == EQuirkEffectType.MedTech)
+                    {
+                        if (isNew)
+                        {
+                            currentMedTek += effect.modifier;
+                        }
+                        else
+                        {
+                            currentMedTek -= effect.modifier;
+                        }
+
+                        updateMed = true;
+                    }
+                    else if (effect.type == EQuirkEffectType.Morale)
+                    {
+                        if (isNew)
+                        {
+                            currentMoraleTek += effect.modifier;
+                        }
+                        else
+                        {
+                            currentMoraleTek -= effect.modifier;
+                        }
+
+                        updateMorale = true;
+                    }
+                }
+            }
+
+            if (updateMech)
+            {
+                updateStat(PqMechSkillTracker, MechTechSkill, currentMechTek);
+            }
+            if (updateMed)
+            {
+                updateStat(PqMedSkillTracker, MedTechSkill, currentMedTek);
+            }
+            if (updateMorale)
+            {
+                updateStat(PqMoraleTracker, Morale, currentMoraleTek);
+            }
         }
     }
 }

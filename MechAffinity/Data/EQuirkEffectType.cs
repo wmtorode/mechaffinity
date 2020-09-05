@@ -11,6 +11,7 @@ namespace MechAffinity.Data
         MedTech = 0,
         MechTech = 1,
         CriminalEffect = 2,
-        PilotCostFactor = 3
+        PilotCostFactor = 3,
+        Morale = 4
     }
 }
