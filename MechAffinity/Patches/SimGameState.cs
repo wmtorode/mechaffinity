@@ -8,6 +8,7 @@ using BattleTech;
 using BattleTech.Save;
 using Localize;
 using MechAffinity;
+using UnityEngine;
 
 namespace MechAffinity.Patches
 {
@@ -176,4 +177,67 @@ namespace MechAffinity.Patches
             }
         }
     }
+    
+    [HarmonyPatch(typeof(SimGameState), "CancelArgoUpgrade")]
+    public static class SimGameState_CancelArgoUpgrade
+    {
+        private static int originalCost = 0;
+        
+        public static bool Prepare()
+        {
+            return Main.settings.enablePilotQuirks;
+        }
+        
+        public static void Prefix(SimGameState __instance, bool refund)
+        {
+            ShipModuleUpgrade shipModuleUpgrade = __instance.DataManager.ShipUpgradeDefs.Get(__instance.CurrentUpgradeEntry.upgradeID);
+
+            float multiplier = PilotQuirkManager.Instance.getArgoUpgradeCostModifier(__instance.PilotRoster.ToList(),
+                shipModuleUpgrade.Description.Id, false);
+            
+            if (refund)
+            {
+                originalCost = shipModuleUpgrade.PurchaseCost;
+                Traverse.Create(shipModuleUpgrade).Property("PurchaseCost").SetValue((int)(originalCost * multiplier));
+            }
+        }
+        public static void Postfix(SimGameState __instance, bool refund)
+        {
+            if (refund)
+            {
+                ShipModuleUpgrade shipModuleUpgrade = __instance.DataManager.ShipUpgradeDefs.Get(__instance.CurrentUpgradeEntry.upgradeID);
+                Traverse.Create(shipModuleUpgrade).Property("PurchaseCost").SetValue(originalCost);
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(SimGameState), "GetExpenditures", new Type[] {typeof(EconomyScale), typeof(bool)})]
+    public static class SimGameState_GetExpenditures
+    {
+        public static bool Prepare()
+        {
+            return Main.settings.enablePilotQuirks;
+        }
+        
+        public static bool Prefix(SimGameState __instance, EconomyScale expenditureLevel, bool proRate, int  ___ProRateRefund, ref int __result)
+        {
+            FinancesConstantsDef finances = __instance.Constants.Finances;
+            int baseMaintenanceCost = __instance.GetShipBaseMaintenanceCost();
+            for (int index = 0; index < __instance.ShipUpgrades.Count; ++index)
+            {
+                float pilotQurikModifier = PilotQuirkManager.Instance.getArgoUpgradeCostModifier(__instance.PilotRoster.ToList(),
+                        __instance.ShipUpgrades[index].Description.Id, true);
+                float baseCost = (float) __instance.ShipUpgrades[index].AdditionalCost * pilotQurikModifier;
+                baseMaintenanceCost += Mathf.CeilToInt(baseCost * __instance.Constants.CareerMode.ArgoMaintenanceMultiplier);
+            }
+            foreach (MechDef mechDef in __instance.ActiveMechs.Values)
+                baseMaintenanceCost += finances.MechCostPerQuarter;
+            for (int index = 0; index < __instance.PilotRoster.Count; ++index)
+                baseMaintenanceCost += __instance.GetMechWarriorValue(__instance.PilotRoster[index].pilotDef);
+            float expenditureCostModifier = __instance.GetExpenditureCostModifier(expenditureLevel);
+            __result = Mathf.CeilToInt((float) (baseMaintenanceCost - (proRate ? ___ProRateRefund : 0)) * expenditureCostModifier);
+            return false;
+        }
+    }
+    
 }

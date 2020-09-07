@@ -323,5 +323,38 @@ namespace MechAffinity
             }
             return 0;
         }
+
+        public float getArgoUpgradeCostModifier(List<Pilot> pilots, string upgradeId, bool upkeep)
+        {
+            float ret = 1.0f;
+            EQuirkEffectType type = EQuirkEffectType.ArgoUpgradeFactor;
+            if (upkeep)
+            {
+                type = EQuirkEffectType.ArgoUpkeepFactor;
+            }
+            foreach (Pilot pilot in pilots)
+            {
+                List<PilotQuirk> pilotQuirks = getQuirks(pilot);
+                foreach (PilotQuirk quirk in pilotQuirks)
+                {
+                    foreach (QuirkEffect effect in quirk.quirkEffects)
+                    {
+                        if (effect.type == type)
+                        {
+                            if (effect.affectedIds.Contains(upgradeId))
+                            {
+                                ret += (int) effect.modifier;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (ret < 0.0f)
+            {
+                ret = 0.0f;
+            }
+            return ret;
+        }
     }
 }

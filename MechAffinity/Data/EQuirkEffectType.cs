@@ -12,6 +12,8 @@ namespace MechAffinity.Data
         MechTech = 1,
         CriminalEffect = 2,
         PilotCostFactor = 3,
-        Morale = 4
+        Morale = 4,
+        ArgoUpgradeFactor = 5,
+        ArgoUpkeepFactor = 6
     }
 }
