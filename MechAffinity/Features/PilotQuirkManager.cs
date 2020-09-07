@@ -319,7 +319,7 @@ namespace MechAffinity
             if (roll < stealChance)
             {
                 Main.modLog.LogMessage($"Pilot {pilot.Callsign}, steals: {stealAmount}");
-                return stealAmount;
+                return stealAmount * -1;
             }
             return 0;
         }
