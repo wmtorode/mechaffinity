@@ -83,6 +83,15 @@ namespace MechAffinity.Patches
                 {                 
                     __instance.RoomManager.ShipRoom.AddEventToast(new Text(string.Format("{0} affinities decayed!", (object)pilot.Callsign), (object[])Array.Empty<object>()));
                 }
+
+                if (Main.settings.enablePilotQuirks)
+                {
+                    int stolen = PilotQuirkManager.Instance.stealAmount(pilot);
+                    if (stolen > 0)
+                    {
+                        __instance.AddFunds(stolen, null, true);
+                    }
+                }
             }
         }
     }
@@ -142,6 +151,22 @@ namespace MechAffinity.Patches
         public static void Prefix(SimGameState __instance, Pilot p)
         {
             if (p != null && (__instance.PilotRoster.Contains(p)))
+            {
+                PilotDef def = p.pilotDef;
+                if (def != null)
+                {
+                    PilotQuirkManager.Instance.proccessPilot(def, false);
+                }
+            }
+        }
+    }
+    
+    [HarmonyPatch(typeof(SimGameState), "DismissPilot", new Type[] {typeof(Pilot)})]
+    public static class SimGameState_DismissPilot
+    {
+        public static void Prefix(SimGameState __instance, Pilot p)
+        {
+            if (p != null)
             {
                 PilotDef def = p.pilotDef;
                 if (def != null)

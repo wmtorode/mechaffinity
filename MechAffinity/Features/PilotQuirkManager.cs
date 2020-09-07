@@ -297,5 +297,31 @@ namespace MechAffinity
                 updateStat(PqMoraleTracker, Morale, currentMoraleTek);
             }
         }
+
+        public int stealAmount(Pilot pilot)
+        {
+            int stealChance = 0;
+            int stealAmount = 0;
+            List<PilotQuirk> pilotQuirks = getQuirks(pilot);
+            foreach (PilotQuirk quirk in pilotQuirks)
+            {
+                foreach (QuirkEffect effect in quirk.quirkEffects)
+                {
+                    if (effect.type == EQuirkEffectType.CriminalEffect)
+                    {
+                        stealChance += (int)effect.modifier;
+                        stealAmount += (int)effect.secondaryModifier;
+                    }
+                }
+            }
+            Random random = new Random();
+            int roll = random.Next(1, 101);
+            if (roll < stealChance)
+            {
+                Main.modLog.LogMessage($"Pilot {pilot.Callsign}, steals: {stealAmount}");
+                return stealAmount;
+            }
+            return 0;
+        }
     }
 }
