@@ -118,4 +118,37 @@ namespace MechAffinity.Patches
         }
     }
 
+    [HarmonyPatch(typeof(SimGameState), "AddPilotToRoster", typeof(PilotDef), typeof(bool), typeof(bool))]
+    class SimGameState_AddPilotToRoster
+    {
+        public static bool Prepare()
+        {
+            return Main.settings.enablePilotQuirks;
+        }
+        public static void Postfix(SimGameState __instance, PilotDef def, bool updatePilotDiscardPile = false)
+        {
+            PilotQuirkManager.Instance.proccessPilot(def, true);
+        }
+    }
+
+    [HarmonyPatch(typeof(SimGameState), "KillPilot",
+        new Type[] {typeof(Pilot), typeof(bool), typeof(string), typeof(string)})]
+    public static class SimGameState_KillPilot
+    {
+        public static bool Prepare()
+        {
+            return Main.settings.enablePilotQuirks;
+        }
+        public static void Prefix(SimGameState __instance, Pilot p)
+        {
+            if (p != null && (__instance.PilotRoster.Contains(p)))
+            {
+                PilotDef def = p.pilotDef;
+                if (def != null)
+                {
+                    PilotQuirkManager.Instance.proccessPilot(def, false);
+                }
+            }
+        }
+    }
 }
