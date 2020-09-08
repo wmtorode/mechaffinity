@@ -319,10 +319,12 @@ namespace MechAffinity
             
         }
 
-        public int stealAmount(Pilot pilot)
+        public void stealAmount(Pilot pilot, SimGameState sim)
         {
             int stealChance = 0;
             int stealAmount = 0;
+            int stealChance2 = 0;
+            int stealAmount2 = 0;
             List<PilotQuirk> pilotQuirks = getQuirks(pilot);
             foreach (PilotQuirk quirk in pilotQuirks)
             {
@@ -333,6 +335,11 @@ namespace MechAffinity
                         stealChance += (int)effect.modifier;
                         stealAmount += (int)effect.secondaryModifier;
                     }
+                    else if (effect.type == EQuirkEffectType.CriminalEffect2)
+                    {
+                        stealChance2 += (int)effect.modifier;
+                        stealAmount2 += (int)effect.secondaryModifier;
+                    }
                 }
             }
             Random random = new Random();
@@ -340,9 +347,14 @@ namespace MechAffinity
             if (roll < stealChance)
             {
                 Main.modLog.LogMessage($"Pilot {pilot.Callsign}, steals: {stealAmount}");
-                return stealAmount * -1;
+                 sim.AddFunds(stealAmount * -1, null, true);
             }
-            return 0;
+            roll = random.Next(1, 101);
+            if (roll < stealChance2)
+            {
+                Main.modLog.LogMessage($"Pilot {pilot.Callsign}, steals: {stealAmount2}");
+                sim.AddFunds(stealAmount2 * -1, null, true);
+            }
         }
 
         public float getArgoUpgradeCostModifier(List<Pilot> pilots, string upgradeId, bool upkeep)

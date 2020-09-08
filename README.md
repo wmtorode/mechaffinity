@@ -200,12 +200,12 @@ This type modifies the amount it costs to hire and monthly pay of a pilot. this 
 specified by `modifier` field. A modifier that is postive increases a pilots cost, while a negative decreases costs. 
 examples: a modifier of `0.3` with increase the cost of a pilot by 30%, while a value of `-0.25` will decrease the pilots cost by 25%
 
-- `CriminalEffect`
+- `CriminalEffect` and `CriminalEffect2`
 This type introduces a pilot's ability to steal either for you or from you. When a day passes all pilots with this effect make a roll. on a successful 
 roll they will steal a specified amount. the chance to steal is governed by `modifier` which specifies the percentage (as an int) to successfully roll
 a steal. `secondaryModifier` specifies the amount of cbills to steal when a successful roll is made, a postive amount steals from you, a negative amount
 steals from you. for example a modifier of `9` and a secondaryModifier with a value of 500 gives the pilot a 9% chance to steal 500 cbills from you
-when a day passes.
+when a day passes. `CriminalEffect2` is functionally identical, just used to make a second independant roll.
 
 - `ArgoUpgradeFactor` and `ArgoUpkeepFactor`
 These types affect the pilots ability to reduce or increase the upfront cost or the monthly upkeep of an argo upgrade. the `modifier` field is a float that acts as a multiplier

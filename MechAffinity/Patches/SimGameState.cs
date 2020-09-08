@@ -95,11 +95,7 @@ namespace MechAffinity.Patches
 
                 if (Main.settings.enablePilotQuirks)
                 {
-                    int stolen = PilotQuirkManager.Instance.stealAmount(pilot);
-                    if (stolen != 0)
-                    {
-                        __instance.AddFunds(stolen, null, true);
-                    }
+                    PilotQuirkManager.Instance.stealAmount(pilot, __instance);
                 }
             }
         }
