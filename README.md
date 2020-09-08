@@ -157,7 +157,8 @@ setting value will always be used
     "tag" : "",
     "quirkName" : "",
     "description" : "",
-    "effectData" : []
+    "effectData" : [],
+    "quirkEffects" : []
 }
 ```
 
@@ -167,7 +168,50 @@ setting value will always be used
 
 `description` : a description about what this quirk does
 
-`effectData` : a list of status effects that this level applies
+`effectData` : a list of status effects that this quirk applies
+
+`quirkEffects` : a list of `QuirkEffect` objects that will be applied to this quirk
+
+
+### QuirkEffect objects
+
+```json
+{
+  "type" : "",
+  "modifier" : 0,
+  "secondaryModifier" : 0,
+  "affectedIds" : []
+}
+```
+
+QuirkEffect objects are for managing effects pilot quirks should apply that are sim game related
+and cannot be done by status effects. not all effect types use all the fields available (unused fields for that effect are ignored)
+pilots with multiple quirk effects of the same type are additive
+
+available types:
+
+- `MedTech`, `MechTech` and `Morale`
+These types are used to modify the companies MedTech or MechTech or Morale levels respectively by the amount specified by `modifier`. this can be an int or a float
+and can increment or decrement these levels for example one quirk could add `0.6` mechtech points while another could add `1.4` and a third could add `-0.1`
+this would net an overall boost of 1, with 0.9 leftover and stored for when the pilot roster changes
+
+- `PilotCostFactor`
+This type modifies the amount it costs to hire and monthly pay of a pilot. this works as a multiplier to the standard costs of the pilot by the amount 
+specified by `modifier` field. A modifier that is postive increases a pilots cost, while a negative decreases costs. 
+examples: a modifier of `0.3` with increase the cost of a pilot by 30%, while a value of `-0.25` will decrease the pilots cost by 25%
+
+- `CriminalEffect`
+This type introduces a pilot's ability to steal either for you or from you. When a day passes all pilots with this effect make a roll. on a successful 
+roll they will steal a specified amount. the chance to steal is governed by `modifier` which specifies the percentage (as an int) to successfully roll
+a steal. `secondaryModifier` specifies the amount of cbills to steal when a successful roll is made, a postive amount steals from you, a negative amount
+steals from you. for example a modifier of `9` and a secondaryModifier with a value of 500 gives the pilot a 9% chance to steal 500 cbills from you
+when a day passes.
+
+- `ArgoUpgradeFactor` and `ArgoUpkeepFactor`
+These types affect the pilots ability to reduce or increase the upfront cost or the monthly upkeep of an argo upgrade. the `modifier` field is a float that acts as a multiplier
+to the base/upkeep cost of the upgrade. `affectedIds` is a list of argo upgrade IDs that this quirk affects. to affect all upgrades a value of `PqAllArgoUpgrades` can be 
+added to this list. example: `ArgoUpgradeFactor` with a modifier of `-0.3` and affectedIds list equal to `[PqAllArgoUpgrades]` will give a 30% cost reduction to 
+the purchase cost of all upgrades. while a `ArgoUpkeepFactor` with a modifier of `0.15` will increase the monthly upkeep of all affected upgrades.
 
 
 ## Giving AI Pilots Affinities
