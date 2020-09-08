@@ -18,7 +18,6 @@ namespace MechAffinity.Patches
         
         public static void Prefix(SGEngineeringScreen __instance)
         {
-            float TotalChange = 0;
             var sim = UnityGameInstance.BattleTechGame.Simulation;
             ShipModuleUpgrade selectedUpgrade = (ShipModuleUpgrade) Traverse.Create(__instance).Property("SelectedUpgrade").GetValue();
             

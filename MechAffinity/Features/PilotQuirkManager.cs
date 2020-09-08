@@ -15,6 +15,7 @@ namespace MechAffinity
         private const string PqMechSkillTracker = "PqMechSkillTracker";
         private const string PqMedSkillTracker = "PqMedSkillTracker";
         private const string PqMoraleTracker = "PqMoraleTracker";
+        private const string PqAllArgoUpgrades = "PqAllArgoUpgrades";
         private static PilotQuirkManager _instance;
         private StatCollection companyStats;
         private Dictionary<string, PilotQuirk> quirks;
@@ -341,7 +342,7 @@ namespace MechAffinity
                     {
                         if (effect.type == type)
                         {
-                            if (effect.affectedIds.Contains(upgradeId))
+                            if (effect.affectedIds.Contains(upgradeId) || effect.affectedIds.Contains(PqAllArgoUpgrades))
                             {
                                 ret += (int) effect.modifier;
                             }
