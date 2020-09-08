@@ -226,7 +226,7 @@ namespace MechAffinity
             if (trackerValue < 0)
             {
                 cValue -= 1;
-                trackerValue = Math.Abs(trackerValue);
+                trackerValue = 1.0f + trackerValue;
             }
             Main.modLog.LogMessage($"Updating: {cStat} => {cValue}, tracker => {trackerValue}");
             companyStats.Set<int>(cStat, cValue);
