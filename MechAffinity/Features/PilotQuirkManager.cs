@@ -266,7 +266,6 @@ namespace MechAffinity
                         else
                         {
                             currentMechTek -= effect.modifier;
-                            Main.modLog.LogMessage($"Tracker Stat: {PqMechSkillTracker}, value: {currentMechTek}, {effect.modifier}");
                         }
 
                         updateMech = true;
