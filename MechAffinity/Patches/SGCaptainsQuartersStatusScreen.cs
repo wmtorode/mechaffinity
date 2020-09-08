@@ -12,9 +12,8 @@ using Localize;
 namespace MechAffinity.Patches
 {
     [HarmonyPatch(typeof(SGCaptainsQuartersStatusScreen), "RefreshData", new Type[] {typeof(EconomyScale), typeof(bool)})]
-    public class SGCaptainsQuartersStatusScreen_RefreshData
+    public static class SGCaptainsQuartersStatusScreen_RefreshData
     {
-      private static MethodInfo methodSetField = AccessTools.Method(typeof(SGCaptainsQuartersStatusScreen), "SetField");
       private static MethodInfo methodAddLineItem = AccessTools.Method(typeof(SGCaptainsQuartersStatusScreen), "AddListLineItem");
         public static bool Prepare()
         {
@@ -28,16 +27,22 @@ namespace MechAffinity.Patches
           Transform ___SectionTwoExpensesList, LocalizableText ___EndOfQuarterFunds, LocalizableText ___QuarterOperatingExpenses, 
           LocalizableText ___CurrentFunds, List<LocalizableText> ___ExpenditureLvlBtnMoraleFields, List<LocalizableText> ___ExpenditureLvlBtnCostFields)
         {
+          if (__instance == null || ___simState == null)
+          {
+            return true;
+          }
             float expenditureCostModifier = ___simState.GetExpenditureCostModifier(expenditureLevel);
+            Traverse methodSetField = Traverse.Create(__instance)
+              .Method("SetField", new Type[] {typeof(LocalizableText), typeof(string)});
             int expLevel = (int)Traverse.Create(__instance)
               .Method("GetExpendetureLevelIndexNormalized", new object[] {expenditureLevel}).GetValue();
             ___ExpenditureLevelIndicatorWidget.SetDifficulty(expLevel * 2);
-            methodSetField.Invoke(__instance,new object[] {___ExpenditureLevelField, string.Format("{0}", (object) expenditureLevel)});
-            methodSetField.Invoke(__instance,new object[] {___SectionOneExpenseLevel, string.Format("{0}", (object) expenditureLevel)});
-            methodSetField.Invoke(__instance,new object[] {___SectionTwoExpenseLevel, string.Format("{0}", (object) expenditureLevel)});
+            methodSetField.GetValue(new object[] {___ExpenditureLevelField, string.Format("{0}", (object) expenditureLevel)});
+            methodSetField.GetValue(new object[] {___SectionOneExpenseLevel, string.Format("{0}", (object) expenditureLevel)});
+            methodSetField.GetValue(new object[] {___SectionTwoExpenseLevel, string.Format("{0}", (object) expenditureLevel)});
             ___FinanceWidget.RefreshData(expenditureLevel);
             int num1 = ___simState.ExpenditureMoraleValue[expenditureLevel];
-            methodSetField.Invoke(__instance,new object[] {___MoraleValueField, string.Format("{0}{1}", num1 > 0 ? (object) "+" : (object) "", (object) num1)});
+            methodSetField.GetValue(new object[] {___MoraleValueField, string.Format("{0}{1}", num1 > 0 ? (object) "+" : (object) "", (object) num1)});
             if (showMoraleChange)
             {
               int morale = ___simState.Morale;
@@ -75,7 +80,7 @@ namespace MechAffinity.Patches
               ongoingUpgradeCosts += entry.Value;
               methodAddLineItem.Invoke(__instance,new object[] {___SectionOneExpensesList, entry.Key, SimGameState.GetCBillString(entry.Value)});
             }));
-            methodSetField.Invoke(__instance,new object[] {___SectionOneExpensesField, SimGameState.GetCBillString(ongoingUpgradeCosts)});
+            methodSetField.GetValue(new object[] {___SectionOneExpensesField, SimGameState.GetCBillString(ongoingUpgradeCosts)});
             keyValuePairList.Clear();
             Traverse.Create(__instance).Method("ClearListLineItems",new object[] {___SectionTwoExpensesList}).GetValue();
             int ongoingMechWariorCosts = 0;
@@ -91,10 +96,10 @@ namespace MechAffinity.Patches
               ongoingMechWariorCosts += entry.Value;
               methodAddLineItem.Invoke(__instance,new object[] {___SectionTwoExpensesList, entry.Key, SimGameState.GetCBillString(entry.Value)});
             }));
-            methodSetField.Invoke(__instance,new object[] {___SectionTwoExpensesField, SimGameState.GetCBillString(ongoingMechWariorCosts)});
-            methodSetField.Invoke(__instance,new object[] {___EndOfQuarterFunds, SimGameState.GetCBillString(___simState.Funds + ___simState.GetExpenditures(false))});
-            methodSetField.Invoke(__instance,new object[] {___QuarterOperatingExpenses, SimGameState.GetCBillString(___simState.GetExpenditures(false))});
-            methodSetField.Invoke(__instance,new object[] {___CurrentFunds, SimGameState.GetCBillString(___simState.Funds)});
+            methodSetField.GetValue(new object[] {___SectionTwoExpensesField, SimGameState.GetCBillString(ongoingMechWariorCosts)});
+            methodSetField.GetValue(new object[] {___EndOfQuarterFunds, SimGameState.GetCBillString(___simState.Funds + ___simState.GetExpenditures(false))});
+            methodSetField.GetValue(new object[] {___QuarterOperatingExpenses, SimGameState.GetCBillString(___simState.GetExpenditures(false))});
+            methodSetField.GetValue(new object[] {___CurrentFunds, SimGameState.GetCBillString(___simState.Funds)});
             int index = 0;
             foreach (KeyValuePair<EconomyScale, int> keyValuePair in ___simState.ExpenditureMoraleValue)
             {

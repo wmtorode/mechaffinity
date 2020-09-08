@@ -16,6 +16,7 @@ namespace MechAffinity
         private const string PqMedSkillTracker = "PqMedSkillTracker";
         private const string PqMoraleTracker = "PqMoraleTracker";
         private const string PqAllArgoUpgrades = "PqAllArgoUpgrades";
+        private const string PqMarkedTag = "PqMarked";
         private static PilotQuirkManager _instance;
         private StatCollection companyStats;
         private Dictionary<string, PilotQuirk> quirks;
@@ -62,6 +63,9 @@ namespace MechAffinity
             {
                 companyStats.AddStatistic<float>(PqMoraleTracker, 0.0f);
             }
+            Main.modLog.LogMessage($"Tracker Stat: {PqMechSkillTracker}, value: {companyStats.GetValue<float>(PqMechSkillTracker)}");
+            Main.modLog.LogMessage($"Tracker Stat: {PqMedSkillTracker}, value: {companyStats.GetValue<float>(PqMedSkillTracker)}");
+            Main.modLog.LogMessage($"Tracker Stat: {PqMoraleTracker}, value: {companyStats.GetValue<float>(PqMoraleTracker)}");
         }
 
         private List<PilotQuirk> getQuirks(PilotDef pilotDef)
@@ -231,12 +235,22 @@ namespace MechAffinity
 
         public void proccessPilot(PilotDef def, bool isNew)
         {
+            if (def.PilotTags.Contains(PqMarkedTag) && isNew)
+            {
+                Main.modLog.LogMessage($"pilot {def.Description.Callsign} already marked, skipping");
+                return;
+            }
             float currentMechTek = companyStats.GetValue<float>(PqMechSkillTracker);
             float currentMedTek = companyStats.GetValue<float>(PqMedSkillTracker);
             float currentMoraleTek = companyStats.GetValue<float>(PqMoraleTracker);
             bool updateMech = false;
             bool updateMed = false;
             bool updateMorale = false;
+            
+            Main.modLog.LogMessage($"processing pilot: {def.Description.Callsign}");
+            Main.modLog.LogMessage($"Tracker Stat: {PqMechSkillTracker}, value: {currentMechTek}");
+            Main.modLog.LogMessage($"Tracker Stat: {PqMedSkillTracker}, value: {currentMedTek}");
+            Main.modLog.LogMessage($"Tracker Stat: {PqMoraleTracker}, value: {currentMoraleTek}");
 
             List<PilotQuirk> pilotQuirks = getQuirks(def);
             foreach (PilotQuirk quirk in pilotQuirks)
@@ -252,6 +266,7 @@ namespace MechAffinity
                         else
                         {
                             currentMechTek -= effect.modifier;
+                            Main.modLog.LogMessage($"Tracker Stat: {PqMechSkillTracker}, value: {currentMechTek}, {effect.modifier}");
                         }
 
                         updateMech = true;
@@ -297,6 +312,12 @@ namespace MechAffinity
             {
                 updateStat(PqMoraleTracker, Morale, currentMoraleTek);
             }
+            
+            if (!def.PilotTags.Contains(PqMarkedTag) && isNew)
+            {
+                def.PilotTags.Add(PqMarkedTag);
+            }
+            
         }
 
         public int stealAmount(Pilot pilot)
@@ -344,7 +365,8 @@ namespace MechAffinity
                         {
                             if (effect.affectedIds.Contains(upgradeId) || effect.affectedIds.Contains(PqAllArgoUpgrades))
                             {
-                                ret += (int) effect.modifier;
+                                if (Main.settings.debug) Main.modLog.DebugMessage($"Found Argo factor: {quirk.quirkName}, value: {effect.modifier}");
+                                ret += effect.modifier;
                             }
                         }
                     }
@@ -355,6 +377,7 @@ namespace MechAffinity
             {
                 ret = 0.0f;
             }
+            if (Main.settings.debug) Main.modLog.DebugMessage($"Found cost factor multiplier: {ret}");
             return ret;
         }
     }

@@ -26,6 +26,14 @@ namespace MechAffinity.Patches
                 {
                     PilotAffinityManager.Instance.addToChassisPrefabLut(mech);
                 }
+
+                if (Main.settings.enablePilotQuirks)
+                {
+                    foreach (Pilot pilot in __instance.PilotRoster.ToList())
+                    {
+                        PilotQuirkManager.Instance.proccessPilot(pilot.pilotDef, true);
+                    }
+                }
         }
     }
 
@@ -88,7 +96,7 @@ namespace MechAffinity.Patches
                 if (Main.settings.enablePilotQuirks)
                 {
                     int stolen = PilotQuirkManager.Instance.stealAmount(pilot);
-                    if (stolen > 0)
+                    if (stolen != 0)
                     {
                         __instance.AddFunds(stolen, null, true);
                     }
