@@ -228,6 +228,16 @@ namespace MechAffinity
             return $"{chassis.PrefabIdentifier}_{chassis.Tonnage}";
         }
 
+        private string getPrefabId(VehicleChassisDef chassis)
+        {
+            return $"{chassis.PrefabIdentifier}_{chassis.Tonnage}";
+        }
+
+        private string getPrefabId(VehicleDef vehicle)
+        {
+            return getPrefabId(vehicle.Chassis);
+        }
+
         private string getPrefabId(MechDef mech)
         {
             return getPrefabId(mech.Chassis);
@@ -240,6 +250,11 @@ namespace MechAffinity
             {
                 return getPrefabId(mech.MechDef);
 
+            }
+            Vehicle vehicle = actor as Vehicle;
+            if (vehicle != null)
+            {
+                return getPrefabId(vehicle.VehicleDef);
             }
             return null;
         }
