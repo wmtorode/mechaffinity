@@ -113,13 +113,16 @@ setting value will always be used
 ```json
 {
     "chassisNames" : [],
-    "affinityLevels" : []
+    "affinityLevels" : [],
+    "idType" : "AssemblyVariant"
 }
 ```
 
 `chassisNames` : a list of chassis this affinity is available to. the chassis name is the prefab name followed by a `-` and the tonnage of the mech. In the event a the chassis has an assembly variant (from custom salvage), this will be used instead of the prefab. example chassis name for the assassin `chrPrfMech_assassinBase-001_40`
 
 `affinityLevels` : a list of `affinityLevel` objects to be considered for this affinity
+
+`idType` : where the chassisNames are prefab ids or chassis IDs. possible values `AssemblyVariant` (the default) or `ChassisId`
 
 ### QuirkAffinity objects
 
@@ -139,6 +142,7 @@ setting value will always be used
 ```json
 {
     "tag" : "",
+    "idType" : "AssemblyVariant",
     "chassisNames" : [],
     "affinityLevels" : []
 }
@@ -149,6 +153,8 @@ setting value will always be used
 `chassisNames` : a list of chassis this affinity is available to. the chassis name is the prefab name followed by a `-` and the tonnage of the mech. In the event a the chassis has an assembly variant (from custom salvage), this will be used instead of the prefab. example chassis name for the assassin `chrPrfMech_assassinBase-001_40`
 
 `affinityLevels` : a list of `affinityLevel` objects to be considered for this affinity
+
+`idType` : where the chassisNames are prefab ids or chassis IDs. possible values `AssemblyVariant` (the default) or `ChassisId`
 
 ### PilotQuirk objects
 
