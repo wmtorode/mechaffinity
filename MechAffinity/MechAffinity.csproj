@@ -87,6 +87,7 @@
     <Compile Include="Data\ChassisSpecificAffinity.cs" />
     <Compile Include="Data\DescriptionHolder.cs" />
     <Compile Include="Data\EAffinityType.cs" />
+    <Compile Include="Data\EIdType.cs" />
     <Compile Include="Data\EQuirkEffectType.cs" />
     <Compile Include="Data\Logger.cs" />
     <Compile Include="Data\PilotQuirk.cs" />

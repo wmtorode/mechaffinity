@@ -35,6 +35,7 @@ namespace MechAffinity
         private Dictionary<string, List<string>> pilotNoDeployStatMap;
         private Dictionary<string, List<AffinityLevel>> quirkAffinities;
         private Dictionary<string, List<AffinityLevel>> taggedAffinities;
+        private Dictionary<string, EIdType> overloads;
         private List<string> tagsWithAffinities;
 
         public static PilotAffinityManager Instance
@@ -57,11 +58,16 @@ namespace MechAffinity
             tagsWithAffinities = new List<string>();
             pilotStatMap = new Dictionary<string, List<string>>();
             pilotNoDeployStatMap = new Dictionary<string, List<string>>();
+            overloads = new Dictionary<string, EIdType>();
             foreach (ChassisSpecificAffinity chassisSpecific in Main.settings.chassisAffinities)
             {
                 foreach (string chassisName in chassisSpecific.chassisNames)
                 {
                     chassisAffinities.Add(chassisName, chassisSpecific.affinityLevels);
+                    if (chassisSpecific.idType != EIdType.AssemblyVariant)
+                    {
+                        overloads.Add(chassisName, chassisSpecific.idType);
+                    }
                 }
                 foreach (AffinityLevel affinityLevel in chassisSpecific.affinityLevels)
                 {
@@ -80,6 +86,13 @@ namespace MechAffinity
                 foreach (string chassisName in tagged.chassisNames)
                 {
                     taggedAffinities.Add($"{tagged.tag}={chassisName}", tagged.affinityLevels);
+                    if (tagged.idType != EIdType.AssemblyVariant)
+                    {
+                        if (!overloads.ContainsKey(chassisName))
+                        {
+                            overloads.Add(chassisName, tagged.idType);
+                        }
+                    }
                 }
                 foreach (AffinityLevel affinityLevel in tagged.affinityLevels)
                 {
@@ -132,8 +145,15 @@ namespace MechAffinity
         public void addToChassisPrefabLut(MechDef mech)
         {
             
-            string prefabId = getPrefabId(mech);
-            chassisPrefabLut[prefabId] = mech.Chassis.Description.Name;
+            string variantId = getPrefabId(mech, EIdType.AssemblyVariant);
+            string prefabId = getPrefabId(mech, EIdType.PrefabId);
+            string chassisId = getPrefabId(mech, EIdType.ChassisId);
+            chassisPrefabLut[variantId] = mech.Chassis.Description.Name;
+            chassisPrefabLut[chassisId] = mech.Chassis.Description.Name;
+            if (variantId != prefabId)
+            {
+                chassisPrefabLut[prefabId] = mech.Chassis.Description.Name;
+            }
             //Main.modLog.LogMessage($"adding to lut {prefabId} => {mech.Chassis.Description.Name}");
         }
 
@@ -218,43 +238,54 @@ namespace MechAffinity
             return $"{MaDaysElapsedModStat}{pilotId}";
         }
 
-        private string getPrefabId(ChassisDef chassis)
+        private string getPrefabId(ChassisDef chassis, EIdType idType)
         {
+            if (idType == EIdType.ChassisId)
+            {
+                return chassis.Description.Id;
+            }
             #if USE_CS_CC
-                if (chassis.Is<AssemblyVariant>(out var a) && !string.IsNullOrEmpty(a.PrefabID))
-                    return a.PrefabID + "_" + chassis.Tonnage.ToString();
+                if (idType == EIdType.AssemblyVariant)
+                {
+                    if (chassis.Is<AssemblyVariant>(out var a) && !string.IsNullOrEmpty(a.PrefabID))
+                        return a.PrefabID + "_" + chassis.Tonnage.ToString();
+                }
             #endif
 
             return $"{chassis.PrefabIdentifier}_{chassis.Tonnage}";
         }
 
-        private string getPrefabId(VehicleChassisDef chassis)
+        private string getPrefabId(VehicleChassisDef chassis, EIdType idType)
         {
+            if (idType == EIdType.ChassisId)
+            {
+                return chassis.Description.Id;
+            }
             return $"{chassis.PrefabIdentifier}_{chassis.Tonnage}";
         }
 
-        private string getPrefabId(VehicleDef vehicle)
+        private string getPrefabId(VehicleDef vehicle, EIdType idType)
         {
-            return getPrefabId(vehicle.Chassis);
+            return getPrefabId(vehicle.Chassis, idType);
         }
 
-        private string getPrefabId(MechDef mech)
+        private string getPrefabId(MechDef mech, EIdType idType)
         {
-            return getPrefabId(mech.Chassis);
+            return getPrefabId(mech.Chassis, idType);
         }
 
-        private string getPrefabId(AbstractActor actor)
+        private string getPrefabId(AbstractActor actor, EIdType idType)
         {
             Mech mech = actor as Mech;
             if (mech != null)
             {
-                return getPrefabId(mech.MechDef);
+                return getPrefabId(mech.MechDef, idType);
 
             }
             Vehicle vehicle = actor as Vehicle;
             if (vehicle != null)
             {
-                return getPrefabId(vehicle.VehicleDef);
+                return getPrefabId(vehicle.VehicleDef, idType);
             }
             return null;
         }
@@ -374,19 +405,35 @@ namespace MechAffinity
                 Main.modLog.LogMessage("Null Pilot found!");
                 return $"{MaDeploymentStat}";
             }
-            string prefab = getPrefabId(actor);
+            string prefab = getPrefabId(actor, EIdType.ChassisId);
+            if (!overloads.ContainsKey(prefab))
+            {
+                prefab = getPrefabId(actor, EIdType.PrefabId);
+                if (!overloads.ContainsKey(prefab))
+                {
+                    prefab = getPrefabId(actor, EIdType.AssemblyVariant);
+                }
+            }
             if (String.IsNullOrEmpty(prefab))
             {
                 Main.modLog.LogMessage("Null Prefab!");
                 return $"{MaDeploymentStat}{pilot.pilotDef.Description.Id}";
             }
-            string statName = $"{MaDeploymentStat}{pilot.pilotDef.Description.Id}={getPrefabId(actor)}";
+            string statName = $"{MaDeploymentStat}{pilot.pilotDef.Description.Id}={prefab}";
             return statName;
         }
 
         private string getAffinityStatName(UnitResult result)
-        {
-            string prefabId = getPrefabId(result.mech);
+        {    
+            string prefabId = getPrefabId(result.mech, EIdType.ChassisId);
+            if (!overloads.ContainsKey(prefabId))
+            {
+                prefabId = getPrefabId(result.mech, EIdType.PrefabId);
+                if (!overloads.ContainsKey(prefabId))
+                {
+                    prefabId = getPrefabId(result.mech, EIdType.AssemblyVariant);
+                }
+            }
             chassisPrefabLut[prefabId] = result.mech.Chassis.Description.Name;
             string statName = $"{MaDeploymentStat}{result.pilot.pilotDef.Description.Id}={prefabId}";
             return statName;
@@ -441,7 +488,15 @@ namespace MechAffinity
         public int getDeploymentCountWithMech(AbstractActor actor)
         {
             string statName = getAffinityStatName(actor);
-            string prefab = getPrefabId(actor);
+            string prefab = getPrefabId(actor, EIdType.ChassisId);
+            if (!overloads.ContainsKey(prefab))
+            {
+                prefab = getPrefabId(actor, EIdType.PrefabId);
+                if (!overloads.ContainsKey(prefab))
+                {
+                    prefab = getPrefabId(actor, EIdType.AssemblyVariant);
+                }
+            }
             return getStatDeploymentCountWithMech(statName) + getTaggedDeploymentCountWithMech(actor.GetPilot(), prefab);
             
         }
@@ -992,7 +1047,15 @@ namespace MechAffinity
         private void getDeploymentBonus(AbstractActor actor, out Dictionary<EAffinityType, int> bonuses, out List<EffectData> effects)
         {
             int deployCount = getDeploymentCountWithMech(actor);
-            string chassisPrefab = getPrefabId(actor);
+            string chassisPrefab = getPrefabId(actor, EIdType.ChassisId);
+            if (!overloads.ContainsKey(chassisPrefab))
+            {
+                chassisPrefab = getPrefabId(actor, EIdType.PrefabId);
+                if (!overloads.ContainsKey(chassisPrefab))
+                {
+                    chassisPrefab = getPrefabId(actor, EIdType.AssemblyVariant);
+                }
+            }
             string statName = getAffinityStatName(actor);
             List<string> possibleQuirks = getPossibleQuirkAffinites(actor);
             List<string> possibleTags = getPossibleTaggedAffinities(actor);
@@ -1029,7 +1092,15 @@ namespace MechAffinity
         private void getAIBonuses(AbstractActor actor, out Dictionary<EAffinityType, int> bonuses, out List<EffectData> effects)
         {
             int deployCount = getPilotDeployBonusByTag(actor);
-            string chassisPrefab = getPrefabId(actor);
+            string chassisPrefab = getPrefabId(actor, EIdType.ChassisId);
+            if (!overloads.ContainsKey(chassisPrefab))
+            {
+                chassisPrefab = getPrefabId(actor, EIdType.PrefabId);
+                if (!overloads.ContainsKey(chassisPrefab))
+                {
+                    chassisPrefab = getPrefabId(actor, EIdType.AssemblyVariant);
+                }
+            }
             string statName = getAffinityStatName(actor);
             List<string> possibleQuirks = getPossibleQuirkAffinites(actor);
             List<string> possibleTags = getPossibleTaggedAffinities(actor);
@@ -1152,7 +1223,15 @@ namespace MechAffinity
 
         public string getMechChassisAffinityDescription(ChassisDef chassis)
         {
-            string prefab = getPrefabId(chassis);
+            string prefab = getPrefabId(chassis, EIdType.ChassisId);
+            if (!overloads.ContainsKey(prefab))
+            {
+                prefab = getPrefabId(chassis, EIdType.PrefabId);
+                if (!overloads.ContainsKey(prefab))
+                {
+                    prefab = getPrefabId(chassis, EIdType.AssemblyVariant);
+                }
+            }
             string ret = "\n";
             List<string> levels = new List<string>();
             Main.modLog.DebugMessage($"Found prefab: {prefab}");
