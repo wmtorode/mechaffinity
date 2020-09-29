@@ -406,6 +406,11 @@ namespace MechAffinity
                 return $"{MaDeploymentStat}";
             }
             string prefab = getPrefabId(actor, EIdType.ChassisId);
+            if (String.IsNullOrEmpty(prefab))
+            {
+                Main.modLog.LogMessage("Null Prefab!");
+                return $"{MaDeploymentStat}{pilot.pilotDef.Description.Id}";
+            }
             if (!overloads.ContainsKey(prefab))
             {
                 prefab = getPrefabId(actor, EIdType.PrefabId);
@@ -414,13 +419,7 @@ namespace MechAffinity
                     prefab = getPrefabId(actor, EIdType.AssemblyVariant);
                 }
             }
-            if (String.IsNullOrEmpty(prefab))
-            {
-                Main.modLog.LogMessage("Null Prefab!");
-                return $"{MaDeploymentStat}{pilot.pilotDef.Description.Id}";
-            }
-            string statName = $"{MaDeploymentStat}{pilot.pilotDef.Description.Id}={prefab}";
-            return statName;
+            return $"{MaDeploymentStat}{pilot.pilotDef.Description.Id}={prefab}";
         }
 
         private string getAffinityStatName(UnitResult result)
