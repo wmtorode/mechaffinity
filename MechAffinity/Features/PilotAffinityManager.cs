@@ -1047,6 +1047,13 @@ namespace MechAffinity
         {
             int deployCount = getDeploymentCountWithMech(actor);
             string chassisPrefab = getPrefabId(actor, EIdType.ChassisId);
+            if (String.IsNullOrEmpty(chassisPrefab))
+            {
+                Main.modLog.LogMessage("Null Prefab on player unit!!");
+                bonuses = new Dictionary<EAffinityType, int>();
+                effects = new List<EffectData>();
+                return;
+            }
             if (!overloads.ContainsKey(chassisPrefab))
             {
                 chassisPrefab = getPrefabId(actor, EIdType.PrefabId);
@@ -1092,6 +1099,13 @@ namespace MechAffinity
         {
             int deployCount = getPilotDeployBonusByTag(actor);
             string chassisPrefab = getPrefabId(actor, EIdType.ChassisId);
+            if (String.IsNullOrEmpty(chassisPrefab))
+            {
+                //probably a turret
+                bonuses = new Dictionary<EAffinityType, int>();
+                effects = new List<EffectData>();
+                return;
+            }
             if (!overloads.ContainsKey(chassisPrefab))
             {
                 chassisPrefab = getPrefabId(actor, EIdType.PrefabId);
