@@ -26,7 +26,9 @@ example:
     "chassisAffinities" : [],
     "quirkAffinities" : [],
     "taggedAffinities" : [],
-    "pilotQuirks" : []
+    "pilotQuirks" : [],
+    "quirkPools" : [],
+    "playerQuirkPools" : false
 }
 ```
 
@@ -67,6 +69,10 @@ setting value will always be used
 `taggedAffinities` : a list of `TaggedAffinity` objects. These will only apply to pilot-chassis combos that are called out by the affinity, when the pilot has the specificed tag. Note these are additive with all other affinities.
 
 `pilotQuirks` : a list of `PilotQuirk` objects. These will only be used if `enablePilotQuirks` is set to `true`
+
+`quirkPools` : a list of `QuirkPool` objects. These will only be used if `enablePilotQuirks` is set to `true`
+
+`playerQuirkPools` : when `true` player pilots can also use quirk pools. Can only be used if `enablePilotQuirks` is set to `true`
 
 ### affinityLevel objects
 
@@ -219,10 +225,29 @@ to the base/upkeep cost of the upgrade. `affectedIds` is a list of argo upgrade 
 added to this list. example: `ArgoUpgradeFactor` with a modifier of `-0.3` and affectedIds list equal to `[PqAllArgoUpgrades]` will give a 30% cost reduction to 
 the purchase cost of all upgrades. while a `ArgoUpkeepFactor` with a modifier of `0.15` will increase the monthly upkeep of all affected upgrades.
 
+### QuirkPool objects
+
+```json
+{
+  "tag" : "",
+  "quirksToPick": 0,
+  "quirksAvailable" : []
+}
+```
+- `tag` : the tag that activates this quirk pool
+
+- `quirksToPick` : the number of quirks to select from this pool
+
+- `quirksAvailable` : a list of quirk tags this pool can select
+
 
 ## Giving AI Pilots Affinities
 
 non player pilots can also be setup to recieve affinities. to do this add a pliot tag of `affinityLevel_X` where X is the number of deployments that should be granted to the pilot. pilots with this tag will be able to recieve all affinites (Global, Chassis, Quirk & Tagged) that a player pilot of equal deployments is applicable for
+
+## Giving AI Pilots Quirks
+
+non player pilots can be setup to get randomized quirks. To do this add quirk pools and make sure all AI pilots that should get quirks have at least one of the tags used by a quirk pool.
 
 ## Affinities By Tags
 

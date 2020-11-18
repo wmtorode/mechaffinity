@@ -30,5 +30,7 @@ namespace MechAffinity.Data
 
         public bool enablePilotQuirks = false;
         public List<PilotQuirk> pilotQuirks = new List<PilotQuirk>();
+        public List<QuirkPool> quirkPools = new List<QuirkPool>();
+        public bool playerQuirkPools = false;
     }
 }

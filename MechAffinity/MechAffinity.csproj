@@ -26,7 +26,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;USE_CS_CC</DefineConstants>
+    <DefineConstants>TRACE;USE_CS_CC;USE_LT</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -40,6 +40,12 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'ReleaseNoLT|AnyCPU' ">
+    <OutputPath>bin\ReleaseNoLT\</OutputPath>
+    <DefineConstants>TRACE;USE_CS_CC</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
       <HintPath>D:\SteamLibrary\steamapps\common\BATTLETECH\Mods\ModTek\0Harmony.dll</HintPath>
@@ -52,6 +58,9 @@
     </Reference>
     <Reference Include="CustomSalvage">
       <HintPath>S:\SteamLibrary\steamapps\common\BATTLETECH\Mods\CustomSalvage\CustomSalvage.dll</HintPath>
+    </Reference>
+    <Reference Include="LewdableTanks, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>D:\rogueTech\Cache\RtCache\LewdableTanks\LewdableTanks.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>D:\SteamLibrary\steamapps\common\BATTLETECH\BattleTech_Data\Managed\Newtonsoft.Json.dll</HintPath>
@@ -94,6 +103,7 @@
     <Compile Include="Data\PrefabOverride.cs" />
     <Compile Include="Data\QuirkAffinity.cs" />
     <Compile Include="Data\QuirkEffect.cs" />
+    <Compile Include="Data\QuirkPool.cs" />
     <Compile Include="Data\Settings.cs" />
     <Compile Include="Data\TaggedAffinity.cs" />
     <Compile Include="Features\BaseEffectManager.cs" />

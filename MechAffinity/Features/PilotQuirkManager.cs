@@ -20,6 +20,7 @@ namespace MechAffinity
         private static PilotQuirkManager _instance;
         private StatCollection companyStats;
         private Dictionary<string, PilotQuirk> quirks;
+        private Dictionary<string, QuirkPool> quirkPools;
 
         public static PilotQuirkManager Instance
         {
@@ -45,6 +46,11 @@ namespace MechAffinity
 
                 quirks.Add(pilotQuirk.tag, pilotQuirk);
             }
+            quirkPools = new Dictionary<string, QuirkPool>();
+            foreach (QuirkPool quirkPool in Main.settings.quirkPools)
+            {
+                quirkPools.Add(quirkPool.tag, quirkPool);
+            }
         }
         
         public void setCompanyStats(StatCollection stats)
@@ -68,12 +74,29 @@ namespace MechAffinity
             Main.modLog.LogMessage($"Tracker Stat: {PqMoraleTracker}, value: {companyStats.GetValue<float>(PqMoraleTracker)}");
         }
 
-        private List<PilotQuirk> getQuirks(PilotDef pilotDef)
+        private List<string> getPooledQuirks(QuirkPool pool)
+        {
+            List<string> choosenQuirks = new List<string>();
+            Random random = new Random();
+            while (choosenQuirks.Count < pool.quirksToPick)
+            {
+                string quirk = pool.quirksAvailable[random.Next(pool.quirksAvailable.Count)];
+                if (!choosenQuirks.Contains(quirk))
+                {
+                    choosenQuirks.Add(quirk);
+                }
+            }
+
+            return choosenQuirks;
+        }
+        
+        private List<PilotQuirk> getQuirks(PilotDef pilotDef, bool usePools = false)
         {
             List<PilotQuirk> pilotQuirks = new List<PilotQuirk>();
             if (pilotDef != null)
             {
                 List<string> tags = pilotDef.PilotTags.ToList();
+                List<string> usedQuirks = new List<string>();
                 foreach (string tag in tags)
                 {
                     //Main.modLog.LogMessage($"Processing tag: {tag}");
@@ -81,30 +104,60 @@ namespace MechAffinity
                     if (quirks.TryGetValue(tag, out quirk))
                     {
                         pilotQuirks.Add(quirk);
+                        usedQuirks.Add(tag);
+                    }
+                }
+
+                if (usePools)
+                {
+                    foreach (string tag in tags)
+                    {
+                        QuirkPool quirkpool;
+                        if (quirkPools.TryGetValue(tag, out quirkpool))
+                        {
+                            List<string> choosenQuirks = getPooledQuirks(quirkpool);
+                            foreach (string possibleQuirk in choosenQuirks)
+                            {
+                                PilotQuirk quirk;
+                                if (quirks.TryGetValue(possibleQuirk, out quirk))
+                                {
+                                    if (!usedQuirks.Contains(possibleQuirk))
+                                    {
+                                        pilotQuirks.Add(quirk);
+                                        usedQuirks.Add(possibleQuirk);
+                                        Main.modLog.LogMessage($"Adding Randomized Quirk: {possibleQuirk}");
+                                    }
+                                    else
+                                    {
+                                        Main.modLog.LogMessage($"Skipped adding randomized quirk {possibleQuirk}, because it was already used");
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
             return pilotQuirks;
         }
 
-        private List<PilotQuirk> getQuirks(Pilot pilot)
+        private List<PilotQuirk> getQuirks(Pilot pilot, bool usePools = false)
         {
             if (pilot == null)
             {
                 return new List<PilotQuirk>();
             }
 
-            return getQuirks(pilot.pilotDef);
+            return getQuirks(pilot.pilotDef, usePools);
         }
 
-        private List<PilotQuirk> getQuirks(AbstractActor actor)
+        private List<PilotQuirk> getQuirks(AbstractActor actor, bool usePools)
         {
             if (actor == null)
             {
                 return new List<PilotQuirk>();
             }
 
-            return getQuirks(actor.GetPilot());
+            return getQuirks(actor.GetPilot(), usePools);
         }
 
         public string getPilotToolTip(Pilot pilot)
@@ -169,10 +222,10 @@ namespace MechAffinity
             return false;
         }
 
-        private void getEffectBonuses(AbstractActor actor, out List<EffectData> effects)
+        private void getEffectBonuses(AbstractActor actor, bool usePools, out List<EffectData> effects)
         {
             effects = new List<EffectData>();
-            List<PilotQuirk> pilotQuirks = getQuirks(actor);
+            List<PilotQuirk> pilotQuirks = getQuirks(actor, usePools);
             foreach (PilotQuirk quirk in pilotQuirks)
             {
                 foreach (EffectData effect in quirk.effects)
@@ -188,7 +241,21 @@ namespace MechAffinity
             if (Main.settings.enablePilotQuirks)
             {
                 List<EffectData> effects;
-                getEffectBonuses(actor, out effects);
+                bool canUsePools = false;
+                if (actor.team == null || !actor.team.IsLocalPlayer)
+                {
+                    canUsePools = true;
+                    Main.modLog.LogMessage("Processing AI actor, allowing pooled quirk use");
+                }
+                else
+                {
+                    if (Main.settings.playerQuirkPools)
+                    {
+                        canUsePools = true;
+                        Main.modLog.LogMessage("pq player pools enabled, allowing pooled quirk use");
+                    }
+                }
+                getEffectBonuses(actor, canUsePools, out effects);
                 applyStatusEffects(actor, effects);
             }
 

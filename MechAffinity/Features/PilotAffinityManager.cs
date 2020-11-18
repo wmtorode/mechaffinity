@@ -10,6 +10,10 @@ using CustomComponents;
 using CustomSalvage;
 #endif
 
+#if USE_CS_CC && USE_LT
+    using LewdableTanks;
+#endif
+
 // ReSharper disable once CheckNamespace
 namespace MechAffinity
 {
@@ -261,6 +265,13 @@ namespace MechAffinity
             {
                 return chassis.Description.Id;
             }
+            #if USE_CS_CC && USE_LT
+                        if (idType == EIdType.AssemblyVariant)
+                        {
+                            if (chassis.Is<VAssemblyVariant>(out var a) && !string.IsNullOrEmpty(a.PrefabID))
+                                return a.PrefabID + "_" + chassis.Tonnage.ToString();
+                        }
+            #endif
             return $"{chassis.PrefabIdentifier}_{chassis.Tonnage}";
         }
 
