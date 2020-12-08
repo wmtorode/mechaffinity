@@ -32,5 +32,8 @@ namespace MechAffinity.Data
         public List<PilotQuirk> pilotQuirks = new List<PilotQuirk>();
         public List<QuirkPool> quirkPools = new List<QuirkPool>();
         public bool playerQuirkPools = false;
+        public bool pqArgoAdditive = true;
+        public bool pqArgoMultiAutoAdjust = true;
+        public float pqArgoMin = 0.0f;
     }
 }

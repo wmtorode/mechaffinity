@@ -28,7 +28,10 @@ example:
     "taggedAffinities" : [],
     "pilotQuirks" : [],
     "quirkPools" : [],
-    "playerQuirkPools" : false
+    "playerQuirkPools" : false,
+    "pqArgoAdditive" : true,
+    "pqArgoMultiAutoAdjust" : true,
+    "pqArgoMin" : 0.0
 }
 ```
 
@@ -73,6 +76,12 @@ setting value will always be used
 `quirkPools` : a list of `QuirkPool` objects. These will only be used if `enablePilotQuirks` is set to `true`
 
 `playerQuirkPools` : when `true` player pilots can also use quirk pools. Can only be used if `enablePilotQuirks` is set to `true`
+
+`pqArgoAdditive` : when `true` argo upgrade modifiers are processed using an additive model, when `false` a multiplicative model is used instead
+
+`pqArgoMin` : the lowest possible argo upgrade modifier, defaults to 0.0
+
+`pqArgoMultiAutoAdjust` : when `true` auto normalize modifiers for the multiplicative model (by adding 1.0 to the modifier before its factored in) instead of directly applying the modifier
 
 ### affinityLevel objects
 

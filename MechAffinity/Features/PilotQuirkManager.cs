@@ -444,16 +444,32 @@ namespace MechAffinity
                             if (effect.affectedIds.Contains(upgradeId) || effect.affectedIds.Contains(PqAllArgoUpgrades))
                             {
                                 if (Main.settings.debug) Main.modLog.DebugMessage($"Found Argo factor: {quirk.quirkName}, value: {effect.modifier}");
-                                ret += effect.modifier;
+                                if (Main.settings.pqArgoAdditive)
+                                {
+                                    ret += effect.modifier;
+                                }
+                                else
+                                {
+                                    if (Main.settings.pqArgoMultiAutoAdjust)
+                                    {
+                                        ret *= (1.0f + effect.modifier);
+                                    }
+                                    else
+                                    {
+                                        ret *= effect.modifier;
+                                    }
+                                }
+
+                                
                             }
                         }
                     }
                 }
             }
 
-            if (ret < 0.0f)
+            if (ret < Main.settings.pqArgoMin)
             {
-                ret = 0.0f;
+                ret = Main.settings.pqArgoMin;
             }
             if (Main.settings.debug) Main.modLog.DebugMessage($"Found cost factor multiplier: {ret}");
             return ret;

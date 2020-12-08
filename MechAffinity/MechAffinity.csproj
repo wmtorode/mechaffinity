@@ -60,7 +60,7 @@
       <HintPath>S:\SteamLibrary\steamapps\common\BATTLETECH\Mods\CustomSalvage\CustomSalvage.dll</HintPath>
     </Reference>
     <Reference Include="LewdableTanks, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>D:\rogueTech\Cache\RtCache\LewdableTanks\LewdableTanks.dll</HintPath>
+      <HintPath>D:\RtMasterCache\RtCache\LewdableTanks\LewdableTanks.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>D:\SteamLibrary\steamapps\common\BATTLETECH\BattleTech_Data\Managed\Newtonsoft.Json.dll</HintPath>
