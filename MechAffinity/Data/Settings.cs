@@ -29,6 +29,8 @@ namespace MechAffinity.Data
         public int topAffinitiesInTooltipCount = 3;
 
         public bool enablePilotQuirks = false;
+        public string FatiguedTagStatusText = "<b>***PILOT FATIGUED***</b>\nPilot will suffer from Low Spirits if used in combat. The lance will also experience reduced Resolve per turn during combat.\n\n";
+        public string LightInjuryTagSatusText = "<b>***PILOT LIGHT INJURY***</b>\nPilot cannot drop into combat. This pilot requires rest after dropping too frequently while fatigued.\n\n";
         public List<PilotQuirk> pilotQuirks = new List<PilotQuirk>();
         public List<QuirkPool> quirkPools = new List<QuirkPool>();
         public bool playerQuirkPools = false;

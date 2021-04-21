@@ -33,12 +33,10 @@ namespace MechAffinity.Patches
             {
                 if (pilot.pilotDef.PilotTags.Contains("pilot_fatigued"))
                 {
-                    Desc +=
-                        "<b>***PILOT FATIGUED***</b>\nPilot will suffer from Low Spirits if used in combat. The lance will also experience reduced Resolve per turn during combat.\n\n";
+                    Desc += Main.settings.FatiguedTagStatusText;
                 }
                 else if (pilot.pilotDef.PilotTags.Contains("pilot_lightinjury"))
-                    Desc +=
-                        "<b>***PILOT LIGHT INJURY***</b>\nPilot cannot drop into combat. This pilot requires rest after dropping too frequently while fatigued.\n\n";
+                    Desc += Main.settings.LightInjuryTagSatusText;
             }
 
             Desc += PilotQuirkManager.Instance.getPilotToolTip(pilot);
