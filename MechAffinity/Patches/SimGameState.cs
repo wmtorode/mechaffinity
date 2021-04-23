@@ -218,27 +218,74 @@ namespace MechAffinity.Patches
     [HarmonyPatch(typeof(SimGameState), "GetExpenditures", new Type[] {typeof(EconomyScale), typeof(bool)})]
     public static class SimGameState_GetExpenditures
     {
+        private static float CalculateCBillValue(MechDef mech)
+        {
+            float num = 10000f;
+            float currentCBillValue = (float)mech.Chassis.Description.Cost;
+            float num2 = 0f;
+            num2 += mech.Head.CurrentArmor;
+            num2 += mech.CenterTorso.CurrentArmor;
+            num2 += mech.CenterTorso.CurrentRearArmor;
+            num2 += mech.LeftTorso.CurrentArmor;
+            num2 += mech.LeftTorso.CurrentRearArmor;
+            num2 += mech.RightTorso.CurrentArmor;
+            num2 += mech.RightTorso.CurrentRearArmor;
+            num2 += mech.LeftArm.CurrentArmor;
+            num2 += mech.RightArm.CurrentArmor;
+            num2 += mech.LeftLeg.CurrentArmor;
+            num2 += mech.RightLeg.CurrentArmor;
+            num2 *= UnityGameInstance.BattleTechGame.MechStatisticsConstants.CBILLS_PER_ARMOR_POINT;
+            currentCBillValue += num2;
+            for (int i = 0; i < mech.Inventory.Length; i++)
+            {
+                MechComponentRef mechComponentRef = mech.Inventory[i];
+                currentCBillValue += (float)mechComponentRef.Def.Description.Cost;
+            }
+            currentCBillValue = Mathf.Round(currentCBillValue / num) * num;
+            return currentCBillValue;
+        }
         public static bool Prepare()
         {
-            return Main.settings.enablePilotQuirks;
+            if (Main.settings.enablePilotQuirks || Main.settings.MechMaintenanceByCost)
+                return true;
+            else
+                return false;
         }
         
         public static bool Prefix(SimGameState __instance, EconomyScale expenditureLevel, bool proRate, int  ___ProRateRefund, ref int __result)
         {
             FinancesConstantsDef finances = __instance.Constants.Finances;
             int baseMaintenanceCost = __instance.GetShipBaseMaintenanceCost();
+            float expenditureCostModifier = __instance.GetExpenditureCostModifier(expenditureLevel);
             for (int index = 0; index < __instance.ShipUpgrades.Count; ++index)
             {
-                float pilotQurikModifier = PilotQuirkManager.Instance.getArgoUpgradeCostModifier(__instance.PilotRoster.ToList(),
+                float baseCost = (float)__instance.ShipUpgrades[index].AdditionalCost;
+                if (Main.settings.enablePilotQuirks)
+                {
+                    float pilotQurikModifier = PilotQuirkManager.Instance.getArgoUpgradeCostModifier(__instance.PilotRoster.ToList(),
                         __instance.ShipUpgrades[index].Description.Id, true);
-                float baseCost = (float) __instance.ShipUpgrades[index].AdditionalCost * pilotQurikModifier;
+                    baseCost = (float)__instance.ShipUpgrades[index].AdditionalCost * pilotQurikModifier;
+                }
                 baseMaintenanceCost += Mathf.CeilToInt(baseCost * __instance.Constants.CareerMode.ArgoMaintenanceMultiplier);
             }
             foreach (MechDef mechDef in __instance.ActiveMechs.Values)
-                baseMaintenanceCost += finances.MechCostPerQuarter;
+            {
+                if(Main.settings.MechMaintenanceByCost)
+                {
+                    if (Main.settings.MMBC_CostByTons)
+                    {
+                        baseMaintenanceCost += Mathf.RoundToInt((float)mechDef.Chassis.Tonnage * Main.settings.MMBC_cbillsPerTon * expenditureCostModifier);
+                        if (Main.settings.MMBC_TonsAdditive)
+                            baseMaintenanceCost += Mathf.RoundToInt(CalculateCBillValue(mechDef) * Main.settings.MMBC_PercentageOfMechCost * expenditureCostModifier);
+                    }
+                    else
+                        baseMaintenanceCost += Mathf.RoundToInt(CalculateCBillValue(mechDef) * Main.settings.MMBC_PercentageOfMechCost * expenditureCostModifier);
+                }
+                else
+                    baseMaintenanceCost += finances.MechCostPerQuarter;
+            }
             for (int index = 0; index < __instance.PilotRoster.Count; ++index)
                 baseMaintenanceCost += __instance.GetMechWarriorValue(__instance.PilotRoster[index].pilotDef);
-            float expenditureCostModifier = __instance.GetExpenditureCostModifier(expenditureLevel);
             __result = Mathf.CeilToInt((float) (baseMaintenanceCost - (proRate ? ___ProRateRefund : 0)) * expenditureCostModifier);
             return false;
         }

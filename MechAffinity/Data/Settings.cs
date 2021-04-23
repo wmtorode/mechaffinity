@@ -27,7 +27,13 @@ namespace MechAffinity.Data
         public bool trackLowestDecayByStat = false;
         public bool showAllPilotAffinities = true;
         public int topAffinitiesInTooltipCount = 3;
-
+        
+        public bool MechMaintenanceByCost = false;
+        public float MMBC_PercentageOfMechCost = 0.003f;
+        public bool MMBC_CostByTons = false;
+        public int MMBC_cbillsPerTon = 500;
+        public bool MMBC_TonsAdditive = false;
+        
         public bool enablePilotQuirks = false;
         public List<PilotQuirk> pilotQuirks = new List<PilotQuirk>();
         public List<QuirkPool> quirkPools = new List<QuirkPool>();

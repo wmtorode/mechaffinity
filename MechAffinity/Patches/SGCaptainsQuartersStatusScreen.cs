@@ -14,10 +14,39 @@ namespace MechAffinity.Patches
     [HarmonyPatch(typeof(SGCaptainsQuartersStatusScreen), "RefreshData", new Type[] {typeof(EconomyScale), typeof(bool)})]
     public static class SGCaptainsQuartersStatusScreen_RefreshData
     {
-      private static MethodInfo methodAddLineItem = AccessTools.Method(typeof(SGCaptainsQuartersStatusScreen), "AddListLineItem");
+        private static MethodInfo methodAddLineItem = AccessTools.Method(typeof(SGCaptainsQuartersStatusScreen), "AddListLineItem");
+        private static float CalculateCBillValue(MechDef mech)
+        {
+            float num = 10000f;
+            float currentCBillValue = (float)mech.Chassis.Description.Cost;
+            float num2 = 0f;
+            num2 += mech.Head.CurrentArmor;
+            num2 += mech.CenterTorso.CurrentArmor;
+            num2 += mech.CenterTorso.CurrentRearArmor;
+            num2 += mech.LeftTorso.CurrentArmor;
+            num2 += mech.LeftTorso.CurrentRearArmor;
+            num2 += mech.RightTorso.CurrentArmor;
+            num2 += mech.RightTorso.CurrentRearArmor;
+            num2 += mech.LeftArm.CurrentArmor;
+            num2 += mech.RightArm.CurrentArmor;
+            num2 += mech.LeftLeg.CurrentArmor;
+            num2 += mech.RightLeg.CurrentArmor;
+            num2 *= UnityGameInstance.BattleTechGame.MechStatisticsConstants.CBILLS_PER_ARMOR_POINT;
+            currentCBillValue += num2;
+            for (int i = 0; i < mech.Inventory.Length; i++)
+            {
+                MechComponentRef mechComponentRef = mech.Inventory[i];
+                currentCBillValue += (float)mechComponentRef.Def.Description.Cost;
+            }
+            currentCBillValue = Mathf.Round(currentCBillValue / num) * num;
+            return currentCBillValue;
+        }
         public static bool Prepare()
         {
-            return Main.settings.enablePilotQuirks;
+            if (Main.settings.enablePilotQuirks || Main.settings.MechMaintenanceByCost)
+                return true;
+            else
+                return false;
         }
         
         public static bool Prefix(SGCaptainsQuartersStatusScreen __instance, EconomyScale expenditureLevel, bool showMoraleChange, SimGameState ___simState,
@@ -58,21 +87,35 @@ namespace MechAffinity.Patches
             keyValuePairList.Add(new KeyValuePair<string, int>(key, num2));
             foreach (ShipModuleUpgrade shipUpgrade in ___simState.ShipUpgrades)
             {
-              float pilotQurikModifier = PilotQuirkManager.Instance.getArgoUpgradeCostModifier(___simState.PilotRoster.ToList(),
-                shipUpgrade.Description.Id, true);
-              float baseCost = (float) shipUpgrade.AdditionalCost * pilotQurikModifier;
-              if (___simState.CurDropship == DropshipType.Argo && Mathf.CeilToInt((float) baseCost * ___simState.Constants.CareerMode.ArgoMaintenanceMultiplier) > 0)
-              {
-                string name = shipUpgrade.Description.Name;
-                int num3 = Mathf.RoundToInt(expenditureCostModifier * (float) Mathf.CeilToInt((float) baseCost * ___simState.Constants.CareerMode.ArgoMaintenanceMultiplier));
-                keyValuePairList.Add(new KeyValuePair<string, int>(name, num3));
-              }
+                float baseCost = shipUpgrade.AdditionalCost;
+                if (Main.settings.enablePilotQuirks)
+                {
+                    float pilotQurikModifier = PilotQuirkManager.Instance.getArgoUpgradeCostModifier(___simState.PilotRoster.ToList(), shipUpgrade.Description.Id, true);											  
+                    baseCost = (float)shipUpgrade.AdditionalCost * pilotQurikModifier;
+                }
+                if (___simState.CurDropship == DropshipType.Argo && Mathf.CeilToInt((float) baseCost * ___simState.Constants.CareerMode.ArgoMaintenanceMultiplier) > 0)
+                {
+                    string name = shipUpgrade.Description.Name;
+                    int num3 = Mathf.RoundToInt(expenditureCostModifier * (float) Mathf.CeilToInt((float) baseCost * ___simState.Constants.CareerMode.ArgoMaintenanceMultiplier));
+                    keyValuePairList.Add(new KeyValuePair<string, int>(name, num3));
+                }
             }
             foreach (MechDef mechDef in ___simState.ActiveMechs.Values)
             {
-              string name = mechDef.Name;
-              int num3 = Mathf.RoundToInt(expenditureCostModifier * (float) ___simState.Constants.Finances.MechCostPerQuarter);
-              keyValuePairList.Add(new KeyValuePair<string, int>(name, num3));
+                string name = mechDef.Name;
+                int num3 = Mathf.RoundToInt(expenditureCostModifier * (float) ___simState.Constants.Finances.MechCostPerQuarter);
+                if(Main.settings.MechMaintenanceByCost)
+                {
+                    if (Main.settings.MMBC_CostByTons)
+                    {
+                        num3 = Mathf.RoundToInt(expenditureCostModifier * (float)mechDef.Chassis.Tonnage * Main.settings.MMBC_cbillsPerTon);
+                        if (Main.settings.MMBC_TonsAdditive)
+                            num3 += Mathf.RoundToInt(expenditureCostModifier * CalculateCBillValue(mechDef) * Main.settings.MMBC_PercentageOfMechCost);
+                    }
+                    else
+                        num3 = Mathf.RoundToInt(expenditureCostModifier * CalculateCBillValue(mechDef) * Main.settings.MMBC_PercentageOfMechCost);
+                }
+                keyValuePairList.Add(new KeyValuePair<string, int>(name, num3));
             }
             keyValuePairList.Sort((Comparison<KeyValuePair<string, int>>) ((a, b) => b.Value.CompareTo(a.Value)));
             keyValuePairList.ForEach((Action<KeyValuePair<string, int>>) (entry =>
