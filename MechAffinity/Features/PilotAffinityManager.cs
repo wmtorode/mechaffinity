@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using MechAffinity.Data;
 using BattleTech;
+using BattleTech.Data;
 using Newtonsoft.Json.Linq;
 
 #if USE_CS_CC
@@ -41,6 +42,7 @@ namespace MechAffinity
         private Dictionary<string, List<AffinityLevel>> taggedAffinities;
         private Dictionary<string, EIdType> overloads;
         private List<string> tagsWithAffinities;
+        private DataManager dataManager = null;
 
         public static PilotAffinityManager Instance
         {
@@ -161,6 +163,11 @@ namespace MechAffinity
             //Main.modLog.LogMessage($"adding to lut {prefabId} => {mech.Chassis.Description.Name}");
         }
 
+        public void setDataManager(DataManager dManager)
+        {
+            dataManager = dManager;
+        }
+
         public void setCompanyStats(StatCollection stats)
         {
             companyStats = stats;
@@ -266,11 +273,11 @@ namespace MechAffinity
                 return chassis.Description.Id;
             }
             #if USE_CS_CC && USE_LT
-                        if (idType == EIdType.AssemblyVariant)
-                        {
-                            if (chassis.Is<VAssemblyVariant>(out var a) && !string.IsNullOrEmpty(a.PrefabID))
-                                return a.PrefabID + "_" + chassis.Tonnage.ToString();
-                        }
+                if (idType == EIdType.AssemblyVariant)
+                {
+                    if (chassis.Is<VAssemblyVariant>(out var a) && !string.IsNullOrEmpty(a.PrefabID))
+                        return a.PrefabID + "_" + chassis.Tonnage.ToString();
+                }
             #endif
             return $"{chassis.PrefabIdentifier}_{chassis.Tonnage}";
         }
@@ -282,6 +289,13 @@ namespace MechAffinity
 
         private string getPrefabId(MechDef mech, EIdType idType)
         {
+            #if USE_CS_CC && USE_LT
+                if (mech.IsVehicle())
+                {
+                    VehicleDef vehicle = dataManager.VehicleDefs.Get(mech.Description.Id);
+                    return getPrefabId(vehicle, idType);
+                }
+            #endif
             return getPrefabId(mech.Chassis, idType);
         }
 
@@ -291,7 +305,6 @@ namespace MechAffinity
             if (mech != null)
             {
                 return getPrefabId(mech.MechDef, idType);
-
             }
             Vehicle vehicle = actor as Vehicle;
             if (vehicle != null)

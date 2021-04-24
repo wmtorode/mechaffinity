@@ -35,5 +35,7 @@ namespace MechAffinity.Data
         public bool pqArgoAdditive = true;
         public bool pqArgoMultiAutoAdjust = true;
         public float pqArgoMin = 0.0f;
+        
+        public List<PilotTooltipTag> pqTooltipTags = new List<PilotTooltipTag>();
     }
 }

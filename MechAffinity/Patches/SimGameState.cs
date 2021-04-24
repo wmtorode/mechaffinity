@@ -19,6 +19,8 @@ namespace MechAffinity.Patches
         public static void Postfix(SimGameState __instance, GameInstanceSave gameInstanceSave)
         {
                 PilotAffinityManager.Instance.setCompanyStats(__instance.CompanyStats);
+                PilotAffinityManager.Instance.setDataManager(__instance.DataManager);
+                
                 PilotQuirkManager.Instance.setCompanyStats(__instance.CompanyStats);
                 
                 List<MechDef> mechs = __instance.DataManager.MechDefs.Select(pair => pair.Value).ToList();
@@ -44,6 +46,8 @@ namespace MechAffinity.Patches
         {
 
             PilotAffinityManager.Instance.setCompanyStats(__instance.CompanyStats);
+            PilotAffinityManager.Instance.setDataManager(__instance.DataManager);
+            
             PilotQuirkManager.Instance.setCompanyStats(__instance.CompanyStats);
             
             List<MechDef> mechs = __instance.DataManager.MechDefs.Select(pair => pair.Value).ToList();

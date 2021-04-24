@@ -100,6 +100,7 @@
     <Compile Include="Data\EQuirkEffectType.cs" />
     <Compile Include="Data\Logger.cs" />
     <Compile Include="Data\PilotQuirk.cs" />
+    <Compile Include="Data\PilotTooltipTag.cs" />
     <Compile Include="Data\PrefabOverride.cs" />
     <Compile Include="Data\QuirkAffinity.cs" />
     <Compile Include="Data\QuirkEffect.cs" />

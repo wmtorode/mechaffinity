@@ -9,6 +9,7 @@ using BattleTech.UI.TMProWrapper;
 using BattleTech.UI.Tooltips;
 using Harmony;
 using MechAffinity;
+using MechAffinity.Data;
 
 namespace MechAffinity.Patches
 {
@@ -28,17 +29,13 @@ namespace MechAffinity.Patches
             {
                 Desc = "";
             }
-
-            if (Main.settings.enablePilotQuirks)
+            
+            foreach (PilotTooltipTag pqTag in Main.settings.pqTooltipTags)
             {
-                if (pilot.pilotDef.PilotTags.Contains("pilot_fatigued"))
+                if (pilot.pilotDef.PilotTags.Contains(pqTag.tag))
                 {
-                    Desc +=
-                        "<b>***PILOT FATIGUED***</b>\nPilot will suffer from Low Spirits if used in combat. The lance will also experience reduced Resolve per turn during combat.\n\n";
+                    Desc += $"{pqTag.tooltipText}\n\n";
                 }
-                else if (pilot.pilotDef.PilotTags.Contains("pilot_lightinjury"))
-                    Desc +=
-                        "<b>***PILOT LIGHT INJURY***</b>\nPilot cannot drop into combat. This pilot requires rest after dropping too frequently while fatigued.\n\n";
             }
 
             Desc += PilotQuirkManager.Instance.getPilotToolTip(pilot);

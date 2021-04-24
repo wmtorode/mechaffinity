@@ -83,6 +83,8 @@ setting value will always be used
 
 `pqArgoMultiAutoAdjust` : when `true` auto normalize modifiers for the multiplicative model (by adding 1.0 to the modifier before its factored in) instead of directly applying the modifier
 
+`pqTooltipTags` : a list of `PilotTooltipTag` objects. These will be used for tooltips, this can be used for TBAS or for legacy functions of PilotQuirks for PilotFatigue support
+
 ### affinityLevel objects
 
 ```json
@@ -249,6 +251,17 @@ the purchase cost of all upgrades. while a `ArgoUpkeepFactor` with a modifier of
 
 - `quirksAvailable` : a list of quirk tags this pool can select
 
+### PilotTooltipTag objects
+```json
+{
+  "tag" : "",
+  "tooltipText" : ""
+}
+```
+
+- `tag` : the tag that activates this tooltip text
+
+- `tooltipText` : the text for the tooltip, Note: a double new line will be automatically added to the end
 
 ## Giving AI Pilots Affinities
 
