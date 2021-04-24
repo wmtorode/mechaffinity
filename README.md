@@ -31,7 +31,8 @@ example:
     "playerQuirkPools" : false,
     "pqArgoAdditive" : true,
     "pqArgoMultiAutoAdjust" : true,
-    "pqArgoMin" : 0.0
+    "pqArgoMin" : 0.0,
+    "pqTooltipTags" : []
 }
 ```
 
