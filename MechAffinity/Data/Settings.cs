@@ -37,5 +37,11 @@ namespace MechAffinity.Data
         public float pqArgoMin = 0.0f;
         
         public List<PilotTooltipTag> pqTooltipTags = new List<PilotTooltipTag>();
+
+        public bool MechMaintenanceByCost = false;
+        public float MMBC_PercentageOfMechCost = 0.0015f;
+        public bool MMBC_CostByTons = false;
+        public int MMBC_cbillsPerTon = 500;
+        public bool MMBC_TonsAdditive = false;
     }
 }
