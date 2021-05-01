@@ -4,6 +4,7 @@ using System.Linq;
 using BattleTech;
 using MechAffinity.Data;
 using Newtonsoft.Json.Linq;
+using Harmony;
 
 namespace MechAffinity
 {
@@ -362,6 +363,18 @@ namespace MechAffinity
                         }
 
                         updateMorale = true;
+                    }
+                    else if (effect.type == EQuirkEffectType.PilotHealth)
+                    {
+                        if (isNew)
+                        {
+                            Traverse.Create(def).Property("Health").SetValue((int) (def.Health + (int) effect.modifier));
+                        }
+                        else
+                        {
+                            Traverse.Create(def).Property("Health").SetValue((int) (def.Health - (int) effect.modifier));
+                        }
+                        
                     }
                 }
             }

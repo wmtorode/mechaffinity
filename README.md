@@ -236,6 +236,9 @@ These types affect the pilots ability to reduce or increase the upfront cost or 
 to the base/upkeep cost of the upgrade. `affectedIds` is a list of argo upgrade IDs that this quirk affects. to affect all upgrades a value of `PqAllArgoUpgrades` can be 
 added to this list. example: `ArgoUpgradeFactor` with a modifier of `-0.3` and affectedIds list equal to `[PqAllArgoUpgrades]` will give a 30% cost reduction to 
 the purchase cost of all upgrades. while a `ArgoUpkeepFactor` with a modifier of `0.15` will increase the monthly upkeep of all affected upgrades.
+  
+- `PilotHealth`
+This type is used to add or remove health from a pilot
 
 ### QuirkPool objects
 
