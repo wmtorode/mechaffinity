@@ -18,6 +18,7 @@ namespace MechAffinity
         private const string PqMoraleTracker = "PqMoraleTracker";
         private const string PqAllArgoUpgrades = "PqAllArgoUpgrades";
         private const string PqMarkedTag = "PqMarked";
+        private const string PqMarkedPrefix = "PqTagged_";
         private static PilotQuirkManager _instance;
         private StatCollection companyStats;
         private Dictionary<string, PilotQuirk> quirks;
@@ -301,8 +302,44 @@ namespace MechAffinity
             companyStats.Set<float>(trackerStat, trackerValue);
         }
 
+        private void proccessPilotStats(PilotDef def, bool isNew)
+        {
+            List<string> proccessTags = new List<string>();
+            List<PilotQuirk> pilotQuirks = getQuirks(def);
+            foreach (PilotQuirk quirk in pilotQuirks)
+            {
+                foreach (QuirkEffect effect in quirk.quirkEffects)
+                {
+                    if (effect.type == EQuirkEffectType.PilotHealth)
+                    {
+                        if (isNew && !def.PilotTags.Contains(PqMarkedPrefix + EQuirkEffectType.PilotHealth.ToString()))
+                        {
+                            Traverse.Create(def).Property("Health").SetValue((int) (def.Health + (int) effect.modifier));
+                            Main.modLog.LogMessage($"adding health to pilot: {def.Description.Callsign}");
+                            if (!proccessTags.Contains(PqMarkedPrefix + EQuirkEffectType.PilotHealth.ToString()))
+                            {
+                                proccessTags.Add(PqMarkedPrefix + EQuirkEffectType.PilotHealth.ToString());
+                            }
+                        }
+                        else
+                        {
+                            Traverse.Create(def).Property("Health").SetValue((int) (def.Health - (int) effect.modifier));
+                        }
+                        
+                    }
+                }
+            }
+
+            foreach (string tag in proccessTags)
+            {
+                def.PilotTags.Add(tag);
+            }
+        }
+
         public void proccessPilot(PilotDef def, bool isNew)
         {
+            Main.modLog.LogMessage($"processing pilot: {def.Description.Callsign}");
+            proccessPilotStats(def, isNew);
             if (def.PilotTags.Contains(PqMarkedTag) && isNew)
             {
                 Main.modLog.LogMessage($"pilot {def.Description.Callsign} already marked, skipping");
@@ -315,7 +352,7 @@ namespace MechAffinity
             bool updateMed = false;
             bool updateMorale = false;
             
-            Main.modLog.LogMessage($"processing pilot: {def.Description.Callsign}");
+            
             Main.modLog.LogMessage($"Tracker Stat: {PqMechSkillTracker}, value: {currentMechTek}");
             Main.modLog.LogMessage($"Tracker Stat: {PqMedSkillTracker}, value: {currentMedTek}");
             Main.modLog.LogMessage($"Tracker Stat: {PqMoraleTracker}, value: {currentMoraleTek}");
@@ -363,18 +400,6 @@ namespace MechAffinity
                         }
 
                         updateMorale = true;
-                    }
-                    else if (effect.type == EQuirkEffectType.PilotHealth)
-                    {
-                        if (isNew)
-                        {
-                            Traverse.Create(def).Property("Health").SetValue((int) (def.Health + (int) effect.modifier));
-                        }
-                        else
-                        {
-                            Traverse.Create(def).Property("Health").SetValue((int) (def.Health - (int) effect.modifier));
-                        }
-                        
                     }
                 }
             }
