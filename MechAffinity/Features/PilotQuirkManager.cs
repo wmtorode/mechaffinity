@@ -312,17 +312,22 @@ namespace MechAffinity
                 {
                     if (effect.type == EQuirkEffectType.PilotHealth)
                     {
-                        if (isNew && !def.PilotTags.Contains(PqMarkedPrefix + EQuirkEffectType.PilotHealth.ToString()))
+                        if (isNew)
                         {
-                            Traverse.Create(def).Property("Health").SetValue((int) (def.Health + (int) effect.modifier));
-                            Main.modLog.LogMessage($"adding health to pilot: {def.Description.Callsign}");
-                            if (!proccessTags.Contains(PqMarkedPrefix + EQuirkEffectType.PilotHealth.ToString()))
+                            if (!def.PilotTags.Contains(PqMarkedPrefix + EQuirkEffectType.PilotHealth.ToString()))
                             {
-                                proccessTags.Add(PqMarkedPrefix + EQuirkEffectType.PilotHealth.ToString());
+                                Traverse.Create(def).Property("Health")
+                                    .SetValue((int) (def.Health + (int) effect.modifier));
+                                Main.modLog.LogMessage($"adding health to pilot: {def.Description.Callsign}");
+                                if (!proccessTags.Contains(PqMarkedPrefix + EQuirkEffectType.PilotHealth.ToString()))
+                                {
+                                    proccessTags.Add(PqMarkedPrefix + EQuirkEffectType.PilotHealth.ToString());
+                                }
                             }
                         }
                         else
                         {
+                            Main.modLog.LogMessage($"removing health to pilot: {def.Description.Callsign}");
                             Traverse.Create(def).Property("Health").SetValue((int) (def.Health - (int) effect.modifier));
                         }
                         

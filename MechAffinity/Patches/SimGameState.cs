@@ -34,7 +34,11 @@ namespace MechAffinity.Patches
                     foreach (Pilot pilot in __instance.PilotRoster.ToList())
                     {
                         PilotQuirkManager.Instance.proccessPilot(pilot.pilotDef, true);
+                        pilot.FromPilotDef(pilot.pilotDef);
                     }
+                    // the commander is not part of the roster, so need to specifically call it.
+                    PilotQuirkManager.Instance.proccessPilot(__instance.Commander.pilotDef, true);
+                    __instance.Commander.FromPilotDef(__instance.Commander.pilotDef);
                 }
         }
     }
@@ -55,6 +59,34 @@ namespace MechAffinity.Patches
             {
                 PilotAffinityManager.Instance.addToChassisPrefabLut(mech);
             }
+        }
+    }
+    
+    [HarmonyPatch(typeof(SimGameState), "OnCareerModeCharacterCreationComplete")]
+    class SimGameState_OnCareerModeCharacterCreationComplete
+    {
+        public static bool Prepare()
+        {
+            return Main.settings.enablePilotQuirks;
+        }
+        public static void Postfix(SimGameState __instance, Pilot p)
+        {
+            PilotQuirkManager.Instance.proccessPilot(__instance.Commander.pilotDef, true);
+            __instance.Commander.FromPilotDef(__instance.Commander.pilotDef);
+        }
+    }
+    
+    [HarmonyPatch(typeof(SimGameState), "OnCharacterCreationComplete")]
+    class SimGameState_OnCharacterCreationComplete
+    {
+        public static bool Prepare()
+        {
+            return Main.settings.enablePilotQuirks;
+        }
+        public static void Postfix(SimGameState __instance, Pilot p)
+        {
+            PilotQuirkManager.Instance.proccessPilot(__instance.Commander.pilotDef, true);
+            __instance.Commander.FromPilotDef(__instance.Commander.pilotDef);
         }
     }
 
@@ -143,9 +175,12 @@ namespace MechAffinity.Patches
         {
             return Main.settings.enablePilotQuirks;
         }
-        public static void Postfix(SimGameState __instance, PilotDef def, bool updatePilotDiscardPile = false)
+        public static void Prefix(SimGameState __instance, PilotDef def, bool updatePilotDiscardPile = false)
         {
-            PilotQuirkManager.Instance.proccessPilot(def, true);
+            if (def != null)
+            {
+                PilotQuirkManager.Instance.proccessPilot(def, true);
+            }
         }
     }
 
