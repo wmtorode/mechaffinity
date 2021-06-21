@@ -50,6 +50,14 @@ namespace MechAffinity
                 modLog.LogException(ex);
             }
         }
+        public static void FinishedLoading(List<string> loadOrder) {
+          try {
+            PilotAffinityManager.Instance.initialize();
+            PilotQuirkManager.Instance.initialize();
+          }catch (Exception ex){
+            modLog.LogException(ex);
+          }
+        }
 
         public static void Init(string modDirectory, string settingsJSON)
         {
