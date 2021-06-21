@@ -65,8 +65,10 @@ namespace MechAffinity
             pilotStatMap = new Dictionary<string, List<string>>();
             pilotNoDeployStatMap = new Dictionary<string, List<string>>();
             overloads = new Dictionary<string, EIdType>();
+            Main.modLog.LogMessage("chassisAffinities:"+ Main.settings.chassisAffinities.Count);
             foreach (ChassisSpecificAffinity chassisSpecific in Main.settings.chassisAffinities)
             {
+                Main.modLog.LogMessage(" id:"+ chassisSpecific.id);
                 foreach (string chassisName in chassisSpecific.chassisNames)
                 {
                     chassisAffinities.Add(chassisName, chassisSpecific.affinityLevels);
@@ -77,6 +79,7 @@ namespace MechAffinity
                 }
                 foreach (AffinityLevel affinityLevel in chassisSpecific.affinityLevels)
                 {
+                    Main.modLog.LogMessage("  level:" + affinityLevel.id);
                     levelDescriptors[affinityLevel.levelName] = new DescriptionHolder(affinityLevel.levelName, affinityLevel.decription, affinityLevel.missionsRequired);
                     foreach (JObject jObject in affinityLevel.effectData)
                     {
@@ -86,9 +89,11 @@ namespace MechAffinity
                     }
                 }
             }
+            Main.modLog.LogMessage("taggedAffinities:" + Main.settings.taggedAffinities.Count);
             foreach (TaggedAffinity tagged in Main.settings.taggedAffinities)
             {
                 tagsWithAffinities.Add(tagged.tag);
+                Main.modLog.LogMessage(" id:"+ tagged.id);
                 foreach (string chassisName in tagged.chassisNames)
                 {
                     taggedAffinities.Add($"{tagged.tag}={chassisName}", tagged.affinityLevels);
@@ -103,6 +108,7 @@ namespace MechAffinity
                 foreach (AffinityLevel affinityLevel in tagged.affinityLevels)
                 {
                     levelDescriptors[affinityLevel.levelName] = new DescriptionHolder(affinityLevel.levelName, affinityLevel.decription, affinityLevel.missionsRequired);
+                    Main.modLog.LogMessage("  level:" + affinityLevel.id);
                     foreach (JObject jObject in affinityLevel.effectData)
                     {
                         EffectData effectData = new EffectData();
@@ -111,14 +117,17 @@ namespace MechAffinity
                     }
                 }
             }
+            Main.modLog.LogMessage("quirkAffinities:" + Main.settings.quirkAffinities.Count);
             foreach (QuirkAffinity quirkAffinity in Main.settings.quirkAffinities)
             {
+                Main.modLog.LogMessage(" id:"+ quirkAffinity.id);
                 foreach (string quirkName in quirkAffinity.quirkNames)
                 {
                     quirkAffinities.Add(quirkName, quirkAffinity.affinityLevels);
                 }
                 foreach (AffinityLevel affinityLevel in quirkAffinity.affinityLevels)
                 {
+                    Main.modLog.LogMessage("  level:" + affinityLevel.id);
                     levelDescriptors[affinityLevel.levelName] = new DescriptionHolder(affinityLevel.levelName, affinityLevel.decription, affinityLevel.missionsRequired);
                     foreach (JObject jObject in affinityLevel.effectData)
                     {
@@ -128,8 +137,10 @@ namespace MechAffinity
                     }
                 }
             }
+            Main.modLog.LogMessage("globalAffinities:" + Main.settings.globalAffinities.Count);
             foreach (AffinityLevel affinity in Main.settings.globalAffinities)
             {
+                Main.modLog.LogMessage(" id:"+ affinity.id);
                 foreach (JObject jObject in affinity.effectData)
                 {
                     EffectData effectData = new EffectData();

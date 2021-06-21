@@ -8,6 +8,9 @@ namespace MechAffinity.Data
 {
     class AffinityLevel
     {
+
+        [JsonProperty(Order = -1)]
+        public string id;
         public int missionsRequired = 0;
         public string levelName = "sample";
         public string decription = "";
