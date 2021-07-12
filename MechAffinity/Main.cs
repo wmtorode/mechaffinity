@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using MechAffinity.Data;
 using Harmony;
 using System.Reflection;
+using BattleTech;
 
 namespace MechAffinity
 {
@@ -16,20 +17,29 @@ namespace MechAffinity
         internal static Logger modLog;
         internal static Settings settings;
         internal static string modDir;
-
-        public static void Init(string modDirectory, string settingsJSON)
-        {
-
-            modDir = modDirectory;
-            modLog = new Logger(modDir, "MechAffinity", true);
-
-            try
-            {
-                using (StreamReader reader = new StreamReader($"{modDir}/settings.json"))
-                {
-                    string jdata = reader.ReadToEnd();
-                    settings = JsonConvert.DeserializeObject<Settings>(jdata);
+        internal static readonly string AffinitiesDefinitionTypeName = "AffinitiesDef";
+        public static void FinishedLoading(List<string> loadOrder, Dictionary<string, Dictionary<string, VersionManifestEntry>> customResources) {
+          foreach (var customResource in customResources) {
+            modLog.LogMessage("customResource:" + customResource.Key);
+            if (customResource.Key == AffinitiesDefinitionTypeName) {
+              foreach (var custMechRep in customResource.Value) {
+                try {
+                  modLog.LogMessage("Path:" + custMechRep.Value.FilePath);
+                  Settings add_settings = JsonConvert.DeserializeObject<Settings>(File.ReadAllText(custMechRep.Value.FilePath));
+                  if(add_settings.Check(custMechRep.Value.FilePath)){
+                    File.WriteAllText(custMechRep.Value.FilePath, JsonConvert.SerializeObject(settings, Formatting.Indented));
+                    add_settings = JsonConvert.DeserializeObject<Settings>(File.ReadAllText(custMechRep.Value.FilePath));
+                  }
+                  settings.Merge(add_settings);
+                } catch (Exception ex) {
+                  modLog.LogException(ex);
                 }
+              }
+            }
+          }
+          try {
+                
+                
                 PilotAffinityManager.Instance.initialize();
                 PilotQuirkManager.Instance.initialize();
 
@@ -38,6 +48,26 @@ namespace MechAffinity
             catch (Exception ex)
             {
                 modLog.LogException(ex);
+            }
+        }
+        public static void FinishedLoading(List<string> loadOrder) {
+          try {
+            PilotAffinityManager.Instance.initialize();
+            PilotQuirkManager.Instance.initialize();
+          }catch (Exception ex){
+            modLog.LogException(ex);
+          }
+        }
+
+        public static void Init(string modDirectory, string settingsJSON)
+        {
+
+            modDir = modDirectory;
+            modLog = new Logger(modDir, "MechAffinity", true);
+            settings = JsonConvert.DeserializeObject<Settings>(File.ReadAllText($"{modDir}/settings.json")); //if we had failed to read settings it is useless to proceed. Better notify ModTek instead.
+            if (settings.Check($"{modDir}/settings.json")) {
+                File.WriteAllText($"{modDir}/settings.json",JsonConvert.SerializeObject(settings, Formatting.Indented));
+                settings = JsonConvert.DeserializeObject<Settings>(File.ReadAllText($"{modDir}/settings.json"));
             }
 
             var harmony = HarmonyInstance.Create("ca.jwolf.MechAffinity");

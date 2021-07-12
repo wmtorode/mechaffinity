@@ -8,11 +8,8 @@ using Newtonsoft.Json;
 
 namespace MechAffinity.Data
 {
-    class ChassisSpecificAffinity
-    {
+    class ChassisSpecificAffinity: LeveledAffinity {
         public List<string> chassisNames = new List<string> ();
-        public List<AffinityLevel> affinityLevels = new List<AffinityLevel>();
-        
         [JsonConverter(typeof(StringEnumConverter))]
         public EIdType idType = EIdType.AssemblyVariant;
     }
