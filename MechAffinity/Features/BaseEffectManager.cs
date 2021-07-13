@@ -9,6 +9,7 @@ namespace MechAffinity
 {
     public class BaseEffectManager
     {
+        protected bool hasInitialized = false; 
         protected void applyStatusEffects(AbstractActor actor, List<EffectData> effects)
         {
             foreach (EffectData statusEffect in effects)

@@ -49,6 +49,7 @@ namespace MechAffinity
             get
             {
                 if (_instance == null) _instance = new PilotAffinityManager();
+                if (!_instance.hasInitialized) _instance.initialize();
                 return _instance;
             }
         }
@@ -88,6 +89,8 @@ namespace MechAffinity
                         affinityLevel.effects.Add(effectData);
                     }
                 }
+
+                hasInitialized = true;
             }
             Main.modLog.LogMessage("taggedAffinities:" + Main.settings.taggedAffinities.Count);
             foreach (TaggedAffinity tagged in Main.settings.taggedAffinities)

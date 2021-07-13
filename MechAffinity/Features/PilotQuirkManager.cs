@@ -29,6 +29,7 @@ namespace MechAffinity
             get
             {
                 if (_instance == null) _instance = new PilotQuirkManager();
+                if (!_instance.hasInitialized) _instance.initialize();
                 return _instance;
             }
         }
@@ -53,6 +54,8 @@ namespace MechAffinity
             {
                 quirkPools.Add(quirkPool.tag, quirkPool);
             }
+
+            hasInitialized = true;
         }
         
         public void setCompanyStats(StatCollection stats)
