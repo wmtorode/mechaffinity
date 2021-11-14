@@ -282,5 +282,66 @@ namespace MechAffinity.Patches
             return false;
         }
     }
-    
+
+    [HarmonyPatch(typeof(SimGameState), "FirstTimeInitializeDataFromDefs")]
+    public static class SimGameState_FirstTimeInitializeDataFromDefs
+    {
+        public static void Postfix(SimGameState __instance)
+        {
+            if (RngStart.Settings.NumberRandomRonin + RngStart.Settings.NumberProceduralPilots + RngStart.Settings.NumberRoninFromList > 0)
+            {
+                while (__instance.PilotRoster.Count > 0)
+                {
+                    __instance.PilotRoster.RemoveAt(0);
+                }
+                List<PilotDef> list = new List<PilotDef>();
+                
+                if (RngStart.Settings.StartingRonin != null)
+                {
+                    var RoninRandomizer = new List<string>();
+                    RoninRandomizer.AddRange(GetRandomSubList(RngStart.Settings.StartingRonin, RngStart.Settings.NumberRoninFromList));
+                    foreach (var roninID in RoninRandomizer)
+                    {
+                        var pilotDef = __instance.DataManager.PilotDefs.Get(roninID);
+
+                        // add directly to roster, don't want to get duplicate ronin from random ronin
+                        if (pilotDef != null)
+                            __instance.AddPilotToRoster(pilotDef, true);
+                    }
+                }
+
+                if (RngStart.Settings.NumberRandomRonin > 0)
+                {
+                    List<PilotDef> list2 = new List<PilotDef>(__instance.RoninPilots);
+                    for (int m = list2.Count - 1; m >= 0; m--)
+                    {
+                        for (int n = 0; n < __instance.PilotRoster.Count; n++)
+                        {
+                            if (list2[m].Description.Id == __instance.PilotRoster[n].Description.Id)
+                            {
+                                list2.RemoveAt(m);
+                                break;
+                            }
+                        }
+                    }
+                    list2.RNGShuffle<PilotDef>();
+                    for (int i = 0; i < RngStart.Settings.NumberRandomRonin; i++)
+                    {
+                        list.Add(list2[i]);
+                    }
+                }
+
+                if (RngStart.Settings.NumberProceduralPilots > 0)
+                {
+                    List<PilotDef> list3;
+                    List<PilotDef> collection = __instance.PilotGenerator.GeneratePilots(RngStart.Settings.NumberProceduralPilots, 1, 0f, out list3);
+                    list.AddRange(collection);
+                }
+                foreach (PilotDef def in list)
+                {
+                    __instance.AddPilotToRoster(def, true);
+                }
+            }
+    }
+
 }

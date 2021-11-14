@@ -16,6 +16,7 @@ namespace MechAffinity
     {
         internal static Logger modLog;
         internal static Settings settings;
+        internal static PilotSelectSettings pilotSelectSettings = new PilotSelectSettings();
         internal static string modDir;
         internal static readonly string AffinitiesDefinitionTypeName = "AffinitiesDef";
         public static void FinishedLoading(List<string> loadOrder, Dictionary<string, Dictionary<string, VersionManifestEntry>> customResources) {
@@ -74,6 +75,18 @@ namespace MechAffinity
             if (settings.Check($"{modDir}/settings.json")) {
                 File.WriteAllText($"{modDir}/settings.loaded.json",JsonConvert.SerializeObject(settings, Formatting.Indented));
                 settings = JsonConvert.DeserializeObject<Settings>(File.ReadAllText($"{modDir}/settings.loaded.json"));
+            }
+            try
+            {
+                using (StreamReader reader = new StreamReader($"{modDir}/pilotselectsettings.json"))
+                {
+                    string jdata = reader.ReadToEnd();
+                    pilotSelectSettings = JsonConvert.DeserializeObject<PilotSelectSettings>(jdata);
+                }
+            }
+            catch (Exception ex)
+            {
+                modLog.LogException(ex);
             }
 
             var harmony = HarmonyInstance.Create("ca.jwolf.MechAffinity");
