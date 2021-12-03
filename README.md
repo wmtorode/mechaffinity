@@ -32,7 +32,8 @@ example:
     "pqArgoAdditive" : true,
     "pqArgoMultiAutoAdjust" : true,
     "pqArgoMin" : 0.0,
-    "pqTooltipTags" : []
+    "pqTooltipTags" : [],
+    "enablePilotSelect" : false
 }
 ```
 
@@ -85,6 +86,8 @@ setting value will always be used
 `pqArgoMultiAutoAdjust` : when `true` auto normalize modifiers for the multiplicative model (by adding 1.0 to the modifier before its factored in) instead of directly applying the modifier
 
 `pqTooltipTags` : a list of `PilotTooltipTag` objects. These will be used for tooltips, this can be used for TBAS or for legacy functions of PilotQuirks for PilotFatigue support
+
+`enablePilotSelect` : when `true` allow set or random ronin to be part of the initial career start pilot roster. you must setup `Pilot Select Settings` in `pilotselectsettings.json` for this to work
 
 ### affinityLevel objects
 
@@ -291,3 +294,35 @@ Consumable tags follow this scheme `MaConsumableAffinity_X=prefabId` where X is 
 
 Example: Pilot Raza has been given the tag `MaConsumableAffinity_5=chrPrfMech_urbanmechBase-001_30` this means Raza has a 5 point boost added when using the chassis `chrPrfMech_urbanmechBase-001_30` (the UrbanMech),
 overtime this may decay if Raza decides to pilot another mech.
+
+## Pilot Select Settings
+
+These settings control how many of each type of pilot to include in the initial pilot roster for a career.
+
+**Note: This is a port of `https://github.com/BattletechModders/SelectPilots` to fix a conflict between the two mods, as such they will conflict when this is enabled**
+
+```json
+{
+  "PossibleStartingRonin": [],
+  "RoninFromList": 0,
+  "ProceduralPilots": 4,
+  "RandomRonin": 4
+}
+```
+
+`PossibleStartingRonin` : a list of ronin pilot IDs that can be selected when drawing from the list
+
+example list for vanilla pilots: 
+```json
+[
+  "pilot_sim_starter_medusa",
+  "pilot_sim_starter_behemoth",
+  "pilot_sim_starter_dekker",
+  "pilot_sim_starter_glitch"
+]
+```
+
+`RoninFromList` : the number of ronin to randomly select from the list
+`RandomRonin` : the number of ronin to randomly select from the entire pool of ronin in the game
+`ProceduralPilots`: the number of procedural pilots to generate to fill out the rest of the roster
+
