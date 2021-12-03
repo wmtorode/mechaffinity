@@ -30,6 +30,8 @@ namespace MechAffinity.Data
         public bool pqArgoMultiAutoAdjust = true;
         public float pqArgoMin = 0.0f;
 
+        public bool enablePilotSelect = false;
+
         [JsonIgnore]
         private Dictionary<string, AffinityLevel> globalAffinities_dict = new Dictionary<string, AffinityLevel>();
         [JsonIgnore]

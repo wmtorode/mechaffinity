@@ -76,17 +76,21 @@ namespace MechAffinity
                 File.WriteAllText($"{modDir}/settings.loaded.json",JsonConvert.SerializeObject(settings, Formatting.Indented));
                 settings = JsonConvert.DeserializeObject<Settings>(File.ReadAllText($"{modDir}/settings.loaded.json"));
             }
-            try
+
+            if (settings.enablePilotSelect)
             {
-                using (StreamReader reader = new StreamReader($"{modDir}/pilotselectsettings.json"))
+                try
                 {
-                    string jdata = reader.ReadToEnd();
-                    pilotSelectSettings = JsonConvert.DeserializeObject<PilotSelectSettings>(jdata);
+                    using (StreamReader reader = new StreamReader($"{modDir}/pilotselectsettings.json"))
+                    {
+                        string jdata = reader.ReadToEnd();
+                        pilotSelectSettings = JsonConvert.DeserializeObject<PilotSelectSettings>(jdata);
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                modLog.LogException(ex);
+                catch (Exception ex)
+                {
+                    modLog.LogException(ex);
+                }
             }
 
             var harmony = HarmonyInstance.Create("ca.jwolf.MechAffinity");
