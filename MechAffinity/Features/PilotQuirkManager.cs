@@ -79,7 +79,7 @@ namespace MechAffinity
             }
             if (!companyStats.ContainsStatistic(PqMoraleModifierTracker))
             {
-                companyStats.AddStatistic<int>(PqMoraleTracker, 0);
+                companyStats.AddStatistic<int>(PqMoraleModifierTracker, 0);
                 moraleModInstanced = false;
             }
             Main.modLog.LogMessage($"Tracker Stat: {PqMechSkillTracker}, value: {companyStats.GetValue<float>(PqMechSkillTracker)}");
@@ -572,6 +572,13 @@ namespace MechAffinity
 
         public void resetMorale(SimGameState sim)
         {
+            // this can only happen on new career start
+            if (companyStats == null)
+            {
+                setCompanyStats(sim.CompanyStats);
+                forceMoraleInstanced();
+            }
+            
             int MoraleModifier = companyStats.GetValue<int>(PqMoraleModifierTracker);
             Main.modLog.LogMessage($"Reseting Morale, baseline {MoraleModifier}");
             if (sim.CurDropship == DropshipType.Argo)
@@ -596,8 +603,8 @@ namespace MechAffinity
             Main.modLog.LogMessage($"Morale, baseline + Argo {MoraleModifier}");
             MoraleModifier += sim.Constants.Story.StartingMorale;
             Main.modLog.LogMessage($"New Morale: {MoraleModifier}");
-            sim.CompanyStats.ModifyStat<int>("Mission", 0, "COMPANY_MonthlyStartingMorale", StatCollection.StatOperation.Set, MoraleModifier, -1, true);
-            sim.CompanyStats.ModifyStat<int>("Mission", 0, "Morale", StatCollection.StatOperation.Set, MoraleModifier, -1, true);
+            companyStats.ModifyStat<int>("Mission", 0, "COMPANY_MonthlyStartingMorale", StatCollection.StatOperation.Set, MoraleModifier, -1, true);
+            companyStats.ModifyStat<int>("Mission", 0, "Morale", StatCollection.StatOperation.Set, MoraleModifier, -1, true);
         }
     }
 }
