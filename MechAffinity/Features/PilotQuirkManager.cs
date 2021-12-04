@@ -19,10 +19,12 @@ namespace MechAffinity
         private const string PqAllArgoUpgrades = "PqAllArgoUpgrades";
         private const string PqMarkedTag = "PqMarked";
         private const string PqMarkedPrefix = "PqTagged_";
+        private const string PqMoraleModifierTracker = "PqMoraleModifierTracker";
         private static PilotQuirkManager _instance;
         private StatCollection companyStats;
         private Dictionary<string, PilotQuirk> quirks;
         private Dictionary<string, QuirkPool> quirkPools;
+        private bool moraleModInstanced;
 
         public static PilotQuirkManager Instance
         {
@@ -37,6 +39,7 @@ namespace MechAffinity
         public void initialize()
         {
             UidManager.reset();
+            moraleModInstanced = true;
             quirks = new Dictionary<string, PilotQuirk>();
             foreach (PilotQuirk pilotQuirk in Main.settings.pilotQuirks)
             {
@@ -74,9 +77,19 @@ namespace MechAffinity
             {
                 companyStats.AddStatistic<float>(PqMoraleTracker, 0.0f);
             }
+            if (!companyStats.ContainsStatistic(PqMoraleModifierTracker))
+            {
+                companyStats.AddStatistic<int>(PqMoraleTracker, 0);
+                moraleModInstanced = false;
+            }
             Main.modLog.LogMessage($"Tracker Stat: {PqMechSkillTracker}, value: {companyStats.GetValue<float>(PqMechSkillTracker)}");
             Main.modLog.LogMessage($"Tracker Stat: {PqMedSkillTracker}, value: {companyStats.GetValue<float>(PqMedSkillTracker)}");
             Main.modLog.LogMessage($"Tracker Stat: {PqMoraleTracker}, value: {companyStats.GetValue<float>(PqMoraleTracker)}");
+        }
+
+        public void forceMoraleInstanced()
+        {
+            moraleModInstanced = true;
         }
 
         private List<string> getPooledQuirks(QuirkPool pool)
@@ -288,21 +301,30 @@ namespace MechAffinity
         private void updateStat(string trackerStat, string cStat, float trackerValue)
         {
             int cValue = companyStats.GetValue<int>(cStat);
+            int MoraleMod = companyStats.GetValue<int>(PqMoraleModifierTracker);
+            bool updateMoraleMod = cStat == Morale;
             Main.modLog.LogMessage($"possible update to {cStat}, current {cValue}, tracker: {trackerValue}");
             int trackerInt = (int) trackerValue;
             trackerValue -= trackerInt;
             if (trackerInt != 0)
             {
                 cValue += trackerInt;
+                MoraleMod += trackerInt;
             }
             if (trackerValue < 0)
             {
                 cValue -= 1;
+                MoraleMod -= 1;
                 trackerValue = 1.0f + trackerValue;
             }
             Main.modLog.LogMessage($"Updating: {cStat} => {cValue}, tracker => {trackerValue}");
             companyStats.Set<int>(cStat, cValue);
             companyStats.Set<float>(trackerStat, trackerValue);
+            if (updateMoraleMod)
+            {
+                Main.modLog.LogMessage($"Updating: {PqMoraleModifierTracker} => {MoraleMod}");
+                companyStats.Set<int>(PqMoraleModifierTracker, MoraleMod);
+            }
         }
 
         private void proccessPilotStats(PilotDef def, bool isNew)
@@ -350,6 +372,33 @@ namespace MechAffinity
             proccessPilotStats(def, isNew);
             if (def.PilotTags.Contains(PqMarkedTag) && isNew)
             {
+                if (!moraleModInstanced)
+                {
+                    int currentMorale = companyStats.GetValue<int>(PqMoraleModifierTracker);
+                    bool updateMoraleMod = false;
+                    float modChange = 0.0f;
+                    
+                    List<PilotQuirk> pQuirks = getQuirks(def);
+                    foreach (PilotQuirk quirk in pQuirks)
+                    {
+                        foreach (QuirkEffect effect in quirk.quirkEffects)
+                        {
+                            if (effect.type == EQuirkEffectType.Morale)
+                            {
+
+                                modChange += effect.modifier;
+                                updateMoraleMod = true;
+                            }
+                        }
+                    }
+
+                    if (updateMoraleMod)
+                    {
+                        currentMorale += (int)modChange;
+                        Main.modLog.LogMessage($"Updating: {PqMoraleModifierTracker} => {currentMorale}");
+                        companyStats.Set<int>(PqMoraleModifierTracker, currentMorale);
+                    }
+                }
                 Main.modLog.LogMessage($"pilot {def.Description.Callsign} already marked, skipping");
                 return;
             }
@@ -519,6 +568,36 @@ namespace MechAffinity
             }
             if (Main.settings.debug) Main.modLog.DebugMessage($"Found cost factor multiplier: {ret}");
             return ret;
+        }
+
+        public void resetMorale(SimGameState sim)
+        {
+            int MoraleModifier = companyStats.GetValue<int>(PqMoraleModifierTracker);
+            Main.modLog.LogMessage($"Reseting Morale, baseline {MoraleModifier}");
+            if (sim.CurDropship == DropshipType.Argo)
+            {
+                foreach (ShipModuleUpgrade shipModuleUpgrade in sim.ShipUpgrades)
+                {
+                    foreach (SimGameStat stat in shipModuleUpgrade.Stats)
+                    {
+                        bool isNumeric = false;
+                        int modifier = 0;
+                        if (stat.name == Morale)
+                        {
+                            isNumeric = int.TryParse(stat.value, out modifier);
+                            if (isNumeric)
+                            {
+                                MoraleModifier += modifier;
+                            }
+                        }
+                    }
+                }
+            }
+            Main.modLog.LogMessage($"Morale, baseline + Argo {MoraleModifier}");
+            MoraleModifier += sim.Constants.Story.StartingMorale;
+            Main.modLog.LogMessage($"New Morale: {MoraleModifier}");
+            sim.CompanyStats.ModifyStat<int>("Mission", 0, "COMPANY_MonthlyStartingMorale", StatCollection.StatOperation.Set, MoraleModifier, -1, true);
+            sim.CompanyStats.ModifyStat<int>("Mission", 0, "Morale", StatCollection.StatOperation.Set, MoraleModifier, -1, true);
         }
     }
 }

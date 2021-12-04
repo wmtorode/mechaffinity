@@ -33,7 +33,8 @@ example:
     "pqArgoMultiAutoAdjust" : true,
     "pqArgoMin" : 0.0,
     "pqTooltipTags" : [],
-    "enablePilotSelect" : false
+    "enablePilotSelect" : false,
+    "enableMonthlyMoraleReset": false
 }
 ```
 
@@ -88,6 +89,8 @@ setting value will always be used
 `pqTooltipTags` : a list of `PilotTooltipTag` objects. These will be used for tooltips, this can be used for TBAS or for legacy functions of PilotQuirks for PilotFatigue support
 
 `enablePilotSelect` : when `true` allow set or random ronin to be part of the initial career start pilot roster. you must setup `Pilot Select Settings` in `pilotselectsettings.json` for this to work
+
+`enableMonthlyMoraleReset`: when `true` morale will be reset on the start of each month and then recalculated based on argo upgrades and pilot quirks
 
 ### affinityLevel objects
 

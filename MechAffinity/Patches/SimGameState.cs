@@ -39,6 +39,7 @@ namespace MechAffinity.Patches
                     // the commander is not part of the roster, so need to specifically call it.
                     PilotQuirkManager.Instance.proccessPilot(__instance.Commander.pilotDef, true);
                     __instance.Commander.FromPilotDef(__instance.Commander.pilotDef);
+                    PilotQuirkManager.Instance.forceMoraleInstanced();
                 }
         }
     }
@@ -53,6 +54,8 @@ namespace MechAffinity.Patches
             PilotAffinityManager.Instance.setDataManager(__instance.DataManager);
             
             PilotQuirkManager.Instance.setCompanyStats(__instance.CompanyStats);
+            // new career so this will be instanced automatically
+            PilotQuirkManager.Instance.forceMoraleInstanced();
             
             List<MechDef> mechs = __instance.DataManager.MechDefs.Select(pair => pair.Value).ToList();
             foreach (MechDef mech in mechs)
@@ -293,6 +296,19 @@ namespace MechAffinity.Patches
         public static void Postfix(SimGameState __instance)
         {
             PilotRandomizerManager.Instance.setStartingRonin(__instance);
+        }
+    }
+    
+    [HarmonyPatch(typeof(SimGameState), "OnNewQuarterBegin")]
+    public static class OnNewQuarterBeginSimGameStateBattleTechPatch
+    {
+        public static bool Prepare()
+        {
+            return Main.settings.enableMonthlyMoraleReset;
+        }
+        public static void Postfix(SimGameState __instance)
+        {
+            PilotQuirkManager.Instance.resetMorale(__instance);
         }
     }
 

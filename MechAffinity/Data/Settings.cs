@@ -31,6 +31,7 @@ namespace MechAffinity.Data
         public float pqArgoMin = 0.0f;
 
         public bool enablePilotSelect = false;
+        public bool enableMonthlyMoraleReset = false;
 
         [JsonIgnore]
         private Dictionary<string, AffinityLevel> globalAffinities_dict = new Dictionary<string, AffinityLevel>();
