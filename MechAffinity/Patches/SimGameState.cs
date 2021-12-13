@@ -311,5 +311,30 @@ namespace MechAffinity.Patches
             PilotQuirkManager.Instance.resetMorale(__instance);
         }
     }
+    
+    [HarmonyPatch(typeof(SimGameState), "AddMorale")]
+    public static class AddMoralePatch
+    {
+        public static bool Prepare()
+        {
+            return Main.settings.enableMonthlyMoraleReset;
+        }
+        public static bool Prefix(SimGameState __instance, int val, string sourceID)
+        {
+            if (sourceID == null)
+                sourceID = nameof (SimGameState);
+            if (__instance.CompanyStats.ContainsStatistic("Morale"))
+                __instance.CompanyStats.ModifyStat<int>(sourceID, 0, "Morale", StatCollection.StatOperation.Int_Add, val);
+            else
+            {
+                __instance.CompanyStats.AddStatistic<int>("Morale", val,
+                    new Statistic.Validator<int>(__instance.MinimumZeroMaximumFiftyValidator<int>));
+                //now that morale exists as a stat correctly set/calculate it
+                PilotQuirkManager.Instance.resetMorale(__instance);
+            }
+            __instance.RoomManager.RefreshDisplay();
+            return false;
+        }
+    }
 
 }
