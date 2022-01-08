@@ -55,6 +55,8 @@ namespace MechAffinity.Data
         public List<TaggedAffinity> taggedAffinities = new List<TaggedAffinity>();
 
         public List<PrefabOverride> prefabOverrides = new List<PrefabOverride>();
+        public List<AffinityGroup> affinityGroups = new List<AffinityGroup>();
+
     private static int unique_id_counter = 0;
     private static HashSet<string> used_unique_Ids = new HashSet<string>();
     public static string createId(string pattern) { return pattern.Replace(" ","_").Replace(".","_").Replace("!","_").Replace("!", "_").Replace("@", "_"); }

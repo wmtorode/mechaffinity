@@ -41,6 +41,7 @@ namespace MechAffinity
         private Dictionary<string, List<AffinityLevel>> quirkAffinities;
         private Dictionary<string, List<AffinityLevel>> taggedAffinities;
         private Dictionary<string, EIdType> overloads;
+        private Dictionary<string, string> remappedIds;
         private List<string> tagsWithAffinities;
         private DataManager dataManager = null;
 
@@ -66,6 +67,8 @@ namespace MechAffinity
             pilotStatMap = new Dictionary<string, List<string>>();
             pilotNoDeployStatMap = new Dictionary<string, List<string>>();
             overloads = new Dictionary<string, EIdType>();
+            remappedIds = new Dictionary<string, string>();
+            
             Main.modLog.LogMessage("chassisAffinities:"+ Main.settings.chassisAffinities.Count);
             foreach (ChassisSpecificAffinity chassisSpecific in Main.settings.chassisAffinities)
             {
@@ -160,6 +163,13 @@ namespace MechAffinity
                 levelDescriptors[affinityLevel.levelName] = new DescriptionHolder(affinityLevel.levelName, affinityLevel.decription, affinityLevel.missionsRequired);
             }
             levelDescriptors[MaNoAffinity] = new DescriptionHolder(MaNoAffinity, "", 0);
+            foreach (AffinityGroup affinityGroup in Main.settings.affinityGroups)
+            {
+                foreach (string id in affinityGroup.assemblyGroup)
+                {
+                    remappedIds[id] = affinityGroup.affinityId;
+                }
+            }
         }
 
         public void addToChassisPrefabLut(MechDef mech)
@@ -263,7 +273,7 @@ namespace MechAffinity
             return $"{MaDaysElapsedModStat}{pilotId}";
         }
 
-        private string getPrefabId(ChassisDef chassis, EIdType idType)
+        private string getPrefabIdInternal(ChassisDef chassis, EIdType idType)
         {
             if (idType == EIdType.ChassisId)
             {
@@ -280,7 +290,18 @@ namespace MechAffinity
             return $"{chassis.PrefabIdentifier}_{chassis.Tonnage}";
         }
 
-        private string getPrefabId(VehicleChassisDef chassis, EIdType idType)
+        private string getPrefabId(ChassisDef chassis, EIdType idType)
+        {
+            string prefab = getPrefabIdInternal(chassis, idType);
+            if (remappedIds.ContainsKey(prefab))
+            {
+                return remappedIds[prefab];
+            }
+
+            return prefab;
+        }
+
+        private string getPrefabIdInternal(VehicleChassisDef chassis, EIdType idType)
         {
             if (idType == EIdType.ChassisId)
             {
@@ -294,6 +315,17 @@ namespace MechAffinity
                 }
             #endif
             return $"{chassis.PrefabIdentifier}_{chassis.Tonnage}";
+        }
+        
+        private string getPrefabId(VehicleChassisDef chassis, EIdType idType)
+        {
+            string prefab = getPrefabIdInternal(chassis, idType);
+            if (remappedIds.ContainsKey(prefab))
+            {
+                return remappedIds[prefab];
+            }
+
+            return prefab;
         }
 
         private string getPrefabId(VehicleDef vehicle, EIdType idType)

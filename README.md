@@ -26,6 +26,7 @@ example:
     "chassisAffinities" : [],
     "quirkAffinities" : [],
     "taggedAffinities" : [],
+    "affinityGroups" : [],
     "pilotQuirks" : [],
     "quirkPools" : [],
     "playerQuirkPools" : false,
@@ -73,6 +74,8 @@ setting value will always be used
 `quirkAffinities` : a list of `QuirkAffinity` objects. These apply only to pilots-chassis combos equiped with the defined gear that are called out by the affinity. Note these are additive with all other affinities.
 
 `taggedAffinities` : a list of `TaggedAffinity` objects. These will only apply to pilot-chassis combos that are called out by the affinity, when the pilot has the specificed tag. Note these are additive with all other affinities.
+
+`affinityGroups` : a list of `AffinityGroup` objects. These allow you to treat a group of prefabs/assembly IDs as a single ID
 
 `pilotQuirks` : a list of `PilotQuirk` objects. These will only be used if `enablePilotQuirks` is set to `true`
 
@@ -179,6 +182,20 @@ setting value will always be used
 `affinityLevels` : a list of `affinityLevel` objects to be considered for this affinity
 
 `idType` : where the chassisNames are prefab ids or chassis IDs. possible values `AssemblyVariant` (the default) or `ChassisId`
+
+### AffinityGroup objects
+
+affinity groups allow you to re-map prefab ids to be treated as one specific ID
+
+```json
+{
+  "affinityId" : "",
+  "assemblyGroup" : []
+}
+```
+
+`affinityId` : the ID you want the mentioned IDs to be mapped to. this is the ID you should use in affinities you want to assign
+`assemblyGroup` : the prefab/assemblyvariants you want to be remapped to the `affinityId`
 
 ### PilotQuirk objects
 
