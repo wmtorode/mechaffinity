@@ -57,6 +57,7 @@ namespace MechAffinity
 
         public void initialize()
         {
+            if(hasInitialized) return;
             chassisAffinities = new Dictionary<string, List<AffinityLevel>>();
             quirkAffinities = new Dictionary<string, List<AffinityLevel>>();
             taggedAffinities = new Dictionary<string, List<AffinityLevel>>();
@@ -92,8 +93,6 @@ namespace MechAffinity
                         affinityLevel.effects.Add(effectData);
                     }
                 }
-
-                hasInitialized = true;
             }
             Main.modLog.LogMessage("taggedAffinities:" + Main.settings.taggedAffinities.Count);
             foreach (TaggedAffinity tagged in Main.settings.taggedAffinities)
@@ -170,6 +169,7 @@ namespace MechAffinity
                     remappedIds[id] = affinityGroup.affinityId;
                 }
             }
+            hasInitialized = true;
         }
 
         public void addToChassisPrefabLut(MechDef mech)

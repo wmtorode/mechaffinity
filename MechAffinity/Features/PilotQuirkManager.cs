@@ -38,6 +38,7 @@ namespace MechAffinity
 
         public void initialize()
         {
+            if(hasInitialized) return;
             UidManager.reset();
             moraleModInstanced = true;
             quirks = new Dictionary<string, PilotQuirk>();
