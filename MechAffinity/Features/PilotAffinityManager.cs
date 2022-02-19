@@ -338,6 +338,10 @@ namespace MechAffinity
             #if USE_CS_CC && USE_LT
                 if (mech.IsVehicle())
                 {
+                    if (dataManager == null)
+                    {
+                        return null;
+                    }
                     VehicleDef vehicle = dataManager.VehicleDefs.Get(mech.Description.Id);
                     return getPrefabId(vehicle, idType);
                 }
