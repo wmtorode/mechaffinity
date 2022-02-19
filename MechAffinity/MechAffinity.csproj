@@ -115,6 +115,7 @@
     <Compile Include="Features\PilotRandomizerManager.cs" />
     <Compile Include="Features\UidManager.cs" />
     <Compile Include="Main.cs" />
+    <Compile Include="Patches\AbstractActor.cs" />
     <Compile Include="Patches\AttackSequence.cs" />
     <Compile Include="Patches\MechDetails.cs" />
     <Compile Include="Patches\MechLabStockInfoPopup.cs" />

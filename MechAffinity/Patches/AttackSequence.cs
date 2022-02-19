@@ -15,7 +15,7 @@ namespace MechAffinity.Patches
     [HarmonyPatch(typeof(AttackDirector.AttackSequence), "get_IsBreachingShot")]
     class AttackSequence_IsBreachingShot
     {
-        private const string superBreachingShot = "SuperPrecisionShot";
+        public static readonly string superBreachingShot = "SuperPrecisionShot";
         public static void Postfix(AttackDirector.AttackSequence __instance, ref bool __result)
         {
             if (!__result)
