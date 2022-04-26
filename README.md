@@ -16,6 +16,7 @@ example:
     "decayByModulo" : false,
     "defaultDaysBeforeSimDecay" : -1,
     "topAffinitiesInTooltipCount" : 3,
+    "showRemainingAffinitiesSummary" : false,
     "showQuirks" : false,
     "showDescriptionsOnChassis" : false,
     "trackSimDecayByStat" : true,
@@ -58,6 +59,8 @@ manipulate this value by changing the company stat `MaSimDaysDecayModulator`. se
 setting value will always be used
 
 `topAffinitiesInTooltipCount` : the number of mechs to show affinity about in the pilot tooltip, if the pilot has affinities with more mechs than this, mechs with the fewest affinities will be dropped from display
+
+`showRemainingAffinitiesSummary` : if true, instead of dropping any mech affinities that are beyond the `topAffinitiesInTooltipCount` a one line summary for the affinity will be shown.
 
 `showQuirks` : when true, quirk affinities that are assiocated with a mech will be shown in the mechbay description of the mech in addition to any chassis specific affinities
 
