@@ -915,17 +915,7 @@ namespace MechAffinity
                                 affinites[level] = new List<string>();
                             }
 
-                            if (prefabOverrides.ContainsKey(chassisId))
-                            {
-                                chassisName = prefabOverrides[chassisId];
-                            }
-                            else
-                            {
-                                if (chassisPrefabLut.ContainsKey(chassisId))
-                                {
-                                    chassisName = chassisPrefabLut[chassisId];
-                                }
-                            }
+                            chassisName = getChassisName(chassisId);
 
                             affinites[level].Add(chassisName);
                         }
@@ -946,72 +936,66 @@ namespace MechAffinity
 
         public string getPilotToolTip(Pilot pilot)
         {
-
-            
-
             if (pilot != null)
             {
-
-                Dictionary<string, int> chassisValues = new Dictionary<string, int>();
                 int chassisCountToShow = 0;
-                List<KeyValuePair<string, int>> sortedCounts = new List<KeyValuePair<string, int>>();
-
 
                 addToMapIfNeeded(pilot);
                 string pilotId = pilot.pilotDef.Description.Id;
-                Dictionary<string, List<string>> affinites = new Dictionary<string, List<string>>();
+                var chassisLevels = new List<ChassisLevel>();
+
                 if (pilotStatMap.ContainsKey(pilotId))
                 {
+
                     foreach (string chassisId in pilotStatMap[pilotId])
                     {
-                        chassisValues[chassisId] = getDeploymentCountWithMech(pilot, chassisId);
+
+                        ChassisLevel chassisLevel = new ChassisLevel();
+                        chassisLevel.ChassisId = chassisId;
+                        chassisLevel.DeploymentCount = getDeploymentCountWithMech(pilot, chassisId);
+                        chassisLevel.ChassisName = getChassisName(chassisId);
+
+                        chassisLevels.Add(chassisLevel);
+
                     }
 
-                    chassisCountToShow = Math.Min(chassisValues.Count, Main.settings.topAffinitiesInTooltipCount);
-                    sortedCounts = chassisValues.Where(d=> d.Value > 0).OrderByDescending(d => d.Value).ToList();
+                    chassisCountToShow = Math.Min(chassisLevels.Count, Main.settings.topAffinitiesInTooltipCount);
 
-                    foreach (KeyValuePair<string,int> chassisValue in sortedCounts)
+                    chassisLevels = chassisLevels
+                        .Where(d => d.DeploymentCount > 0)
+                        .OrderByDescending(d => d.DeploymentCount)
+                        .ThenBy(d => d.ChassisName, StringComparer.OrdinalIgnoreCase)
+                        .ToList();
+
+                    foreach (ChassisLevel chassisLevel in chassisLevels)
                     {
                         List<string> levels;
 
-                        levels = getAllLevelsToolTip(pilot, chassisValue.Key);
-                        affinites[chassisValue.Key] = levels;
+                        levels = getAllLevelsToolTip(pilot, chassisLevel.ChassisId);
+
+                        chassisLevel.LevelTextLines = levels;
                     }
                 }
 
                 string ret = "\n";
                 int loop = 0;
 
+                    
                 //Shows a one line summary for affinities beyond the top affinity count.
                 bool showAdditionalAffinities = Main.settings.showRemainingAffinitiesSummary;
 
-                foreach (KeyValuePair<string, List<string>> level in affinites)
+                foreach (ChassisLevel chassisLevel in chassisLevels)
                 {
-                    string chassisName = level.Key;
-                    if (prefabOverrides.ContainsKey(level.Key))
-                    {
-                        chassisName = prefabOverrides[level.Key];
-                    }
-                    else
-                    {
-                        if (chassisPrefabLut.ContainsKey(level.Key))
-                        {
-                            chassisName = chassisPrefabLut[level.Key];
-                        }
-                    }
-
-                    int deploymentCount = sortedCounts[loop].Value;
-
                     if (loop +1 <= chassisCountToShow)
                     {
-                        string unit = $"<b>{chassisName}</b>\n";
-                        string levels = string.Join("\n", level.Value);
+                        string unit = $"<b>{chassisLevel.ChassisName}</b>\n";
+                        string levels = string.Join("\n", chassisLevel.LevelTextLines);
                         unit += levels;
                         ret += unit + "\n\n";
                     }
                     else if(showAdditionalAffinities)
                     {
-                        string unit = $"<b>{chassisName}: ({deploymentCount})</b>\n";
+                        string unit = $"<b>{chassisLevel.ChassisName}: ({chassisLevel.DeploymentCount})</b>\n";
                         ret += unit;
                     }
 
@@ -1396,6 +1380,23 @@ namespace MechAffinity
 
             return ret;
         }
+
+        private string getChassisName(string chassisKey)
+        {
+            if (prefabOverrides.ContainsKey(chassisKey))
+            {
+                return prefabOverrides[chassisKey];
+            }
+            else if (chassisPrefabLut.ContainsKey(chassisKey))
+            {
+                return chassisPrefabLut[chassisKey];
+            }
+            else
+            {
+                return chassisKey;
+            }
+        }
+
 
     }
 
