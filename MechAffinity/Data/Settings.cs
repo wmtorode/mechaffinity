@@ -27,7 +27,7 @@ namespace MechAffinity.Data
         /// <summary>
         /// For any mech affinities beyond the topAffinitiesInTooltipCount, show a one line summary.
         /// </summary>
-        public bool showRemainingAffinitiesSummary = false;
+        public bool showRemainingAffinitiesSummary = true;
 
         public bool enablePilotQuirks = false;
         public bool playerQuirkPools = false;
