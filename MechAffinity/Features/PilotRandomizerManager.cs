@@ -33,10 +33,10 @@ namespace MechAffinity
             while (randomizeMe.Count < number)
                 randomizeMe.AddRange(list);
             
-            var randomized = randomizeMe.OrderBy(item => rng.Next());
+            var randomized = randomizeMe.OrderBy(item => rng.Next()).ToList();
             
             for (var i = 0; i < number; i++)
-                subList.Add(randomizeMe[i]);
+                subList.Add(randomized[i]);
 
             return subList;
         }

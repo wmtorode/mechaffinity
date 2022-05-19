@@ -48,6 +48,7 @@ namespace MechAffinity
                     }
                 }
             }
+            settings.InitLookups();
             try {
                 PilotAffinityManager.Instance.initialize();
                 PilotQuirkManager.Instance.initialize();
@@ -76,6 +77,7 @@ namespace MechAffinity
                 File.WriteAllText($"{modDir}/settings.loaded.json",JsonConvert.SerializeObject(settings, Formatting.Indented));
                 settings = JsonConvert.DeserializeObject<Settings>(File.ReadAllText($"{modDir}/settings.loaded.json"));
             }
+            settings.InitLookups();
 
             if (settings.enablePilotSelect)
             {

@@ -16,7 +16,7 @@ namespace MechAffinity.Patches
     [HarmonyPatch(typeof(SGBarracksRosterSlot), "Refresh")]
     public static class SGBarracksRosterSlot_Refresh_Patch
     {
-        public static void Postfix(SGBarracksRosterSlot __instance)
+        public static void Postfix(SGBarracksRosterSlot __instance, UIColorRefTracker ___pilotTypeBackground)
         {
             if (__instance.Pilot == null)
                 return;
@@ -35,6 +35,18 @@ namespace MechAffinity.Patches
                 if (pilot.pilotDef.PilotTags.Contains(pqTag.tag))
                 {
                     Desc += $"{pqTag.tooltipText}\n\n";
+                }
+            }
+
+            foreach (string tag in pilot.pilotDef.PilotTags)
+            {
+                Main.modLog.LogMessage($"checking tag: {tag}: {Main.settings.iconColoursMap.ContainsKey(tag)}");
+                if (Main.settings.iconColoursMap.ContainsKey(tag))
+                {
+                    Main.modLog.LogMessage("Setting Pilot Icon Colour!");
+                    ___pilotTypeBackground.SetUIColor(UIColor.Custom);
+                    ___pilotTypeBackground.OverrideWithColor(Main.settings.iconColoursMap[tag]);
+                    break;
                 }
             }
 

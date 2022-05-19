@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace MechAffinity.Data
 {
@@ -43,6 +44,8 @@ namespace MechAffinity.Data
         private Dictionary<string, TaggedAffinity> taggedAffinities_dict = new Dictionary<string, TaggedAffinity>();
         [JsonIgnore]
         private Dictionary<string, PilotQuirk> pilotQuirks_dict = new Dictionary<string, PilotQuirk>();
+        [JsonIgnore]
+        public Dictionary<string, Color> iconColoursMap = new Dictionary<string, Color>();
 
 
         public List<QuirkPool> quirkPools = new List<QuirkPool>();
@@ -56,6 +59,7 @@ namespace MechAffinity.Data
 
         public List<PrefabOverride> prefabOverrides = new List<PrefabOverride>();
         public List<AffinityGroup> affinityGroups = new List<AffinityGroup>();
+        public List<PilotIconColour> iconColours = new List<PilotIconColour>();
 
     private static int unique_id_counter = 0;
     private static HashSet<string> used_unique_Ids = new HashSet<string>();
@@ -70,6 +74,16 @@ namespace MechAffinity.Data
       };
       used_unique_Ids.Add(result);
       return result;
+    }
+
+    public void InitLookups()
+    {
+      foreach (PilotIconColour pilotIcon in iconColours)
+      {
+        iconColoursMap.Clear();
+        if (iconColoursMap.ContainsKey(pilotIcon.tag)) continue;
+        iconColoursMap.Add(pilotIcon.tag, pilotIcon.GetColor());
+      }
     }
     public void Merge_globalAffinities(List<AffinityLevel> add_globalAffinities) {
       foreach (AffinityLevel new_lvl in add_globalAffinities) {
