@@ -35,7 +35,8 @@ example:
     "pqArgoMin" : 0.0,
     "pqTooltipTags" : [],
     "enablePilotSelect" : false,
-    "enableMonthlyMoraleReset": false
+    "enableMonthlyMoraleReset": false,
+    "iconColours" : []
 }
 ```
 
@@ -94,6 +95,8 @@ setting value will always be used
 `enablePilotSelect` : when `true` allow set or random ronin to be part of the initial career start pilot roster. you must setup `Pilot Select Settings` in `pilotselectsettings.json` for this to work
 
 `enableMonthlyMoraleReset`: when `true` morale will be reset on the start of each month and then recalculated based on argo upgrades and pilot quirks
+
+`iconColours`: a list of `PilotIconColour` objects
 
 ### affinityLevel objects
 
@@ -289,6 +292,20 @@ This type is used to add or remove health from a pilot
 - `tag` : the tag that activates this tooltip text
 
 - `tooltipText` : the text for the tooltip, Note: a double new line will be automatically added to the end
+
+### PilotIconColour objects
+```json
+{
+  "colour" : "#f21c1c",
+  "tag" : "pilot_rtolegend"
+}
+```
+
+PilotIconColour objects allow you to change the pilot type's background colour to the specified colour, based on tags the pilot has. 
+*Note: if a pilot qualifies for multiple colour's only the first one will be applied*
+
+- `colour`: the colour to set the background to
+- `tag`: the tag the pilot must have to use this colour
 
 ## Giving AI Pilots Affinities
 
