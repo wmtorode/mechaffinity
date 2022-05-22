@@ -118,6 +118,7 @@
     <Compile Include="Main.cs" />
     <Compile Include="Patches\AbstractActor.cs" />
     <Compile Include="Patches\AttackSequence.cs" />
+    <Compile Include="Patches\Mech.cs" />
     <Compile Include="Patches\MechDetails.cs" />
     <Compile Include="Patches\MechLabStockInfoPopup.cs" />
     <Compile Include="Patches\SGBarracksRosterSlot.cs" />

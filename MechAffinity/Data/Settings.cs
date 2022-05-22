@@ -33,6 +33,8 @@ namespace MechAffinity.Data
 
         public bool enablePilotSelect = false;
         public bool enableMonthlyMoraleReset = false;
+        public bool pilotingMitigatesStabilityDmg = false;
+        public float stabilityDmgReductionPerPiloting = 0.02f;
 
         [JsonIgnore]
         private Dictionary<string, AffinityLevel> globalAffinities_dict = new Dictionary<string, AffinityLevel>();

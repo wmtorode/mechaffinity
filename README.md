@@ -36,7 +36,9 @@ example:
     "pqTooltipTags" : [],
     "enablePilotSelect" : false,
     "enableMonthlyMoraleReset": false,
-    "iconColours" : []
+    "iconColours" : [],
+    "pilotingMitigatesStabilityDmg" : false,
+    "stabilityDmgReductionPerPiloting" : 0.02
 }
 ```
 
@@ -97,6 +99,11 @@ setting value will always be used
 `enableMonthlyMoraleReset`: when `true` morale will be reset on the start of each month and then recalculated based on argo upgrades and pilot quirks
 
 `iconColours`: a list of `PilotIconColour` objects
+
+`pilotingMitigatesStabilityDmg`: when `true` enables 'Stable Piloting' features
+
+`stabilityDmgReductionPerPiloting` : when `pilotingMitigatesStabilityDmg` is `true` incoming stability damage is reduced by this value times the piloting skill of the pilot. for example, if 
+40 stability damage would be added and this value is `0.05` and the pilot has a piloting skill of 5, then the stability damage would be reduced by 25% (40 => 30)
 
 ### affinityLevel objects
 
