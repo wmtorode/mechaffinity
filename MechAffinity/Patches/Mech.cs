@@ -17,13 +17,12 @@ namespace MechAffinity.Patches
     {
         public static bool Prepare()
         {
-            return Main.settings.pilotingMitigatesStabilityDmg;
+            return Main.settings.enableStablePiloting;
         }
         
         public static void Prefix(Mech __instance, ref float amt)
         {
-            float pilotSkill = (float)__instance.pilot.Piloting;
-            amt *= 1f - (Main.settings.stabilityDmgReductionPerPiloting * pilotSkill);
+            amt *= StablePilotingManager.Instance.getStabilityModifier(__instance.pilot);
         }
     }
 }
