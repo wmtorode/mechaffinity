@@ -100,10 +100,9 @@ setting value will always be used
 
 `iconColours`: a list of `PilotIconColour` objects
 
-`pilotingMitigatesStabilityDmg`: when `true` enables 'Stable Piloting' features
+`enableStablePiloting`: when `true` enables 'Stable Piloting' features
 
-`stabilityDmgReductionPerPiloting` : when `pilotingMitigatesStabilityDmg` is `true` incoming stability damage is reduced by this value times the piloting skill of the pilot. for example, if 
-40 stability damage would be added and this value is `0.05` and the pilot has a piloting skill of 5, then the stability damage would be reduced by 25% (40 => 30)
+`stablePilotingSettings` : settings object for Stable Piloting
 
 ### affinityLevel objects
 
@@ -369,4 +368,45 @@ example list for vanilla pilots:
 `RoninFromList` : the number of ronin to randomly select from the list
 `RandomRonin` : the number of ronin to randomly select from the entire pool of ronin in the game
 `ProceduralPilots`: the number of procedural pilots to generate to fill out the rest of the roster
+
+## Stable Piloting Settings
+
+These settings control the 'Stable Piloting' feature set.
+
+Stable Piloting allows for various modifications to stability damage taken by pilots.
+
+```json
+{
+  "reductionPerPiloting" : 0.02,
+  "increasePerInjury" : 0.05,
+  "InverseMax" : 20,
+  "tagEffects" : []
+}
+```
+
+`reductionPerPiloting`: the reduction of stability damage taken, per point of Piloting of a pilot. default setting is 2% reduction per level.
+`increasePerInjury`: the increase of stability damage taken, per injury on a pilot.
+`InverseMax`: The maximum Piloting skill level to use for Inverse tag effects. default is 20
+`tagEffects`: a list of `PilotTagStabilityEffect` objects
+
+### PilotTagStabilityEffect Objects
+
+These objects define stability reductions or penalties for pilots possessing matching tags. A pilot with multiple matching tags will receive the benefits (or penalties) for all applicable tags.
+
+```json
+{
+  "tag" : "pilot_klutz",
+  "effect": 0.01,
+  "type" : "Piloting"
+}
+```
+
+`tag`: the pilot tag required to apply this effect
+`effect`: the magnitude for this effect. Note that exactly how this is applied is based on the type. a positive value is a penalty (increase in stability damage taken), a negative is a boost (reduction in stability damage taken)
+
+`type`: This determines how `effect` is apllied. Valid values for this field are:
+- `Flat`: the default value, the magnitude of this effect is simply the value of `effect`
+- `Piloting` : the magnitude of this effect is the `effect` value multiplied by the Piloting skill of the pilot.
+- `PilotingInverse` : the magnitude of this effect is the `effect` value multiplied by the `InverseMax` minus the Piloting skill of the pilot. When piloting reaches the Inverse Max or greater, this effect will become 0. This mode is best used to reduce a penalty as Piloting Skill grows.
+
 
