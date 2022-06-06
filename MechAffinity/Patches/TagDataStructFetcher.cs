@@ -21,7 +21,8 @@ namespace MechAffinity.Patches
             string desc;
             if (PilotQuirkManager.Instance.lookUpQuirkDescription(id, out desc))
             {
-                __result.DescriptionTag += "\n\n" + desc;
+                if (!string.IsNullOrEmpty(__result.DescriptionTag)) __result.DescriptionTag += "\n\n";
+                __result.DescriptionTag += desc;
             }
         }
     }
