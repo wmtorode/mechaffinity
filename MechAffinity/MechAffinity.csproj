@@ -49,21 +49,27 @@
   <ItemGroup>
     <Reference Include="0Harmony">
       <HintPath>D:\SteamLibrary\steamapps\common\BATTLETECH\Mods\ModTek\0Harmony.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>D:\SteamLibrary\steamapps\common\BATTLETECH\BattleTech_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="CustomComponents">
       <HintPath>S:\SteamLibrary\steamapps\common\BATTLETECH\Mods\CustomComponents\CustomComponents.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="CustomSalvage">
       <HintPath>S:\SteamLibrary\steamapps\common\BATTLETECH\Mods\CustomSalvage\CustomSalvage.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="LewdableTanks, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>D:\RtMasterCache\RtCache\LewdableTanks\LewdableTanks.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>D:\SteamLibrary\steamapps\common\BATTLETECH\BattleTech_Data\Managed\Newtonsoft.Json.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -76,18 +82,22 @@
     <Reference Include="Unity.TextMeshPro, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>S:\SteamLibrary\steamapps\common\BATTLETECH\BattleTech_Data\Managed\Unity.TextMeshPro.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>S:\SteamLibrary\steamapps\common\BATTLETECH\BattleTech_Data\Managed\UnityEngine.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>S:\SteamLibrary\steamapps\common\BATTLETECH\BattleTech_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>S:\SteamLibrary\steamapps\common\BATTLETECH\BattleTech_Data\Managed\UnityEngine.UI.dll</HintPath>
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
