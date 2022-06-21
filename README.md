@@ -38,7 +38,8 @@ example:
     "enableMonthlyMoraleReset": false,
     "iconColours" : [],
     "pilotingMitigatesStabilityDmg" : false,
-    "stabilityDmgReductionPerPiloting" : 0.02
+    "stabilityDmgReductionPerPiloting" : 0.02,
+    "addTags" : []
 }
 ```
 
@@ -103,6 +104,8 @@ setting value will always be used
 `enableStablePiloting`: when `true` enables 'Stable Piloting' features
 
 `stablePilotingSettings` : settings object for Stable Piloting
+
+`addTags` : a list of pilot tags. When Quirks are enabled, these tags will be automatically added to any pilot in your roster
 
 ### affinityLevel objects
 

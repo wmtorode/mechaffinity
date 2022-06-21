@@ -62,6 +62,7 @@ namespace MechAffinity.Data
         public List<PrefabOverride> prefabOverrides = new List<PrefabOverride>();
         public List<AffinityGroup> affinityGroups = new List<AffinityGroup>();
         public List<PilotIconColour> iconColours = new List<PilotIconColour>();
+        public List<String> addTags = new List<string>();
 
     private static int unique_id_counter = 0;
     private static HashSet<string> used_unique_Ids = new HashSet<string>();

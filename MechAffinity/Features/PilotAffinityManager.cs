@@ -1120,7 +1120,10 @@ namespace MechAffinity
         private void getDeploymentBonus(AbstractActor actor, out Dictionary<EAffinityType, int> bonuses, out List<EffectData> effects)
         {
             int deployCount = getDeploymentCountWithMech(actor);
+            Main.modLog.LogMessage($"Pilot Natural Affinity: {deployCount}");
+            deployCount += getPilotDeployBonusByTag(actor);
             string chassisPrefab = getPrefabId(actor, EIdType.ChassisId);
+            Main.modLog.LogMessage($"Pilot Total Affinity: {deployCount}");
             if (String.IsNullOrEmpty(chassisPrefab))
             {
                 Main.modLog.LogMessage("Null Prefab on player unit!!");

@@ -367,10 +367,26 @@ namespace MechAffinity
             }
         }
 
+        private void processAdditionalTags(PilotDef def, bool isNew)
+        {
+            if (!isNew) return;
+            List<string> tags = def.PilotTags.ToList();
+            foreach (string tag in Main.settings.addTags)
+            {
+                if (!tags.Contains(tag))
+                {
+                    def.PilotTags.Add(tag);
+                    Main.modLog.LogMessage($"Adding Tag: {tag} to {def.Description.Callsign}");
+                }
+            }
+            
+        }
+
         public void proccessPilot(PilotDef def, bool isNew)
         {
             Main.modLog.LogMessage($"processing pilot: {def.Description.Callsign}");
             proccessPilotStats(def, isNew);
+            processAdditionalTags(def, isNew);
             if (def.PilotTags.Contains(PqMarkedTag) && isNew)
             {
                 if (!moraleModInstanced)
