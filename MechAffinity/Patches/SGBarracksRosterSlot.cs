@@ -51,7 +51,7 @@ namespace MechAffinity.Patches
             }
 
             Desc += PilotQuirkManager.Instance.getPilotToolTip(pilot);
-            Desc += "<b>Pilot Affinities:</b>\n\n";
+            Desc += "<b>Pilot Affinities:</b>\n";
             Desc += PilotAffinityManager.Instance.getPilotToolTip(pilot);
 
             var descriptionDef = new BaseDescriptionDef("Tags", pilot.Callsign, Desc, null);

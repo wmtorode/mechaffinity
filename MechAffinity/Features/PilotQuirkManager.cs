@@ -186,11 +186,13 @@ namespace MechAffinity
             if (pilot != null && Main.settings.enablePilotQuirks)
             {
                 List<PilotQuirk> pilotQuirks = getQuirks(pilot);
-                ret = "\n";
                 foreach (PilotQuirk quirk in pilotQuirks)
                 {
-                    ret += $"<b>{quirk.quirkName}</b>:\n{quirk.description}\n\n";
+                    if (quirk.quirkName.Length > 0 && quirk.description.Length > 0)
+                        ret += $"<b>{quirk.quirkName}</b>:\n{quirk.description}\n\n";
                 }
+                if (ret.Length > 0)
+                    ret += "\n";
             }
 
             return ret;
@@ -205,7 +207,8 @@ namespace MechAffinity
                 List<PilotQuirk> pilotQuirks = getQuirks(pilot);
                 foreach (PilotQuirk quirk in pilotQuirks)
                 {
-                    ret += $"<b>{quirk.quirkName}:</b>{quirk.description}\n\n";
+                    if (quirk.quirkName.Length > 0 && quirk.description.Length > 0)
+                        ret += $"<b>{quirk.quirkName}:</b>{quirk.description}\n\n";
                 }
             }
 
@@ -221,7 +224,8 @@ namespace MechAffinity
                 List<PilotQuirk> pilotQuirks = getQuirks(pilot);
                 foreach (PilotQuirk quirk in pilotQuirks)
                 {
-                    ret += $"{quirk.quirkName}\n\n{quirk.description}\n\n";
+                    if (quirk.quirkName.Length > 0 && quirk.description.Length > 0)
+                        ret += $"{quirk.quirkName}\n\n{quirk.description}\n\n";
                 }
             }
 
