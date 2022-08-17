@@ -32,7 +32,9 @@ namespace MechAffinity.Patches
             {
                 Pilot pilot = playerUnitResult.pilot;
                 PilotDef pilotDef = pilot.pilotDef;
-                if (!playerUnitResult.pilot.IsIncapacitated || PilotQuirkManager.Instance.isPilotImmortal(pilot))
+                bool immortal = PilotQuirkManager.Instance.isPilotImmortal(pilot);
+                Main.modLog.DebugMessage($"Pilot: {pilot.Callsign}, Immortal: {immortal}");
+                if (!playerUnitResult.pilot.IsIncapacitated || immortal)
                 {
                     pilotDef?.SetRecentInjuryDamageType(DamageType.NOT_SET);
                 }

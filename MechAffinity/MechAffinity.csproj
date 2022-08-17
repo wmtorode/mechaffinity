@@ -101,6 +101,7 @@
     <Compile Include="Data\EQuirkEffectType.cs" />
     <Compile Include="Data\EStabilityEffectType.cs" />
     <Compile Include="Data\Logger.cs" />
+    <Compile Include="Data\PilotDelayedEffects.cs" />
     <Compile Include="Data\PilotIconColour.cs" />
     <Compile Include="Data\PilotQuirk.cs" />
     <Compile Include="Data\PilotSelectSettings.cs" />
