@@ -536,6 +536,30 @@ namespace MechAffinity
             }
         }
 
+        public bool isPilotImmortal(PilotDef pilotDef)
+        {
+            if (pilotDef.IsImmortal) return true;
+            
+            List<PilotQuirk> pilotQuirks = getQuirks(pilotDef);
+            foreach (PilotQuirk quirk in pilotQuirks)
+            {
+                foreach (QuirkEffect effect in quirk.quirkEffects)
+                {
+                    if (effect.type == EQuirkEffectType.Immortality)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        public bool isPilotImmortal(Pilot pilot)
+        {
+            return isPilotImmortal(pilot.pilotDef);
+        }
+
         public float getArgoUpgradeCostModifier(List<Pilot> pilots, string upgradeId, bool upkeep)
         {
             float ret = 1.0f;
