@@ -17,7 +17,7 @@ namespace MechAffinity.Data
       public bool Check(string filename) {
         bool result = false;
         foreach (AffinityLevel lvl in this.affinityLevels) {
-          if (string.IsNullOrEmpty(lvl.id)) { result = true; lvl.id = Settings.createUniqueId(lvl.levelName); }
+          if (string.IsNullOrEmpty(lvl.id)) { result = true; lvl.id = LegacySettings.createUniqueId(lvl.levelName); }
           if (affinityLevels_dict.ContainsKey(lvl.id)) { throw new Exception("AffinityLevel id duplication detected " + lvl.id + " in file " + filename); }
           affinityLevels_dict.Add(lvl.id, lvl);
         }

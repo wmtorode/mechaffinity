@@ -13,7 +13,7 @@ namespace MechAffinity.Patches
     {
         public static bool Prepare()
         {
-            return Main.settings.enablePilotQuirks;
+            return Main.legacySettings.enablePilotQuirks;
         }
         public static void Postfix(string id, TagDataStruct __result)
         {

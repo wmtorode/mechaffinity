@@ -29,7 +29,7 @@ namespace MechAffinity.Patches
                     PilotAffinityManager.Instance.addToChassisPrefabLut(mech);
                 }
 
-                if (Main.settings.enablePilotQuirks)
+                if (Main.legacySettings.enablePilotQuirks)
                 {
                     foreach (Pilot pilot in __instance.PilotRoster.ToList())
                     {
@@ -70,7 +70,7 @@ namespace MechAffinity.Patches
     {
         public static bool Prepare()
         {
-            return Main.settings.enablePilotQuirks;
+            return Main.legacySettings.enablePilotQuirks;
         }
         public static void Postfix(SimGameState __instance, Pilot p)
         {
@@ -84,7 +84,7 @@ namespace MechAffinity.Patches
     {
         public static bool Prepare()
         {
-            return Main.settings.enablePilotQuirks;
+            return Main.legacySettings.enablePilotQuirks;
         }
         public static void Postfix(SimGameState __instance, Pilot p)
         {
@@ -132,7 +132,7 @@ namespace MechAffinity.Patches
                     __instance.RoomManager.ShipRoom.AddEventToast(new Text(string.Format("{0} affinities decayed!", (object)pilot.Callsign), (object[])Array.Empty<object>()));
                 }
 
-                if (Main.settings.enablePilotQuirks)
+                if (Main.legacySettings.enablePilotQuirks)
                 {
                     PilotQuirkManager.Instance.stealAmount(pilot, __instance);
                 }
@@ -145,7 +145,7 @@ namespace MechAffinity.Patches
     {
         public static bool Prepare()
         {
-            return Main.settings.enablePilotQuirks;
+            return Main.legacySettings.enablePilotQuirks;
         }
         public static void Postfix(SimGameState __instance, PilotDef def, ref int __result)
         {
@@ -161,7 +161,7 @@ namespace MechAffinity.Patches
     {
         public static bool Prepare()
         {
-            return Main.settings.enablePilotQuirks;
+            return Main.legacySettings.enablePilotQuirks;
         }
         public static void Postfix(SimGameState __instance, PilotDef def, ref int __result)
         {
@@ -176,7 +176,7 @@ namespace MechAffinity.Patches
     {
         public static bool Prepare()
         {
-            return Main.settings.enablePilotQuirks;
+            return Main.legacySettings.enablePilotQuirks;
         }
         public static void Prefix(SimGameState __instance, PilotDef def, bool updatePilotDiscardPile = false)
         {
@@ -193,7 +193,7 @@ namespace MechAffinity.Patches
     {
         public static bool Prepare()
         {
-            return Main.settings.enablePilotQuirks;
+            return Main.legacySettings.enablePilotQuirks;
         }
         public static void Prefix(SimGameState __instance, Pilot p)
         {
@@ -231,7 +231,7 @@ namespace MechAffinity.Patches
         
         public static bool Prepare()
         {
-            return Main.settings.enablePilotQuirks;
+            return Main.legacySettings.enablePilotQuirks;
         }
         
         public static void Prefix(SimGameState __instance, bool refund)
@@ -262,7 +262,7 @@ namespace MechAffinity.Patches
     {
         public static bool Prepare()
         {
-            return Main.settings.enablePilotQuirks;
+            return Main.legacySettings.enablePilotQuirks;
         }
         
         public static bool Prefix(SimGameState __instance, EconomyScale expenditureLevel, bool proRate, int  ___ProRateRefund, ref int __result)
@@ -291,7 +291,7 @@ namespace MechAffinity.Patches
     {
         public static bool Prepare()
         {
-            return Main.settings.enablePilotSelect;
+            return Main.legacySettings.enablePilotSelect;
         }
         public static void Postfix(SimGameState __instance)
         {
@@ -304,7 +304,7 @@ namespace MechAffinity.Patches
     {
         public static bool Prepare()
         {
-            return Main.settings.enableMonthlyMoraleReset;
+            return Main.legacySettings.enableMonthlyMoraleReset;
         }
         public static void Postfix(SimGameState __instance)
         {
@@ -317,7 +317,7 @@ namespace MechAffinity.Patches
     {
         public static bool Prepare()
         {
-            return Main.settings.enableMonthlyMoraleReset;
+            return Main.legacySettings.enableMonthlyMoraleReset;
         }
         public static bool Prefix(SimGameState __instance, int val, string sourceID)
         {

@@ -111,7 +111,7 @@
     <Compile Include="Data\QuirkAffinity.cs" />
     <Compile Include="Data\QuirkEffect.cs" />
     <Compile Include="Data\QuirkPool.cs" />
-    <Compile Include="Data\Settings.cs" />
+    <Compile Include="Data\LegacySettings.cs" />
     <Compile Include="Data\StablePilotingSettings.cs" />
     <Compile Include="Data\TaggedAffinity.cs" />
     <Compile Include="Features\BaseEffectManager.cs" />

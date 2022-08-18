@@ -26,7 +26,7 @@ namespace MechAffinity
         {
             if(hasInitialized) return;
             tagEffects = new Dictionary<string, PilotTagStabilityEffect>();
-            settings = Main.settings.stablePilotingSettings;
+            settings = Main.legacySettings.stablePilotingSettings;
             foreach (PilotTagStabilityEffect tagEffect in settings.tagEffects)
             {
                 tagEffects.Add(tagEffect.tag, tagEffect);
