@@ -1,4 +1,5 @@
 using System.IO;
+using System.Linq;
 using Newtonsoft.Json;
 
 namespace MechAffinity.Data
@@ -16,62 +17,83 @@ namespace MechAffinity.Data
         
         
         //Helpers
-        internal static Settings FromLegacy(LegacySettings legacySettings)
+        private static string createId(string pattern) { return pattern.Replace(" ","_").Replace(".","_").Replace("\\","_").Replace("/","_").Replace("!","").Replace("@", "_").Replace("\"", "").Replace("(", "").Replace(")", ""); }
+        internal static Settings FromLegacy(LegacySettings legacySettings, string modDirectory)
         {
             Settings settings = new Settings();
 
             settings.debug = legacySettings.debug;
             settings.enablePilotSelect = legacySettings.enablePilotSelect;
 
-            System.IO.Directory.CreateDirectory("AffinityDefs");
-            foreach (var globalAffinity in legacySettings.globalAffinities)
+            if (!Directory.Exists($"{modDirectory}/AffinityDefs"))
             {
-                AffinityDef affinityDef = new AffinityDef()
-                {
-                    id = "AffinityDef_global_" + globalAffinity.id,
-                    affinityType = EAffinityDefType.Global
-                };
-                affinityDef.setAffinityData(globalAffinity);
-                File.WriteAllText($"AffinityDefs/{affinityDef.id}.json",JsonConvert.SerializeObject(settings, Formatting.Indented));
+                int counter = 0;
+                System.IO.Directory.CreateDirectory($"{modDirectory}/AffinityDefs");
                 
-            }
+                foreach (var globalAffinity in legacySettings.globalAffinities)
+                {
+                    AffinityDef affinityDef = new AffinityDef()
+                    {
+                        id = createId("AffinityDef_global_" + $"{globalAffinity.levelName}"),
+                        affinityType = EAffinityDefType.Global
+                    };
+                    if (File.Exists($"{modDirectory}/AffinityDefs/{affinityDef.id}.json"))
+                        affinityDef.id += $"_{counter}";
+                    counter++;
+                    affinityDef.setAffinityData(globalAffinity);
+                    File.WriteAllText($"{modDirectory}/AffinityDefs/{affinityDef.id}.json",
+                        JsonConvert.SerializeObject(affinityDef, Formatting.Indented));
 
-            int counter = 0;
-            foreach (var chassisAffinity in legacySettings.chassisAffinities)
-            {
-                AffinityDef affinityDef = new AffinityDef()
-                {
-                    id = "AffinityDef_chassis_" + chassisAffinity.id,
-                    affinityType = EAffinityDefType.Chassis
-                };
-                counter++;
-                affinityDef.setAffinityData(chassisAffinity);
-                File.WriteAllText($"AffinityDefs/{affinityDef.id}.json",JsonConvert.SerializeObject(settings, Formatting.Indented));
+                }
                 
-            }
-            foreach (var quirkAffinity in legacySettings.quirkAffinities)
-            {
-                AffinityDef affinityDef = new AffinityDef()
+                foreach (var chassisAffinity in legacySettings.chassisAffinities)
                 {
-                    id = "AffinityDef_quirk_" + quirkAffinity.id,
-                    affinityType = EAffinityDefType.Quirk
-                };
-                counter++;
-                affinityDef.setAffinityData(quirkAffinity);
-                File.WriteAllText($"AffinityDefs/{affinityDef.id}.json",JsonConvert.SerializeObject(settings, Formatting.Indented));
-                
-            }
-            foreach (var taggedAffinity in legacySettings.taggedAffinities)
-            {
-                AffinityDef affinityDef = new AffinityDef()
+                    AffinityDef affinityDef = new AffinityDef()
+                    {
+                        id = createId("AffinityDef_chassis_" + $"{chassisAffinity.affinityLevels.First().levelName}"),
+                        affinityType = EAffinityDefType.Chassis
+                    };
+                    Main.modLog.LogMessage($"{affinityDef.id}");
+                    if (File.Exists($"{modDirectory}/AffinityDefs/{affinityDef.id}.json"))
+                        affinityDef.id += $"_{counter}";
+                    counter++;
+                    affinityDef.setAffinityData(chassisAffinity);
+                    File.WriteAllText($"{modDirectory}/AffinityDefs/{affinityDef.id}.json",
+                        JsonConvert.SerializeObject(affinityDef, Formatting.Indented));
+
+                }
+
+                foreach (var quirkAffinity in legacySettings.quirkAffinities)
                 {
-                    id = "AffinityDef_tagged_" + taggedAffinity.id,
-                    affinityType = EAffinityDefType.Tag
-                };
-                counter++;
-                affinityDef.setAffinityData(taggedAffinity);
-                File.WriteAllText($"AffinityDefs/{affinityDef.id}.json",JsonConvert.SerializeObject(settings, Formatting.Indented));
-                
+                    AffinityDef affinityDef = new AffinityDef()
+                    {
+                        id = createId("AffinityDef_quirk_" + $"{quirkAffinity.affinityLevels.First().levelName}"),
+                        affinityType = EAffinityDefType.Quirk
+                    };
+                    if (File.Exists($"{modDirectory}/AffinityDefs/{affinityDef.id}.json"))
+                        affinityDef.id += $"_{counter}";
+                    counter++;
+                    affinityDef.setAffinityData(quirkAffinity);
+                    File.WriteAllText($"{modDirectory}/AffinityDefs/{affinityDef.id}.json",
+                        JsonConvert.SerializeObject(affinityDef, Formatting.Indented));
+
+                }
+
+                foreach (var taggedAffinity in legacySettings.taggedAffinities)
+                {
+                    AffinityDef affinityDef = new AffinityDef()
+                    {
+                        id = createId("AffinityDef_tagged_" + $"{taggedAffinity.affinityLevels.First().levelName}"),
+                        affinityType = EAffinityDefType.Tag
+                    };
+                    if (File.Exists($"{modDirectory}/AffinityDefs/{affinityDef.id}.json"))
+                        affinityDef.id += $"_{counter}";
+                    counter++;
+                    affinityDef.setAffinityData(taggedAffinity);
+                    File.WriteAllText($"{modDirectory}/AffinityDefs/{affinityDef.id}.json",
+                        JsonConvert.SerializeObject(affinityDef, Formatting.Indented));
+
+                }
             }
 
             return settings;

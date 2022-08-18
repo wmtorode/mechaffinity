@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace MechAffinity.Data
 {
     public class LeveledAffinity {
-      [JsonProperty(Order = -2)]
+      [JsonProperty(Order = -2, NullValueHandling = NullValueHandling.Ignore)]
       public string id;
       [JsonProperty(Order = -1)]
       public List<AffinityLevel> affinityLevels = new List<AffinityLevel>();

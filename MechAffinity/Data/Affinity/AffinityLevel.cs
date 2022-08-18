@@ -9,7 +9,7 @@ namespace MechAffinity.Data
     public class AffinityLevel
     {
 
-        [JsonProperty(Order = -1)]
+        [JsonProperty(Order = -1, NullValueHandling = NullValueHandling.Ignore)]
         public string id;
         public int missionsRequired = 0;
         public string levelName = "sample";
