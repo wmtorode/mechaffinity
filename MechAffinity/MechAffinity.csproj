@@ -91,15 +91,21 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Data\Affinity.cs" />
-    <Compile Include="Data\AffinityGroup.cs" />
-    <Compile Include="Data\AffinityLevel.cs" />
-    <Compile Include="Data\ChassisSpecificAffinity.cs" />
-    <Compile Include="Data\DescriptionHolder.cs" />
-    <Compile Include="Data\EAffinityType.cs" />
-    <Compile Include="Data\EIdType.cs" />
+    <Compile Include="Data\Affinity\Affinity.cs" />
+    <Compile Include="Data\Affinity\AffinityDef.cs" />
+    <Compile Include="Data\Affinity\AffinityGroup.cs" />
+    <Compile Include="Data\Affinity\AffinityLevel.cs" />
+    <Compile Include="Data\Affinity\ChassisSpecificAffinity.cs" />
+    <Compile Include="Data\Affinity\DescriptionHolder.cs" />
+    <Compile Include="Data\Affinity\EAffinityDefType.cs" />
+    <Compile Include="Data\Affinity\EAffinityType.cs" />
+    <Compile Include="Data\Affinity\EIdType.cs" />
+    <Compile Include="Data\Affinity\QuirkAffinity.cs" />
+    <Compile Include="Data\Affinity\TaggedAffinity.cs" />
     <Compile Include="Data\EQuirkEffectType.cs" />
     <Compile Include="Data\EStabilityEffectType.cs" />
+    <Compile Include="Data\Legacy\LegacyData.cs" />
+    <Compile Include="Data\Legacy\LegacySettings.cs" />
     <Compile Include="Data\Logger.cs" />
     <Compile Include="Data\PilotDelayedEffects.cs" />
     <Compile Include="Data\PilotIconColour.cs" />
@@ -108,12 +114,10 @@
     <Compile Include="Data\PilotTagStabilityEffect.cs" />
     <Compile Include="Data\PilotTooltipTag.cs" />
     <Compile Include="Data\PrefabOverride.cs" />
-    <Compile Include="Data\QuirkAffinity.cs" />
     <Compile Include="Data\QuirkEffect.cs" />
     <Compile Include="Data\QuirkPool.cs" />
-    <Compile Include="Data\LegacySettings.cs" />
+    <Compile Include="Data\Settings.cs" />
     <Compile Include="Data\StablePilotingSettings.cs" />
-    <Compile Include="Data\TaggedAffinity.cs" />
     <Compile Include="Features\BaseEffectManager.cs" />
     <Compile Include="Features\PilotAffinityManager.cs" />
     <Compile Include="Features\PilotQuirkManager.cs" />

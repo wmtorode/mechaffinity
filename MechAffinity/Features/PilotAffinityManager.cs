@@ -1241,7 +1241,7 @@ namespace MechAffinity
             {
                 getDeploymentBonus(actor, out bonuses, out effects);
             }
-            if (Main.legacySettings.debug)
+            if (Main.settings.debug)
             {
                 foreach (KeyValuePair<EAffinityType, int> bonus in bonuses)
                 {

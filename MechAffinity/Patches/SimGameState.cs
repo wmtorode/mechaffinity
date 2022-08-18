@@ -291,7 +291,7 @@ namespace MechAffinity.Patches
     {
         public static bool Prepare()
         {
-            return Main.legacySettings.enablePilotSelect;
+            return Main.settings.enablePilotSelect;
         }
         public static void Postfix(SimGameState __instance)
         {

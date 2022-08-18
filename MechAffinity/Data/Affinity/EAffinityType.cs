@@ -6,8 +6,11 @@ using System.Threading.Tasks;
 
 namespace MechAffinity.Data
 {
-    class TaggedAffinity: ChassisSpecificAffinity
+    public enum EAffinityType
     {
-        public string tag = "";
+        Tactics = 0,
+        Gunnery = 1,
+        Piloting = 2,
+        Guts = 3
     }
 }
