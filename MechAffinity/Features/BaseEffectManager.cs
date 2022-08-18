@@ -66,6 +66,7 @@ namespace MechAffinity
                                 {
                                     actor = actor,
                                     effect = statusEffect,
+                                    effectId = effectId,
                                     effectTargetType = statusEffect.targetingData.effectTargetType
                                 });
                                 break;
