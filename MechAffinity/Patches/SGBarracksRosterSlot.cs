@@ -30,7 +30,7 @@ namespace MechAffinity.Patches
                 Desc = "";
             }
             
-            foreach (PilotTooltipTag pqTag in Main.settings.pqTooltipTags)
+            foreach (PilotTooltipTag pqTag in Main.legacySettings.pqTooltipTags)
             {
                 if (pilot.pilotDef.PilotTags.Contains(pqTag.tag))
                 {
@@ -40,12 +40,12 @@ namespace MechAffinity.Patches
 
             foreach (string tag in pilot.pilotDef.PilotTags)
             {
-                Main.modLog.LogMessage($"checking tag: {tag}: {Main.settings.iconColoursMap.ContainsKey(tag)}");
-                if (Main.settings.iconColoursMap.ContainsKey(tag))
+                Main.modLog.LogMessage($"checking tag: {tag}: {Main.legacySettings.iconColoursMap.ContainsKey(tag)}");
+                if (Main.legacySettings.iconColoursMap.ContainsKey(tag))
                 {
                     Main.modLog.LogMessage("Setting Pilot Icon Colour!");
                     ___pilotTypeBackground.SetUIColor(UIColor.Custom);
-                    ___pilotTypeBackground.OverrideWithColor(Main.settings.iconColoursMap[tag]);
+                    ___pilotTypeBackground.OverrideWithColor(Main.legacySettings.iconColoursMap[tag]);
                     break;
                 }
             }

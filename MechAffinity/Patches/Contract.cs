@@ -22,7 +22,7 @@ namespace MechAffinity.Patches
         
         public static bool Prepare()
         {
-            return Main.settings.enablePilotQuirks;
+            return Main.legacySettings.enablePilotQuirks;
         }
         
         public static bool Prefix(Contract __instance, SimGameState sim)

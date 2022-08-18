@@ -17,7 +17,7 @@ namespace MechAffinity.Patches
       private static MethodInfo methodAddLineItem = AccessTools.Method(typeof(SGCaptainsQuartersStatusScreen), "AddListLineItem");
         public static bool Prepare()
         {
-            return Main.settings.enablePilotQuirks;
+            return Main.legacySettings.enablePilotQuirks;
         }
         
         public static bool Prefix(SGCaptainsQuartersStatusScreen __instance, EconomyScale expenditureLevel, bool showMoraleChange, SimGameState ___simState,

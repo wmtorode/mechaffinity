@@ -14,7 +14,7 @@ namespace MechAffinity.Patches
         
         public static bool Prepare()
         {
-            return Main.settings.enablePilotQuirks;
+            return Main.legacySettings.enablePilotQuirks;
         }
         
         public static void Prefix(SGShipModuleUpgradeViewPopulator __instance, ShipModuleUpgrade upgrade)

@@ -12,7 +12,7 @@ namespace MechAffinity.Patches
         private static string origDesc;
         public static bool Prepare()
         {
-            return Main.settings.enablePilotQuirks;
+            return Main.legacySettings.enablePilotQuirks;
         }
 
         public static void Prefix(Pilot p)

@@ -42,7 +42,7 @@ namespace MechAffinity
             UidManager.reset();
             moraleModInstanced = true;
             quirks = new Dictionary<string, PilotQuirk>();
-            foreach (PilotQuirk pilotQuirk in Main.settings.pilotQuirks)
+            foreach (PilotQuirk pilotQuirk in Main.legacySettings.pilotQuirks)
             {
                 foreach (JObject jObject in pilotQuirk.effectData)
                 {
@@ -54,7 +54,7 @@ namespace MechAffinity
                 quirks.Add(pilotQuirk.tag, pilotQuirk);
             }
             quirkPools = new Dictionary<string, QuirkPool>();
-            foreach (QuirkPool quirkPool in Main.settings.quirkPools)
+            foreach (QuirkPool quirkPool in Main.legacySettings.quirkPools)
             {
                 quirkPools.Add(quirkPool.tag, quirkPool);
             }
@@ -183,7 +183,7 @@ namespace MechAffinity
         {
             string ret = "";
 
-            if (pilot != null && Main.settings.enablePilotQuirks)
+            if (pilot != null && Main.legacySettings.enablePilotQuirks)
             {
                 List<PilotQuirk> pilotQuirks = getQuirks(pilot);
                 ret = "\n";
@@ -200,7 +200,7 @@ namespace MechAffinity
         {
             string ret = "\n\n";
 
-            if (pilot != null && Main.settings.enablePilotQuirks)
+            if (pilot != null && Main.legacySettings.enablePilotQuirks)
             {
                 List<PilotQuirk> pilotQuirks = getQuirks(pilot);
                 foreach (PilotQuirk quirk in pilotQuirks)
@@ -216,7 +216,7 @@ namespace MechAffinity
         {
             string ret = "";
 
-            if (pilot != null && Main.settings.enablePilotQuirks)
+            if (pilot != null && Main.legacySettings.enablePilotQuirks)
             {
                 List<PilotQuirk> pilotQuirks = getQuirks(pilot);
                 foreach (PilotQuirk quirk in pilotQuirks)
@@ -257,7 +257,7 @@ namespace MechAffinity
 
         public void applyBonuses(AbstractActor actor)
         {
-            if (Main.settings.enablePilotQuirks)
+            if (Main.legacySettings.enablePilotQuirks)
             {
                 List<EffectData> effects;
                 bool canUsePools = false;
@@ -268,7 +268,7 @@ namespace MechAffinity
                 }
                 else
                 {
-                    if (Main.settings.playerQuirkPools)
+                    if (Main.legacySettings.playerQuirkPools)
                     {
                         canUsePools = true;
                         Main.modLog.LogMessage("pq player pools enabled, allowing pooled quirk use");
@@ -371,7 +371,7 @@ namespace MechAffinity
         {
             if (!isNew) return;
             List<string> tags = def.PilotTags.ToList();
-            foreach (string tag in Main.settings.addTags)
+            foreach (string tag in Main.legacySettings.addTags)
             {
                 if (!tags.Contains(tag))
                 {
@@ -579,14 +579,14 @@ namespace MechAffinity
                         {
                             if (effect.affectedIds.Contains(upgradeId) || effect.affectedIds.Contains(PqAllArgoUpgrades))
                             {
-                                if (Main.settings.debug) Main.modLog.DebugMessage($"Found Argo factor: {quirk.quirkName}, value: {effect.modifier}");
-                                if (Main.settings.pqArgoAdditive)
+                                if (Main.legacySettings.debug) Main.modLog.DebugMessage($"Found Argo factor: {quirk.quirkName}, value: {effect.modifier}");
+                                if (Main.legacySettings.pqArgoAdditive)
                                 {
                                     ret += effect.modifier;
                                 }
                                 else
                                 {
-                                    if (Main.settings.pqArgoMultiAutoAdjust)
+                                    if (Main.legacySettings.pqArgoMultiAutoAdjust)
                                     {
                                         ret *= (1.0f + effect.modifier);
                                     }
@@ -603,11 +603,11 @@ namespace MechAffinity
                 }
             }
 
-            if (ret < Main.settings.pqArgoMin)
+            if (ret < Main.legacySettings.pqArgoMin)
             {
-                ret = Main.settings.pqArgoMin;
+                ret = Main.legacySettings.pqArgoMin;
             }
-            if (Main.settings.debug) Main.modLog.DebugMessage($"Found cost factor multiplier: {ret}");
+            if (Main.legacySettings.debug) Main.modLog.DebugMessage($"Found cost factor multiplier: {ret}");
             return ret;
         }
 

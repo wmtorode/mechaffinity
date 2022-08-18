@@ -15,7 +15,7 @@ namespace MechAffinity
     public class Main
     {
         internal static Logger modLog;
-        internal static Settings settings;
+        internal static LegacySettings legacySettings;
         internal static PilotSelectSettings pilotSelectSettings = new PilotSelectSettings();
         internal static string modDir;
         internal static readonly string AffinitiesDefinitionTypeName = "AffinitiesDef";
@@ -32,13 +32,13 @@ namespace MechAffinity
                             try
                             {
                                 modLog.LogMessage("Path:" + custMechRep.Value.FilePath);
-                                Settings add_settings = JsonConvert.DeserializeObject<Settings>(File.ReadAllText(custMechRep.Value.FilePath));
-                                if (add_settings.Check(custMechRep.Value.FilePath))
+                                LegacySettings addLegacySettings = JsonConvert.DeserializeObject<LegacySettings>(File.ReadAllText(custMechRep.Value.FilePath));
+                                if (addLegacySettings.Check(custMechRep.Value.FilePath))
                                 {
-                                    File.WriteAllText(custMechRep.Value.FilePath,JsonConvert.SerializeObject(settings, Formatting.Indented));
-                                    add_settings =JsonConvert.DeserializeObject<Settings>(File.ReadAllText(custMechRep.Value.FilePath));
+                                    File.WriteAllText(custMechRep.Value.FilePath,JsonConvert.SerializeObject(legacySettings, Formatting.Indented));
+                                    addLegacySettings =JsonConvert.DeserializeObject<LegacySettings>(File.ReadAllText(custMechRep.Value.FilePath));
                                 }
-                                settings.Merge(add_settings);
+                                legacySettings.Merge(addLegacySettings);
                             }
                             catch (Exception ex)
                             {
@@ -48,7 +48,7 @@ namespace MechAffinity
                     }
                 }
             }
-            settings.InitLookups();
+            legacySettings.InitLookups();
             try {
                 PilotAffinityManager.Instance.initialize();
                 PilotQuirkManager.Instance.initialize();
@@ -72,14 +72,14 @@ namespace MechAffinity
 
             modDir = modDirectory;
             modLog = new Logger(modDir, "MechAffinity", true);
-            settings = JsonConvert.DeserializeObject<Settings>(File.ReadAllText($"{modDir}/settings.json")); //if we had failed to read settings it is useless to proceed. Better notify ModTek instead.
-            if (settings.Check($"{modDir}/settings.json")) {
-                File.WriteAllText($"{modDir}/settings.loaded.json",JsonConvert.SerializeObject(settings, Formatting.Indented));
-                settings = JsonConvert.DeserializeObject<Settings>(File.ReadAllText($"{modDir}/settings.loaded.json"));
+            legacySettings = JsonConvert.DeserializeObject<LegacySettings>(File.ReadAllText($"{modDir}/settings.json")); //if we had failed to read settings it is useless to proceed. Better notify ModTek instead.
+            if (legacySettings.Check($"{modDir}/settings.json")) {
+                File.WriteAllText($"{modDir}/settings.loaded.json",JsonConvert.SerializeObject(legacySettings, Formatting.Indented));
+                legacySettings = JsonConvert.DeserializeObject<LegacySettings>(File.ReadAllText($"{modDir}/settings.loaded.json"));
             }
-            settings.InitLookups();
+            legacySettings.InitLookups();
 
-            if (settings.enablePilotSelect)
+            if (legacySettings.enablePilotSelect)
             {
                 try
                 {

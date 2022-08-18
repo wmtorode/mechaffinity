@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace MechAffinity.Data
 {
-    class Settings
+    class LegacySettings
     {
         public bool debug = false;
         public int missionsBeforeDecay = -1;
@@ -69,7 +69,7 @@ namespace MechAffinity.Data
     public static string createId(string pattern) { return pattern.Replace(" ","_").Replace(".","_").Replace("!","_").Replace("!", "_").Replace("@", "_"); }
     public static string createUniqueId(string pattern = null) {
       if (string.IsNullOrEmpty(pattern)) { pattern = "please_fill_it_with_some_unique_id"; }
-      else{ pattern = Settings.createId(pattern); }
+      else{ pattern = LegacySettings.createId(pattern); }
       string result = pattern;
       while (used_unique_Ids.Contains(result)) { 
         result = string.Format("{0}_{1}", pattern, unique_id_counter);
@@ -145,12 +145,12 @@ namespace MechAffinity.Data
         }
       }
     }
-    public void Merge(Settings add_settings) {
-      this.Merge_pilotQuirks(add_settings.pilotQuirks);
-      this.Merge_globalAffinities(add_settings.globalAffinities);
-      this.Merge_chassisAffinities(add_settings.chassisAffinities);
-      this.Merge_quirkAffinities(add_settings.quirkAffinities);
-      this.Merge_taggedAffinities(add_settings.taggedAffinities);
+    public void Merge(LegacySettings addLegacySettings) {
+      this.Merge_pilotQuirks(addLegacySettings.pilotQuirks);
+      this.Merge_globalAffinities(addLegacySettings.globalAffinities);
+      this.Merge_chassisAffinities(addLegacySettings.chassisAffinities);
+      this.Merge_quirkAffinities(addLegacySettings.quirkAffinities);
+      this.Merge_taggedAffinities(addLegacySettings.taggedAffinities);
     }
     public bool Check(string filename) {
       bool result = false;
