@@ -53,4 +53,18 @@ namespace MechAffinity.Patches
             return false;
         }
     }
+    
+    [HarmonyPatch(typeof(Contract), "CompleteContract")]
+    public static class Contract_CompleteContract_Patch
+    {
+        static void Postfix()
+        {
+            PilotAffinityManager.Instance.ResetEffectCache();
+            if (Main.settings.enablePilotQuirks)
+            {
+                PilotQuirkManager.Instance.ResetEffectCache();
+            }
+            
+        }
+    }
 }

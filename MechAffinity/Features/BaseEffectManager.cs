@@ -16,7 +16,7 @@ namespace MechAffinity
         private List<AbstractActor> spawnedActors = new List<AbstractActor>();
 
 
-        protected void resetDelayedEffects()
+        public void ResetEffectCache()
         {
            delayedEffectsList.Clear();
            spawnedActors.Clear();
