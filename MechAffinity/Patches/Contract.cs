@@ -60,7 +60,7 @@ namespace MechAffinity.Patches
         static void Postfix()
         {
             PilotAffinityManager.Instance.ResetEffectCache();
-            if (Main.settings.enablePilotQuirks)
+            if (Main.legacySettings.enablePilotQuirks)
             {
                 PilotQuirkManager.Instance.ResetEffectCache();
             }
