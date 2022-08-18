@@ -14,6 +14,10 @@ namespace MechAffinity
 {
     public class Main
     {
+        private const string SettingsFilePath = "mechaffinitysettings.json";
+        private const string LegacyFilePath = "settings.json";
+        private const string PilotSelectSettingsFilePath = "pilotselectsettings.json";
+        
         internal static Logger modLog;
         internal static LegacySettings legacySettings;
         internal static Settings settings;
@@ -61,22 +65,32 @@ namespace MechAffinity
         //   }
         // }
 
+        private static void convertLegacyToSettings()
+        {
+            legacySettings = JsonConvert.DeserializeObject<LegacySettings>(File.ReadAllText($"{modDir}/{LegacyFilePath}"));
+            Settings newSettings = Settings.FromLegacy(legacySettings, modDir);
+            File.WriteAllText($"{modDir}/mechaffinitysettings.converted.json",JsonConvert.SerializeObject(newSettings, Formatting.Indented));
+        }
+
         public static void Init(string modDirectory, string settingsJSON)
         {
 
             modDir = modDirectory;
             modLog = new Logger(modDir, "MechAffinity", true);
-            settings = JsonConvert.DeserializeObject<Settings>(File.ReadAllText($"{modDir}/mechaffinitysettings.json")); //if we had failed to read settings it is useless to proceed. Better notify ModTek instead.
+
+            if (!File.Exists($"{modDir}/{SettingsFilePath}") && File.Exists($"{modDir}/{LegacyFilePath}"))
+            {
+                modLog.LogError("Failed to Find Settings File, but found legacy file, converting!");
+                convertLegacyToSettings();
+            }
+            
+            settings = JsonConvert.DeserializeObject<Settings>(File.ReadAllText($"{modDir}/{SettingsFilePath}")); //if we had failed to read settings it is useless to proceed. Better notify ModTek instead.
 
             if (settings.legacyData.debug_convertFromLegacyData)
             {
-                legacySettings = JsonConvert.DeserializeObject<LegacySettings>(File.ReadAllText($"{modDir}/settings.json"));
-                Settings newSettings = Settings.FromLegacy(legacySettings);
-                File.WriteAllText($"{modDir}/mechaffinitysettings.converted.json",JsonConvert.SerializeObject(settings, Formatting.Indented));
+                convertLegacyToSettings();
                 
             }
-            
-            
             
             //ToDo: Convert to new Settings system            
             // legacySettings.InitLookups();
@@ -85,7 +99,7 @@ namespace MechAffinity
             {
                 try
                 {
-                    using (StreamReader reader = new StreamReader($"{modDir}/pilotselectsettings.json"))
+                    using (StreamReader reader = new StreamReader($"{modDir}/{PilotSelectSettingsFilePath}"))
                     {
                         string jdata = reader.ReadToEnd();
                         pilotSelectSettings = JsonConvert.DeserializeObject<PilotSelectSettings>(jdata);
