@@ -16,6 +16,7 @@ namespace MechAffinity
     {
         internal static Logger modLog;
         internal static LegacySettings legacySettings;
+        internal static Settings settings;
         internal static PilotSelectSettings pilotSelectSettings = new PilotSelectSettings();
         internal static string modDir;
         internal static readonly string AffinitiesDefinitionTypeName = "AffinitiesDef";
@@ -32,13 +33,6 @@ namespace MechAffinity
                             try
                             {
                                 modLog.LogMessage("Path:" + custMechRep.Value.FilePath);
-                                LegacySettings addLegacySettings = JsonConvert.DeserializeObject<LegacySettings>(File.ReadAllText(custMechRep.Value.FilePath));
-                                if (addLegacySettings.Check(custMechRep.Value.FilePath))
-                                {
-                                    File.WriteAllText(custMechRep.Value.FilePath,JsonConvert.SerializeObject(legacySettings, Formatting.Indented));
-                                    addLegacySettings =JsonConvert.DeserializeObject<LegacySettings>(File.ReadAllText(custMechRep.Value.FilePath));
-                                }
-                                legacySettings.Merge(addLegacySettings);
                             }
                             catch (Exception ex)
                             {
@@ -72,14 +66,22 @@ namespace MechAffinity
 
             modDir = modDirectory;
             modLog = new Logger(modDir, "MechAffinity", true);
-            legacySettings = JsonConvert.DeserializeObject<LegacySettings>(File.ReadAllText($"{modDir}/settings.json")); //if we had failed to read settings it is useless to proceed. Better notify ModTek instead.
-            if (legacySettings.Check($"{modDir}/settings.json")) {
-                File.WriteAllText($"{modDir}/settings.loaded.json",JsonConvert.SerializeObject(legacySettings, Formatting.Indented));
-                legacySettings = JsonConvert.DeserializeObject<LegacySettings>(File.ReadAllText($"{modDir}/settings.loaded.json"));
-            }
-            legacySettings.InitLookups();
+            settings = JsonConvert.DeserializeObject<Settings>(File.ReadAllText($"{modDir}/mechaffinitysettings.json")); //if we had failed to read settings it is useless to proceed. Better notify ModTek instead.
 
-            if (legacySettings.enablePilotSelect)
+            if (settings.legacyData.debug_convertFromLegacyData)
+            {
+                legacySettings = JsonConvert.DeserializeObject<LegacySettings>(File.ReadAllText($"{modDir}/settings.json"));
+                Settings newSettings = Settings.FromLegacy(legacySettings);
+                File.WriteAllText($"{modDir}/mechaffinitysettings.converted.json",JsonConvert.SerializeObject(settings, Formatting.Indented));
+                
+            }
+            
+            
+            
+            //ToDo: Convert to new Settings system            
+            // legacySettings.InitLookups();
+
+            if (settings.enablePilotSelect)
             {
                 try
                 {

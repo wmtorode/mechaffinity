@@ -579,7 +579,7 @@ namespace MechAffinity
                         {
                             if (effect.affectedIds.Contains(upgradeId) || effect.affectedIds.Contains(PqAllArgoUpgrades))
                             {
-                                if (Main.legacySettings.debug) Main.modLog.DebugMessage($"Found Argo factor: {quirk.quirkName}, value: {effect.modifier}");
+                                if (Main.settings.debug) Main.modLog.DebugMessage($"Found Argo factor: {quirk.quirkName}, value: {effect.modifier}");
                                 if (Main.legacySettings.pqArgoAdditive)
                                 {
                                     ret += effect.modifier;
@@ -607,7 +607,7 @@ namespace MechAffinity
             {
                 ret = Main.legacySettings.pqArgoMin;
             }
-            if (Main.legacySettings.debug) Main.modLog.DebugMessage($"Found cost factor multiplier: {ret}");
+            if (Main.settings.debug) Main.modLog.DebugMessage($"Found cost factor multiplier: {ret}");
             return ret;
         }
 
