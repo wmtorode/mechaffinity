@@ -6,6 +6,7 @@ namespace MechAffinity.Data
 {
     public class Settings
     {
+        public int version = 2;
         //Logging Features
         public bool debug = false;
         
