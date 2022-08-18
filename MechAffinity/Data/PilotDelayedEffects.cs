@@ -7,6 +7,7 @@ namespace MechAffinity.Data
     {
         public AbstractActor actor;
         public EffectData effect;
+        public string effectId;
         public EffectTargetType effectTargetType;
     }
     
