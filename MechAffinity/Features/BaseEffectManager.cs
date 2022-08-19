@@ -79,7 +79,12 @@ namespace MechAffinity
                         foreach (var weapon in actor.Weapons)
                         {
                             Main.modLog.LogMessage($"Add onHit effect: {statusEffect.Description.Name} to {weapon.UIName}");
-                            weapon.weaponDef.statusEffects.Add(statusEffect);
+                            Main.modLog.DebugMessage($"Before Add: {weapon.weaponDef.statusEffects.Length}");
+                            List<EffectData> statEffects = weapon.weaponDef.statusEffects.ToList();
+                            statEffects.Add(statusEffect);
+                            weapon.weaponDef.SetEffectData(statEffects.ToArray());
+                            Main.modLog.DebugMessage($"After Add: {weapon.weaponDef.statusEffects.Length}");
+                            
                         }
                         break;
                     default:
