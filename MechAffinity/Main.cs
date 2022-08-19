@@ -25,9 +25,10 @@ namespace MechAffinity
         internal static PilotSelectSettings pilotSelectSettings = new PilotSelectSettings();
         internal static string modDir;
         internal static readonly string AffinitiesDefinitionTypeName = "AffinitiesDef";
+        internal static List<AffinityDef> affinityDefs = new List<AffinityDef>();
+        internal static List<PilotQuirk> pilotQuirks = new List<PilotQuirk>();
         public static void FinishedLoading(List<string> loadOrder, Dictionary<string, Dictionary<string, VersionManifestEntry>> customResources)
         {
-            List<AffinityDef> affinityDefs = new List<AffinityDef>();
             if (customResources != null)
             {
                 foreach (var customResource in customResources)
@@ -54,7 +55,7 @@ namespace MechAffinity
             legacySettings.InitLookups();
             try {
                 if (settings.enablePilotAffinity) PilotAffinityManager.Instance.initialize(settings.affinitySettings, affinityDefs);
-                PilotQuirkManager.Instance.initialize();
+                if (settings.enablePilotQuirks) PilotQuirkManager.Instance.initialize(settings.quirkSettings, pilotQuirks);
             }
             catch (Exception ex)
             {

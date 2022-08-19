@@ -54,6 +54,7 @@ namespace MechAffinity
             get
             {
                 if (_instance == null) _instance = new PilotAffinityManager();
+                if (!_instance.hasInitialized) _instance.initialize(Main.settings.affinitySettings, Main.affinityDefs);
                 return _instance;
             }
         }

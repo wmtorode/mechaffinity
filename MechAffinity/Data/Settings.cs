@@ -20,6 +20,7 @@ namespace MechAffinity.Data
         
         // Feature Settings
         public PilotAffinitySettings affinitySettings = new PilotAffinitySettings();
+        public PilotQuirkSettings quirkSettings = new PilotQuirkSettings();
         
         // Legacy Settings Debug data
         public LegacyData legacyData = new LegacyData();
@@ -52,6 +53,13 @@ namespace MechAffinity.Data
             settings.affinitySettings.topAffinitiesInTooltipCount = legacySettings.topAffinitiesInTooltipCount;
             settings.affinitySettings.maxAffinityPoints = legacySettings.maxAffinityPoints;
             settings.affinitySettings.prefabOverrides = legacySettings.prefabOverrides;
+
+            settings.quirkSettings.playerQuirkPools = legacySettings.playerQuirkPools;
+            settings.quirkSettings.argoAdditive = legacySettings.pqArgoAdditive;
+            settings.quirkSettings.argoMultiAutoAdjust = legacySettings.pqArgoMultiAutoAdjust;
+            settings.quirkSettings.argoMin = legacySettings.pqArgoMin;
+            settings.quirkSettings.quirkPools = legacySettings.quirkPools;
+            settings.quirkSettings.tooltipTags = legacySettings.pqTooltipTags;
 
             if (!Directory.Exists($"{modDirectory}/AffinityDefs"))
             {
@@ -121,6 +129,24 @@ namespace MechAffinity.Data
                     File.WriteAllText($"{modDirectory}/AffinityDefs/{affinityDef.id}.json",
                         JsonConvert.SerializeObject(affinityDef, Formatting.Indented));
 
+                }
+            }
+
+            if (!Directory.Exists($"{modDirectory}/QuirkDefs"))
+            {
+                int counter = 0;
+                foreach (var pilotQuirk in legacySettings.pilotQuirks)
+                {
+                    if (string.IsNullOrEmpty(pilotQuirk.id))
+                    {
+                        pilotQuirk.id = $"pilotQuirkDef_{pilotQuirk.tag}";
+                    }
+                    if (File.Exists($"{modDirectory}/QuirkDefs/{pilotQuirk.id}.json"))
+                        pilotQuirk.id += $"_{counter}";
+                    counter++;
+                    File.WriteAllText($"{modDirectory}/QuirkDefs/{pilotQuirk.id}.json",
+                        JsonConvert.SerializeObject(pilotQuirk, Formatting.Indented));
+                    
                 }
             }
 

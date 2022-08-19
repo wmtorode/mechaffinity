@@ -6,8 +6,9 @@ using Newtonsoft.Json.Linq;
 
 namespace MechAffinity.Data
 {
-    class PilotQuirk
+    public class PilotQuirk
     {
+        public string id = "";
         public string tag = "";
         public string quirkName = "";
         public string description = "";
@@ -16,5 +17,15 @@ namespace MechAffinity.Data
         public List<EffectData> effects = new List<EffectData>();
         public List<JObject> effectData = new List<JObject>();
         public List<QuirkEffect> quirkEffects = new List<QuirkEffect>();
+
+        public void init()
+        {
+            foreach (JObject jObject in effectData)
+            {
+                EffectData effectData = new EffectData();
+                effectData.FromJSON(jObject.ToString());
+                effects.Add(effectData);
+            }
+        }
     }
 }

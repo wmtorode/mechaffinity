@@ -229,6 +229,10 @@ namespace MechAffinity.Patches
     [HarmonyPatch(typeof(SimGameState), "DismissPilot", new Type[] {typeof(Pilot)})]
     public static class SimGameState_DismissPilot
     {
+        public static bool Prepare()
+        {
+            return Main.settings.enablePilotQuirks;
+        }
         public static void Prefix(SimGameState __instance, Pilot p)
         {
             if (p != null)

@@ -30,7 +30,7 @@ namespace MechAffinity.Patches
                 Desc = "";
             }
             
-            foreach (PilotTooltipTag pqTag in Main.legacySettings.pqTooltipTags)
+            foreach (PilotTooltipTag pqTag in Main.settings.quirkSettings.tooltipTags)
             {
                 if (pilot.pilotDef.PilotTags.Contains(pqTag.tag))
                 {
@@ -50,7 +50,11 @@ namespace MechAffinity.Patches
                 }
             }
 
-            Desc += PilotQuirkManager.Instance.getPilotToolTip(pilot);
+            if (Main.settings.enablePilotQuirks)
+            {
+                Desc += PilotQuirkManager.Instance.getPilotToolTip(pilot);
+            }
+
             if (Main.settings.enablePilotAffinity)
             {
                 Desc += "<b>Pilot Affinities:</b>\n\n";
