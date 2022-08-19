@@ -374,7 +374,7 @@ namespace MechAffinity
         {
             if (!isNew) return;
             List<string> tags = def.PilotTags.ToList();
-            foreach (string tag in Main.legacySettings.addTags)
+            foreach (string tag in settings.addTags)
             {
                 if (!tags.Contains(tag))
                 {

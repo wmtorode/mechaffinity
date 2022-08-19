@@ -19,8 +19,12 @@ namespace MechAffinity.Data
         
         
         // Feature Settings
+        // Note: Monthly Morale has no settings, its handled by the Quirk Manager
+        // but has no settings other than if its enabled or disabled
         public PilotAffinitySettings affinitySettings = new PilotAffinitySettings();
         public PilotQuirkSettings quirkSettings = new PilotQuirkSettings();
+        public StablePilotingSettings stablePilotingSettings = new StablePilotingSettings();
+        public PilotUiSettings pilotUiSettings = new PilotUiSettings();
         
         // Legacy Settings Debug data
         public LegacyData legacyData = new LegacyData();
@@ -60,6 +64,11 @@ namespace MechAffinity.Data
             settings.quirkSettings.argoMin = legacySettings.pqArgoMin;
             settings.quirkSettings.quirkPools = legacySettings.quirkPools;
             settings.quirkSettings.tooltipTags = legacySettings.pqTooltipTags;
+            settings.quirkSettings.addTags = legacySettings.addTags;
+
+            settings.stablePilotingSettings = legacySettings.stablePilotingSettings;
+            
+            settings.pilotUiSettings.iconColours = legacySettings.iconColours;
 
             if (!Directory.Exists($"{modDirectory}/AffinityDefs"))
             {

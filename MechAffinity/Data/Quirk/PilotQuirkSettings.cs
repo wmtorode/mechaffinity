@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace MechAffinity.Data
@@ -11,6 +12,7 @@ namespace MechAffinity.Data
         
         public List<QuirkPool> quirkPools = new List<QuirkPool>();
         public List<PilotTooltipTag> tooltipTags = new List<PilotTooltipTag>();
+        public List<String> addTags = new List<string>();
 
     }
 }

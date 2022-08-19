@@ -52,7 +52,6 @@ namespace MechAffinity
                     }
                 }
             }
-            legacySettings.InitLookups();
             try {
                 if (settings.enablePilotAffinity) PilotAffinityManager.Instance.initialize(settings.affinitySettings, affinityDefs);
                 if (settings.enablePilotQuirks) PilotQuirkManager.Instance.initialize(settings.quirkSettings, pilotQuirks);
@@ -82,18 +81,14 @@ namespace MechAffinity
             JToken version;
             if (!settingsData.TryGetValue("version", out version)) convertLegacyToSettings(true);
             
-            settings = JsonConvert.DeserializeObject<Settings>(File.ReadAllText($"{modDir}/{SettingsFilePath}")); //if we had failed to read settings it is useless to proceed. Better notify ModTek instead.
-
-            if (settings.legacyData.debug_convertFromLegacyData)
-            {
-                convertLegacyToSettings(false);
-            }
-            
-            //ToDo: Convert to new Settings system            
-            // legacySettings.InitLookups();
+            //if we fail to read settings it is useless to proceed. Better notify ModTek instead, by allowing the exception
+            // to be raised
+            settings = JsonConvert.DeserializeObject<Settings>(File.ReadAllText($"{modDir}/{SettingsFilePath}"));
 
             if (settings.enablePilotSelect)
             {
+                // Keep Pilot Select Settings separate, potential for allowing players to do custom player starts in RT
+                // which would necessitate leaving the settings separate to exclude only them from launcher protections
                 try
                 {
                     using (StreamReader reader = new StreamReader($"{modDir}/{PilotSelectSettingsFilePath}"))
