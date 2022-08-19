@@ -44,4 +44,14 @@ namespace MechAffinity.Patches
             }
         }
     }
+    
+    [HarmonyPatch(typeof(AbstractActor), "AddToTeam", typeof(Team))]
+    class AbstractActor_AddToTeam
+    {
+        public static void Postfix(AbstractActor __instance)
+        {
+            PilotAffinityManager.Instance.applyBonuses(__instance);
+            PilotQuirkManager.Instance.applyBonuses(__instance);
+        }
+    }
 }
