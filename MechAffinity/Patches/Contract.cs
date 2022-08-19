@@ -22,7 +22,7 @@ namespace MechAffinity.Patches
         
         public static bool Prepare()
         {
-            return Main.legacySettings.enablePilotQuirks;
+            return Main.settings.enablePilotQuirks;
         }
         
         public static bool Prefix(Contract __instance, SimGameState sim)
@@ -59,8 +59,12 @@ namespace MechAffinity.Patches
     {
         static void Postfix()
         {
-            PilotAffinityManager.Instance.ResetEffectCache();
-            if (Main.legacySettings.enablePilotQuirks)
+            if (Main.settings.enablePilotAffinity)
+            {
+                PilotAffinityManager.Instance.ResetEffectCache();
+            }
+
+            if (Main.settings.enablePilotQuirks)
             {
                 PilotQuirkManager.Instance.ResetEffectCache();
             }

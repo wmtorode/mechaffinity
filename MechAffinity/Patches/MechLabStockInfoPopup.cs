@@ -15,6 +15,11 @@ namespace MechAffinity.Patches
     [HarmonyPatch(typeof(MechLabStockInfoPopup), "StockMechDefLoaded", typeof(string), typeof(MechDef))]
     class MechLabStockInfoPopup_StockMechDefLoaded
     {
+        
+        public static bool Prepare()
+        {
+            return Main.settings.enablePilotAffinity;
+        }
         public static void Postfix(MechLabStockInfoPopup __instance, MechDef def, LocalizableText ___descriptionText)
         {
             if (def != null)

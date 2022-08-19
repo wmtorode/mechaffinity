@@ -18,29 +18,30 @@ namespace MechAffinity.Patches
     {
         public static void Postfix(SimGameState __instance, GameInstanceSave gameInstanceSave)
         {
+            if (Main.settings.enablePilotAffinity)
+            {
                 PilotAffinityManager.Instance.setCompanyStats(__instance.CompanyStats);
                 PilotAffinityManager.Instance.setDataManager(__instance.DataManager);
-                
-                PilotQuirkManager.Instance.setCompanyStats(__instance.CompanyStats);
                 
                 List<MechDef> mechs = __instance.DataManager.MechDefs.Select(pair => pair.Value).ToList();
                 foreach (MechDef mech in mechs)
                 {
                     PilotAffinityManager.Instance.addToChassisPrefabLut(mech);
                 }
-
-                if (Main.legacySettings.enablePilotQuirks)
+            }
+            if (Main.settings.enablePilotQuirks)
+            {
+                PilotQuirkManager.Instance.setCompanyStats(__instance.CompanyStats);
+                foreach (Pilot pilot in __instance.PilotRoster.ToList())
                 {
-                    foreach (Pilot pilot in __instance.PilotRoster.ToList())
-                    {
-                        PilotQuirkManager.Instance.proccessPilot(pilot.pilotDef, true);
-                        pilot.FromPilotDef(pilot.pilotDef);
-                    }
-                    // the commander is not part of the roster, so need to specifically call it.
-                    PilotQuirkManager.Instance.proccessPilot(__instance.Commander.pilotDef, true);
-                    __instance.Commander.FromPilotDef(__instance.Commander.pilotDef);
-                    PilotQuirkManager.Instance.forceMoraleInstanced();
+                    PilotQuirkManager.Instance.proccessPilot(pilot.pilotDef, true);
+                    pilot.FromPilotDef(pilot.pilotDef);
                 }
+                // the commander is not part of the roster, so need to specifically call it.
+                PilotQuirkManager.Instance.proccessPilot(__instance.Commander.pilotDef, true);
+                __instance.Commander.FromPilotDef(__instance.Commander.pilotDef);
+                PilotQuirkManager.Instance.forceMoraleInstanced();
+            }
         }
     }
 
@@ -49,19 +50,27 @@ namespace MechAffinity.Patches
     {
         public static void Postfix(SimGameState __instance)
         {
-
-            PilotAffinityManager.Instance.setCompanyStats(__instance.CompanyStats);
-            PilotAffinityManager.Instance.setDataManager(__instance.DataManager);
-            
-            PilotQuirkManager.Instance.setCompanyStats(__instance.CompanyStats);
-            // new career so this will be instanced automatically
-            PilotQuirkManager.Instance.forceMoraleInstanced();
-            
-            List<MechDef> mechs = __instance.DataManager.MechDefs.Select(pair => pair.Value).ToList();
-            foreach (MechDef mech in mechs)
+            if (Main.settings.enablePilotAffinity)
             {
-                PilotAffinityManager.Instance.addToChassisPrefabLut(mech);
+                PilotAffinityManager.Instance.setCompanyStats(__instance.CompanyStats);
+                PilotAffinityManager.Instance.setDataManager(__instance.DataManager);
+                
+                List<MechDef> mechs = __instance.DataManager.MechDefs.Select(pair => pair.Value).ToList();
+                foreach (MechDef mech in mechs)
+                {
+                    PilotAffinityManager.Instance.addToChassisPrefabLut(mech);
+                }
+
             }
+
+            if (Main.settings.enablePilotQuirks)
+            {
+                PilotQuirkManager.Instance.setCompanyStats(__instance.CompanyStats);
+                // new career so this will be instanced automatically
+                PilotQuirkManager.Instance.forceMoraleInstanced();
+            }
+
+
         }
     }
     
@@ -70,7 +79,7 @@ namespace MechAffinity.Patches
     {
         public static bool Prepare()
         {
-            return Main.legacySettings.enablePilotQuirks;
+            return Main.settings.enablePilotQuirks;
         }
         public static void Postfix(SimGameState __instance, Pilot p)
         {
@@ -84,7 +93,7 @@ namespace MechAffinity.Patches
     {
         public static bool Prepare()
         {
-            return Main.legacySettings.enablePilotQuirks;
+            return Main.settings.enablePilotQuirks;
         }
         public static void Postfix(SimGameState __instance, Pilot p)
         {
@@ -96,6 +105,10 @@ namespace MechAffinity.Patches
     [HarmonyPatch(typeof(SimGameState), "ResolveCompleteContract")]
     class SimGameState_ResolveCompleteContract
     {
+        public static bool Prepare()
+        {
+            return Main.settings.enablePilotAffinity;
+        }
         public static void Prefix(SimGameState __instance)
         {
             if (__instance.CompletedContract != null)
@@ -126,13 +139,18 @@ namespace MechAffinity.Patches
             pilotList.Add(__instance.Commander);
             foreach (Pilot pilot in pilotList)
             {
-                bool decayed = PilotAffinityManager.Instance.onSimDayElapsed(pilot);
-                if (decayed)
-                {                 
-                    __instance.RoomManager.ShipRoom.AddEventToast(new Text(string.Format("{0} affinities decayed!", (object)pilot.Callsign), (object[])Array.Empty<object>()));
+                if (Main.settings.enablePilotAffinity)
+                {
+                    bool decayed = PilotAffinityManager.Instance.onSimDayElapsed(pilot);
+                    if (decayed)
+                    {
+                        __instance.RoomManager.ShipRoom.AddEventToast(new Text(
+                            string.Format("{0} affinities decayed!", (object)pilot.Callsign),
+                            (object[])Array.Empty<object>()));
+                    }
                 }
 
-                if (Main.legacySettings.enablePilotQuirks)
+                if (Main.settings.enablePilotQuirks)
                 {
                     PilotQuirkManager.Instance.stealAmount(pilot, __instance);
                 }
@@ -145,7 +163,7 @@ namespace MechAffinity.Patches
     {
         public static bool Prepare()
         {
-            return Main.legacySettings.enablePilotQuirks;
+            return Main.settings.enablePilotQuirks;
         }
         public static void Postfix(SimGameState __instance, PilotDef def, ref int __result)
         {
@@ -161,7 +179,7 @@ namespace MechAffinity.Patches
     {
         public static bool Prepare()
         {
-            return Main.legacySettings.enablePilotQuirks;
+            return Main.settings.enablePilotQuirks;
         }
         public static void Postfix(SimGameState __instance, PilotDef def, ref int __result)
         {
@@ -176,7 +194,7 @@ namespace MechAffinity.Patches
     {
         public static bool Prepare()
         {
-            return Main.legacySettings.enablePilotQuirks;
+            return Main.settings.enablePilotQuirks;
         }
         public static void Prefix(SimGameState __instance, PilotDef def, bool updatePilotDiscardPile = false)
         {
@@ -193,7 +211,7 @@ namespace MechAffinity.Patches
     {
         public static bool Prepare()
         {
-            return Main.legacySettings.enablePilotQuirks;
+            return Main.settings.enablePilotQuirks;
         }
         public static void Prefix(SimGameState __instance, Pilot p)
         {
@@ -231,7 +249,7 @@ namespace MechAffinity.Patches
         
         public static bool Prepare()
         {
-            return Main.legacySettings.enablePilotQuirks;
+            return Main.settings.enablePilotQuirks;
         }
         
         public static void Prefix(SimGameState __instance, bool refund)
@@ -262,7 +280,7 @@ namespace MechAffinity.Patches
     {
         public static bool Prepare()
         {
-            return Main.legacySettings.enablePilotQuirks;
+            return Main.settings.enablePilotQuirks;
         }
         
         public static bool Prefix(SimGameState __instance, EconomyScale expenditureLevel, bool proRate, int  ___ProRateRefund, ref int __result)
@@ -304,7 +322,7 @@ namespace MechAffinity.Patches
     {
         public static bool Prepare()
         {
-            return Main.legacySettings.enableMonthlyMoraleReset;
+            return Main.settings.enableMonthlyMoraleReset;
         }
         public static void Postfix(SimGameState __instance)
         {
@@ -317,7 +335,7 @@ namespace MechAffinity.Patches
     {
         public static bool Prepare()
         {
-            return Main.legacySettings.enableMonthlyMoraleReset;
+            return Main.settings.enableMonthlyMoraleReset;
         }
         public static bool Prefix(SimGameState __instance, int val, string sourceID)
         {

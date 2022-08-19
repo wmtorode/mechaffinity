@@ -25,7 +25,9 @@ namespace MechAffinity
         internal static PilotSelectSettings pilotSelectSettings = new PilotSelectSettings();
         internal static string modDir;
         internal static readonly string AffinitiesDefinitionTypeName = "AffinitiesDef";
-        public static void FinishedLoading(List<string> loadOrder, Dictionary<string, Dictionary<string, VersionManifestEntry>> customResources) {
+        public static void FinishedLoading(List<string> loadOrder, Dictionary<string, Dictionary<string, VersionManifestEntry>> customResources)
+        {
+            List<AffinityDef> affinityDefs = new List<AffinityDef>();
             if (customResources != null)
             {
                 foreach (var customResource in customResources)
@@ -33,11 +35,13 @@ namespace MechAffinity
                     modLog.LogMessage("customResource:" + customResource.Key);
                     if (customResource.Key == AffinitiesDefinitionTypeName)
                     {
-                        foreach (var custMechRep in customResource.Value)
+                        foreach (var affinityDefPath in customResource.Value)
                         {
                             try
                             {
-                                modLog.LogMessage("Path:" + custMechRep.Value.FilePath);
+                                modLog.LogMessage("Path:" + affinityDefPath.Value.FilePath);
+                                AffinityDef affinityDef = JsonConvert.DeserializeObject<AffinityDef>(File.ReadAllText(affinityDefPath.Value.FilePath));
+                                affinityDefs.Add(affinityDef);
                             }
                             catch (Exception ex)
                             {
@@ -49,7 +53,7 @@ namespace MechAffinity
             }
             legacySettings.InitLookups();
             try {
-                PilotAffinityManager.Instance.initialize();
+                if (settings.enablePilotAffinity) PilotAffinityManager.Instance.initialize(settings.affinitySettings, affinityDefs);
                 PilotQuirkManager.Instance.initialize();
             }
             catch (Exception ex)
@@ -57,14 +61,6 @@ namespace MechAffinity
                 modLog.LogException(ex);
             }
         }
-        // public static void FinishedLoading(List<string> loadOrder) {
-        //   try {
-        //     PilotAffinityManager.Instance.initialize();
-        //     PilotQuirkManager.Instance.initialize();
-        //   }catch (Exception ex){
-        //     modLog.LogException(ex);
-        //   }
-        // }
 
         private static void convertLegacyToSettings(bool throwError)
         {

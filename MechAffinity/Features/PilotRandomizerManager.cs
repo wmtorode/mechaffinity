@@ -65,7 +65,7 @@ namespace MechAffinity
             if (Main.pilotSelectSettings.RandomRonin + Main.pilotSelectSettings.ProceduralPilots + Main.pilotSelectSettings.RoninFromList > 0)
             {
                 // remove all pilot quirks that generate effects
-                if (Main.legacySettings.enablePilotQuirks)
+                if (Main.settings.enablePilotQuirks)
                 {
                     foreach (Pilot pilot in simGameState.PilotRoster.ToList())
                     {

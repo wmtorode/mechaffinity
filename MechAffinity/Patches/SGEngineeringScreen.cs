@@ -13,7 +13,7 @@ namespace MechAffinity.Patches
         
         public static bool Prepare()
         {
-            return Main.legacySettings.enablePilotQuirks;
+            return Main.settings.enablePilotQuirks;
         }
         
         public static void Prefix(SGEngineeringScreen __instance)

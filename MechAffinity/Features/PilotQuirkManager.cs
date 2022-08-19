@@ -183,7 +183,7 @@ namespace MechAffinity
         {
             string ret = "";
 
-            if (pilot != null && Main.legacySettings.enablePilotQuirks)
+            if (pilot != null && Main.settings.enablePilotQuirks)
             {
                 List<PilotQuirk> pilotQuirks = getQuirks(pilot);
                 ret = "\n";
@@ -200,7 +200,7 @@ namespace MechAffinity
         {
             string ret = "\n\n";
 
-            if (pilot != null && Main.legacySettings.enablePilotQuirks)
+            if (pilot != null && Main.settings.enablePilotQuirks)
             {
                 List<PilotQuirk> pilotQuirks = getQuirks(pilot);
                 foreach (PilotQuirk quirk in pilotQuirks)
@@ -216,7 +216,7 @@ namespace MechAffinity
         {
             string ret = "";
 
-            if (pilot != null && Main.legacySettings.enablePilotQuirks)
+            if (pilot != null && Main.settings.enablePilotQuirks)
             {
                 List<PilotQuirk> pilotQuirks = getQuirks(pilot);
                 foreach (PilotQuirk quirk in pilotQuirks)
@@ -257,7 +257,7 @@ namespace MechAffinity
 
         public void applyBonuses(AbstractActor actor)
         {
-            if (Main.legacySettings.enablePilotQuirks)
+            if (Main.settings.enablePilotQuirks)
             {
                 List<EffectData> effects;
                 bool canUsePools = false;

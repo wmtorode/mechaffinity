@@ -11,12 +11,20 @@ namespace MechAffinity.Data
         public bool debug = false;
         
         // Feature Enables
+        public bool enablePilotAffinity = true;
         public bool enablePilotSelect = false;
+        public bool enablePilotQuirks = false;
+        public bool enableMonthlyMoraleReset = false;
+        public bool enableStablePiloting = false;
+        
+        
+        // Feature Settings
+        public PilotAffinitySettings affinitySettings = new PilotAffinitySettings();
         
         // Legacy Settings Debug data
         public LegacyData legacyData = new LegacyData();
-        
-        
+
+
         //Helpers
         private static string createId(string pattern) { return pattern.Replace(" ","_").Replace(".","_").Replace("\\","_").Replace("/","_").Replace("!","").Replace("@", "_").Replace("\"", "").Replace("(", "").Replace(")", ""); }
         internal static Settings FromLegacy(LegacySettings legacySettings, string modDirectory)
@@ -25,6 +33,25 @@ namespace MechAffinity.Data
 
             settings.debug = legacySettings.debug;
             settings.enablePilotSelect = legacySettings.enablePilotSelect;
+            settings.enablePilotQuirks = legacySettings.enablePilotQuirks;
+            settings.enableStablePiloting = legacySettings.enableStablePiloting;
+            settings.enableMonthlyMoraleReset = legacySettings.enableMonthlyMoraleReset;
+
+            settings.affinitySettings.affinityGroups = legacySettings.affinityGroups;
+            settings.affinitySettings.showQuirks = legacySettings.showQuirks;
+            settings.affinitySettings.missionsBeforeDecay = legacySettings.missionsBeforeDecay;
+            settings.affinitySettings.lowestPossibleDecay = legacySettings.lowestPossibleDecay;
+            settings.affinitySettings.removeAffinityAfter = legacySettings.removeAffinityAfter;
+            settings.affinitySettings.decayByModulo = legacySettings.decayByModulo;
+            settings.affinitySettings.debugForceTag = legacySettings.debugForceTag;
+            settings.affinitySettings.defaultDaysBeforeSimDecay = legacySettings.defaultDaysBeforeSimDecay;
+            settings.affinitySettings.showDescriptionsOnChassis = legacySettings.showDescriptionsOnChassis;
+            settings.affinitySettings.trackSimDecayByStat = legacySettings.trackSimDecayByStat;
+            settings.affinitySettings.trackLowestDecayByStat = legacySettings.trackLowestDecayByStat;
+            settings.affinitySettings.showAllPilotAffinities = legacySettings.showAllPilotAffinities;
+            settings.affinitySettings.topAffinitiesInTooltipCount = legacySettings.topAffinitiesInTooltipCount;
+            settings.affinitySettings.maxAffinityPoints = legacySettings.maxAffinityPoints;
+            settings.affinitySettings.prefabOverrides = legacySettings.prefabOverrides;
 
             if (!Directory.Exists($"{modDirectory}/AffinityDefs"))
             {

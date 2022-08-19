@@ -1,3 +1,4 @@
+using BattleTech;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
@@ -16,6 +17,12 @@ namespace MechAffinity.Data
         {
             AffinityLevel affinity = JsonConvert.DeserializeObject<AffinityLevel>(affinityData.ToString());
             affinity.id = id;
+            foreach (JObject jObject in affinity.effectData)
+            {
+                EffectData effectData = new EffectData();
+                effectData.FromJSON(jObject.ToString());
+                affinity.effects.Add(effectData);
+            }
             return affinity;
         }
         
@@ -23,6 +30,18 @@ namespace MechAffinity.Data
         {
             ChassisSpecificAffinity affinity = JsonConvert.DeserializeObject<ChassisSpecificAffinity>(affinityData.ToString());
             affinity.id = id;
+            int counter = 0;
+            foreach (var level in affinity.affinityLevels)
+            {
+                level.id = affinity.id + $"_{counter}";
+                counter++;
+                foreach (JObject jObject in level.effectData)
+                {
+                    EffectData effectData = new EffectData();
+                    effectData.FromJSON(jObject.ToString());
+                    level.effects.Add(effectData);
+                }
+            }
             return affinity;
         }
         
@@ -30,6 +49,18 @@ namespace MechAffinity.Data
         {
             QuirkAffinity affinity = JsonConvert.DeserializeObject<QuirkAffinity>(affinityData.ToString());
             affinity.id = id;
+            int counter = 0;
+            foreach (var level in affinity.affinityLevels)
+            {
+                level.id = affinity.id + $"_{counter}";
+                counter++;
+                foreach (JObject jObject in level.effectData)
+                {
+                    EffectData effectData = new EffectData();
+                    effectData.FromJSON(jObject.ToString());
+                    level.effects.Add(effectData);
+                }
+            }
             return affinity;
         }
         
@@ -37,6 +68,18 @@ namespace MechAffinity.Data
         {
             TaggedAffinity affinity = JsonConvert.DeserializeObject<TaggedAffinity>(affinityData.ToString());
             affinity.id = id;
+            int counter = 0;
+            foreach (var level in affinity.affinityLevels)
+            {
+                level.id = affinity.id + $"_{counter}";
+                counter++;
+                foreach (JObject jObject in level.effectData)
+                {
+                    EffectData effectData = new EffectData();
+                    effectData.FromJSON(jObject.ToString());
+                    level.effects.Add(effectData);
+                }
+            }
             return affinity;
         }
 
