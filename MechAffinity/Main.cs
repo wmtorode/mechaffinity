@@ -69,6 +69,11 @@ namespace MechAffinity
                 }
             }
             try {
+                if (settings.legacyData.debug_writeLegacyAffinityData)
+                {
+                    File.WriteAllText($"{modDir}/{LegacyFilePath}",JsonConvert.SerializeObject(
+                        settings.ToLegacy(affinityDefs, pilotQuirks), Formatting.Indented));
+                }
                 if (settings.enablePilotAffinity) PilotAffinityManager.Instance.initialize(settings.affinitySettings, affinityDefs);
                 if (settings.enablePilotQuirks) PilotQuirkManager.Instance.initialize(settings.quirkSettings, pilotQuirks);
             }

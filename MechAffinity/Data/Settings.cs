@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
@@ -31,7 +32,69 @@ namespace MechAffinity.Data
 
 
         //Helpers
+        internal LegacySettings ToLegacy(List<AffinityDef> affinityDefs, List<PilotQuirk> pilotQuirks)
+        {
+            LegacySettings legacySettings = new LegacySettings();
+
+            legacySettings.debug = debug;
+            legacySettings.enablePilotQuirks = enablePilotQuirks;
+            legacySettings.enablePilotSelect = enablePilotSelect;
+            legacySettings.enableStablePiloting = enableStablePiloting;
+            legacySettings.enableMonthlyMoraleReset = enableMonthlyMoraleReset;
+
+            legacySettings.affinityGroups = affinitySettings.affinityGroups;
+            legacySettings.showQuirks = affinitySettings.showQuirks;
+            legacySettings.missionsBeforeDecay = affinitySettings.missionsBeforeDecay;
+            legacySettings.lowestPossibleDecay = affinitySettings.lowestPossibleDecay;
+            legacySettings.removeAffinityAfter = affinitySettings.removeAffinityAfter;
+            legacySettings.decayByModulo = affinitySettings.decayByModulo;
+            legacySettings.debugForceTag = affinitySettings.debugForceTag;
+            legacySettings.defaultDaysBeforeSimDecay = affinitySettings.defaultDaysBeforeSimDecay;
+            legacySettings.showDescriptionsOnChassis = affinitySettings.showDescriptionsOnChassis;
+            legacySettings.trackSimDecayByStat = affinitySettings.trackSimDecayByStat;
+            legacySettings.trackLowestDecayByStat = affinitySettings.trackLowestDecayByStat;
+            legacySettings.showAllPilotAffinities = affinitySettings.showAllPilotAffinities;
+            legacySettings.topAffinitiesInTooltipCount = affinitySettings.topAffinitiesInTooltipCount;
+            legacySettings.maxAffinityPoints = affinitySettings.maxAffinityPoints;
+            legacySettings.prefabOverrides = affinitySettings.prefabOverrides;
+
+            legacySettings.playerQuirkPools = quirkSettings.playerQuirkPools;
+            legacySettings.pqArgoAdditive = quirkSettings.argoAdditive;
+            legacySettings.pqArgoMultiAutoAdjust = quirkSettings.argoMultiAutoAdjust;
+            legacySettings.pqArgoMin = quirkSettings.argoMin;
+            legacySettings.pqTooltipTags = quirkSettings.tooltipTags;
+            legacySettings.addTags = quirkSettings.addTags;
+
+            legacySettings.stablePilotingSettings = stablePilotingSettings;
+            legacySettings.iconColours = pilotUiSettings.pilotIcons;
+
+            legacySettings.pilotQuirks = pilotQuirks;
+
+            foreach (var affinityDef in affinityDefs)
+            {
+                switch (affinityDef.affinityType)
+                {
+                    case EAffinityDefType.Global:
+                        legacySettings.globalAffinities.Add(affinityDef.getGlobalAffinity());
+                        break;
+                    case EAffinityDefType.Chassis:
+                        legacySettings.chassisAffinities.Add(affinityDef.getChassisAffinity());
+                        break;
+                    case EAffinityDefType.Quirk:
+                        legacySettings.quirkAffinities.Add(affinityDef.getQuirkAffinity());
+                        break;
+                    case EAffinityDefType.Tag:
+                        legacySettings.taggedAffinities.Add(affinityDef.getTaggedAffinity());
+                        break;
+                    
+                }
+            }
+
+            return legacySettings;
+        }
+        
         private static string createId(string pattern) { return pattern.Replace(" ","_").Replace(".","_").Replace("\\","_").Replace("/","_").Replace("!","").Replace("@", "_").Replace("\"", "").Replace("(", "").Replace(")", ""); }
+        
         internal static Settings FromLegacy(LegacySettings legacySettings, string modDirectory)
         {
             Settings settings = new Settings();
