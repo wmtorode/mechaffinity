@@ -68,7 +68,7 @@ namespace MechAffinity.Data
 
             settings.stablePilotingSettings = legacySettings.stablePilotingSettings;
             
-            settings.pilotUiSettings.iconColours = legacySettings.iconColours;
+            settings.pilotUiSettings.pilotIcons = legacySettings.iconColours;
 
             if (!Directory.Exists($"{modDirectory}/AffinityDefs"))
             {
@@ -144,6 +144,7 @@ namespace MechAffinity.Data
             if (!Directory.Exists($"{modDirectory}/QuirkDefs"))
             {
                 int counter = 0;
+                System.IO.Directory.CreateDirectory($"{modDirectory}/QuirkDefs");
                 foreach (var pilotQuirk in legacySettings.pilotQuirks)
                 {
                     if (string.IsNullOrEmpty(pilotQuirk.id))

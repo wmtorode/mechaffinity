@@ -20,11 +20,11 @@ namespace MechAffinity
         private const string PilotSelectSettingsFilePath = "pilotselectsettings.json";
         
         internal static Logger modLog;
-        internal static LegacySettings legacySettings;
         internal static Settings settings;
         internal static PilotSelectSettings pilotSelectSettings = new PilotSelectSettings();
         internal static string modDir;
         internal static readonly string AffinitiesDefinitionTypeName = "AffinitiesDef";
+        internal static readonly string QuirkDefTypeName = "QuirkDef";
         internal static List<AffinityDef> affinityDefs = new List<AffinityDef>();
         internal static List<PilotQuirk> pilotQuirks = new List<PilotQuirk>();
         public static void FinishedLoading(List<string> loadOrder, Dictionary<string, Dictionary<string, VersionManifestEntry>> customResources)
@@ -50,6 +50,22 @@ namespace MechAffinity
                             }
                         }
                     }
+                    if (customResource.Key == QuirkDefTypeName)
+                    {
+                        foreach (var quirkDefPath in customResource.Value)
+                        {
+                            try
+                            {
+                                modLog.LogMessage("Path:" + quirkDefPath.Value.FilePath);
+                                PilotQuirk quirkDef = JsonConvert.DeserializeObject<PilotQuirk>(File.ReadAllText(quirkDefPath.Value.FilePath));
+                                pilotQuirks.Add(quirkDef);
+                            }
+                            catch (Exception ex)
+                            {
+                                modLog.LogException(ex);
+                            }
+                        }
+                    }
                 }
             }
             try {
@@ -64,7 +80,7 @@ namespace MechAffinity
 
         private static void convertLegacyToSettings(bool throwError)
         {
-            legacySettings = JsonConvert.DeserializeObject<LegacySettings>(File.ReadAllText($"{modDir}/{SettingsFilePath}"));
+            LegacySettings legacySettings = JsonConvert.DeserializeObject<LegacySettings>(File.ReadAllText($"{modDir}/{SettingsFilePath}"));
             Settings newSettings = Settings.FromLegacy(legacySettings, modDir);
             File.WriteAllText($"{modDir}/{SettingsFilePath}",JsonConvert.SerializeObject(newSettings, Formatting.Indented));
             File.WriteAllText($"{modDir}/{LegacyFilePath}",JsonConvert.SerializeObject(legacySettings, Formatting.Indented));

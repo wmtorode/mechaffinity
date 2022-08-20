@@ -4,6 +4,6 @@ namespace MechAffinity.Data
 {
     public class PilotUiSettings
     {
-        public List<PilotIconColour> iconColours = new List<PilotIconColour>();
+        public List<PilotIcon> pilotIcons = new List<PilotIcon>();
     }
 }

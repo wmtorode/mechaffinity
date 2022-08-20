@@ -51,13 +51,13 @@ namespace MechAffinity.Data
 
         public List<PrefabOverride> prefabOverrides = new List<PrefabOverride>();
         public List<AffinityGroup> affinityGroups = new List<AffinityGroup>();
-        public List<PilotIconColour> iconColours = new List<PilotIconColour>();
+        public List<PilotIcon> iconColours = new List<PilotIcon>();
         public List<String> addTags = new List<string>();
         
 
     public void InitLookups()
     {
-      foreach (PilotIconColour pilotIcon in iconColours)
+      foreach (PilotIcon pilotIcon in iconColours)
       {
         iconColoursMap.Clear();
         if (iconColoursMap.ContainsKey(pilotIcon.tag)) continue;

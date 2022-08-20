@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using BattleTech;
+using BattleTech.UI;
 using MechAffinity.Data;
 using UnityEngine;
 
@@ -8,7 +10,7 @@ namespace MechAffinity
     {
         private static PilotUiManager _instance;
         
-        private Dictionary<string, Color> iconColoursMap;
+        private Dictionary<string, PilotIcon> iconMap;
         private PilotUiSettings settings;
 
         public static PilotUiManager Instance
@@ -24,16 +26,32 @@ namespace MechAffinity
         public void initialize(PilotUiSettings pilotUiSettings)
         {
             if(hasInitialized) return;
-            iconColoursMap = new Dictionary<string, Color>();
+            iconMap = new Dictionary<string, PilotIcon>();
             settings = pilotUiSettings;
-            foreach (PilotIconColour pilotIcon in settings.iconColours)
+            foreach (PilotIcon pilotIcon in settings.pilotIcons)
             {
-                iconColoursMap.Clear();
-                if (iconColoursMap.ContainsKey(pilotIcon.tag)) continue;
-                iconColoursMap.Add(pilotIcon.tag, pilotIcon.GetColor());
+                iconMap.Clear();
+                if (iconMap.ContainsKey(pilotIcon.tag)) continue;
+                iconMap.Add(pilotIcon.tag, pilotIcon);
             }
 
             hasInitialized = true;
         }
+
+        public void SetPilotIcon(Pilot pilot, UIColorRefTracker pilotTypeBackground)
+        {
+            foreach (string tag in pilot.pilotDef.PilotTags)
+            {
+                Main.modLog.LogMessage($"checking tag: {tag}: {iconMap.ContainsKey(tag)}");
+                if (iconMap.ContainsKey(tag))
+                {
+                    Main.modLog.LogMessage("Setting Pilot Icon Colour!");
+                    pilotTypeBackground.SetUIColor(UIColor.Custom);
+                    pilotTypeBackground.OverrideWithColor(iconMap[tag].GetColor());
+                    break;
+                }
+            }
+        }
+        
     }
 }

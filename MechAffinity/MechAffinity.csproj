@@ -96,6 +96,7 @@
     <Compile Include="Data\Affinity\AffinityGroup.cs" />
     <Compile Include="Data\Affinity\AffinityLevel.cs" />
     <Compile Include="Data\Affinity\ChassisSpecificAffinity.cs" />
+    <Compile Include="Data\Affinity\ChassisTypeMap.cs" />
     <Compile Include="Data\Affinity\DescriptionHolder.cs" />
     <Compile Include="Data\Affinity\EAffinityDefType.cs" />
     <Compile Include="Data\Affinity\EAffinityType.cs" />
@@ -109,7 +110,7 @@
     <Compile Include="Data\Legacy\LegacySettings.cs" />
     <Compile Include="Data\Logger.cs" />
     <Compile Include="Data\PilotSelect\PilotSelectSettings.cs" />
-    <Compile Include="Data\PilotUi\PilotIconColour.cs" />
+    <Compile Include="Data\PilotUi\PilotIcon.cs" />
     <Compile Include="Data\PilotUi\PilotUiSettings.cs" />
     <Compile Include="Data\Quirk\EQuirkEffectType.cs" />
     <Compile Include="Data\Quirk\PilotQuirk.cs" />

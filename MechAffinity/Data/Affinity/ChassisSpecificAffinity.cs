@@ -10,7 +10,10 @@ namespace MechAffinity.Data
 {
     public class ChassisSpecificAffinity: LeveledAffinity {
         public List<string> chassisNames = new List<string> ();
+        
         [JsonConverter(typeof(StringEnumConverter))]
         public EIdType idType = EIdType.AssemblyVariant;
+
+        public List<ChassisTypeMap> altMaps = new List<ChassisTypeMap>();
     }
 }

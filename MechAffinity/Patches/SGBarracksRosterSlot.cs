@@ -38,17 +38,7 @@ namespace MechAffinity.Patches
                 }
             }
 
-            foreach (string tag in pilot.pilotDef.PilotTags)
-            {
-                Main.modLog.LogMessage($"checking tag: {tag}: {Main.legacySettings.iconColoursMap.ContainsKey(tag)}");
-                if (Main.legacySettings.iconColoursMap.ContainsKey(tag))
-                {
-                    Main.modLog.LogMessage("Setting Pilot Icon Colour!");
-                    ___pilotTypeBackground.SetUIColor(UIColor.Custom);
-                    ___pilotTypeBackground.OverrideWithColor(Main.legacySettings.iconColoursMap[tag]);
-                    break;
-                }
-            }
+            PilotUiManager.Instance.SetPilotIcon(pilot, ___pilotTypeBackground);
 
             if (Main.settings.enablePilotQuirks)
             {

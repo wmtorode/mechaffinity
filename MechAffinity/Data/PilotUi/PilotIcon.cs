@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace MechAffinity.Data
 {
-    public class PilotIconColour
+    public class PilotIcon
     {
         public string colour = "#FF00FF";
         public string tag = "";

@@ -96,6 +96,18 @@ namespace MechAffinity
                                 overloads.Add(chassisName, chassisSpecific.idType);
                             }
                         }
+
+                        foreach (var altMap in chassisSpecific.altMaps)
+                        {
+                            foreach (string chassisName in altMap.chassisIds)
+                            {
+                                chassisAffinities.Add(chassisName, chassisSpecific.affinityLevels);
+                                if (altMap.idType != EIdType.AssemblyVariant)
+                                {
+                                    overloads.Add(chassisName, altMap.idType);
+                                }
+                            }
+                        }
                         foreach (AffinityLevel affinityLevel in chassisSpecific.affinityLevels)
                         {
                             Main.modLog.LogMessage("  level:" + affinityLevel.id);
@@ -127,6 +139,20 @@ namespace MechAffinity
                                 if (!overloads.ContainsKey(chassisName))
                                 {
                                     overloads.Add(chassisName, tagged.idType);
+                                }
+                            }
+                        }
+                        foreach (var altMap in tagged.altMaps)
+                        {
+                            foreach (string chassisName in altMap.chassisIds)
+                            {
+                                taggedAffinities.Add($"{tagged.tag}={chassisName}", tagged.affinityLevels);
+                                if (altMap.idType != EIdType.AssemblyVariant)
+                                {
+                                    if (!overloads.ContainsKey(chassisName))
+                                    {
+                                        overloads.Add(chassisName, altMap.idType);
+                                    }
                                 }
                             }
                         }
