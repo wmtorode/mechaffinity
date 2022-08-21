@@ -22,13 +22,13 @@ namespace MechAffinity
             }
         }
     }
-    
+
     public class PilotRandomizerManager : BaseEffectManager
     {
-        
+
         private static PilotRandomizerManager _instance;
         private static readonly Random rng = new Random();
-        
+
         public static PilotRandomizerManager Instance
         {
             get
@@ -37,7 +37,7 @@ namespace MechAffinity
                 return _instance;
             }
         }
-        
+
 
         private static List<T> GetRandomSubList<T>(List<T> list, int number)
         {
@@ -46,8 +46,8 @@ namespace MechAffinity
             if (list.Count <= 0 || number <= 0)
                 return subList;
 
-            var randomizeMe = new List<T>(list);
-            
+            var randomizeMe = new List<T>();
+
             randomizeMe.AddRange(list);
             randomizeMe.Shuffle();
 
@@ -61,8 +61,10 @@ namespace MechAffinity
 
         public void setStartingRonin(SimGameState simGameState)
         {
-            Main.modLog.LogMessage($"PS settings, RL: {Main.pilotSelectSettings.RoninFromList}, RR: {Main.pilotSelectSettings.RandomRonin}, PP: {Main.pilotSelectSettings.ProceduralPilots} ");
-            if (Main.pilotSelectSettings.RandomRonin + Main.pilotSelectSettings.ProceduralPilots + Main.pilotSelectSettings.RoninFromList > 0)
+            Main.modLog.LogMessage(
+                $"PS settings, RL: {Main.pilotSelectSettings.RoninFromList}, RR: {Main.pilotSelectSettings.RandomRonin}, PP: {Main.pilotSelectSettings.ProceduralPilots} ");
+            if (Main.pilotSelectSettings.RandomRonin + Main.pilotSelectSettings.ProceduralPilots +
+                Main.pilotSelectSettings.RoninFromList > 0)
             {
                 // remove all pilot quirks that generate effects
                 if (Main.settings.enablePilotQuirks)
@@ -72,18 +74,20 @@ namespace MechAffinity
                         PilotQuirkManager.Instance.proccessPilot(pilot.pilotDef, false);
                     }
                 }
+
                 // now actually remove them
                 while (simGameState.PilotRoster.Count > 0)
                 {
-                    simGameState.PilotRoster.RemoveAt(0);}
+                    simGameState.PilotRoster.RemoveAt(0);
                 }
+
                 List<PilotDef> newPilots = new List<PilotDef>();
-                
+
                 if (Main.pilotSelectSettings.PossibleStartingRonin != null)
                 {
                     Main.modLog.LogMessage($"Selecting {Main.pilotSelectSettings.RoninFromList} list ronin");
-                    var RoninRandomizer = new List<string>();
-                    RoninRandomizer.AddRange(GetRandomSubList(Main.pilotSelectSettings.PossibleStartingRonin, Main.pilotSelectSettings.RoninFromList));
+                    var RoninRandomizer = GetRandomSubList(Main.pilotSelectSettings.PossibleStartingRonin,
+                        Main.pilotSelectSettings.RoninFromList);
                     foreach (var roninID in RoninRandomizer)
                     {
                         var pilotDef = simGameState.DataManager.PilotDefs.Get(roninID);
@@ -108,7 +112,8 @@ namespace MechAffinity
                             // remove any ronin from the selection pool if they are already hired
                             if (randomRonin[m].Description.Id == simGameState.PilotRoster[n].Description.Id)
                             {
-                                Main.modLog.LogMessage($"Removing Ronin {randomRonin[m].Description.Id}, already in pool");
+                                Main.modLog.LogMessage(
+                                    $"Removing Ronin {randomRonin[m].Description.Id}, already in pool");
                                 randomRonin.RemoveAt(m);
                                 break;
                             }
@@ -130,20 +135,24 @@ namespace MechAffinity
                     }
                 }
 
-                if (Main.pilotSelectSettings.ProceduralPilots  > 0)
+                if (Main.pilotSelectSettings.ProceduralPilots > 0)
                 {
                     Main.modLog.LogMessage($"Generating {Main.pilotSelectSettings.ProceduralPilots} proc pilots");
                     List<PilotDef> list3;
-                    List<PilotDef> collection = simGameState.PilotGenerator.GeneratePilots(Main.pilotSelectSettings.ProceduralPilots, 1, 0f, out list3);
+                    List<PilotDef> collection =
+                        simGameState.PilotGenerator.GeneratePilots(Main.pilotSelectSettings.ProceduralPilots, 1, 0f,
+                            out list3);
                     newPilots.AddRange(collection);
                 }
+
                 Main.modLog.LogMessage($"Pilots to add to roster: {newPilots.Count}");
                 foreach (PilotDef def in newPilots)
                 {
                     Main.modLog.LogMessage($"Adding {def.Description.Callsign} to pilot roster");
                     simGameState.AddPilotToRoster(def, true);
                 }
-        }
+            }
 
+        }
     }
 }
