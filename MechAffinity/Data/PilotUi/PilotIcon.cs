@@ -16,7 +16,7 @@ namespace MechAffinity.Data
         public bool HasColour() => !String.IsNullOrEmpty(colour);
         public bool HasIcon() => !String.IsNullOrEmpty(svgAssetId);
 
-        public bool HasDescription => !String.IsNullOrEmpty(descriptionDefId);
+        public bool HasDescription() => !String.IsNullOrEmpty(descriptionDefId);
         
         public Color GetColor()
         {

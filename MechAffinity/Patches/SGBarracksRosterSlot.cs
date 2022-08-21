@@ -17,7 +17,7 @@ namespace MechAffinity.Patches
     [HarmonyPatch(typeof(SGBarracksRosterSlot), "Refresh")]
     public static class SGBarracksRosterSlot_Refresh_Patch
     {
-        public static void Postfix(SGBarracksRosterSlot __instance, UIColorRefTracker ___pilotTypeBackground, SVGImage ___roninIcon)
+        public static void Postfix(SGBarracksRosterSlot __instance, UIColorRefTracker ___pilotTypeBackground, SVGImage ___roninIcon, HBSTooltip ___RoninTooltip)
         {
             if (__instance.Pilot == null)
                 return;
@@ -52,8 +52,22 @@ namespace MechAffinity.Patches
 
                 if (pilotIcon.HasIcon())
                 {
-                    SVGAsset svgAsset = UnityGameInstance.BattleTechGame.Simulation.DataManager.SVGCache.GetAsset(pilotIcon.svgAssetId);
+                    Main.modLog.LogMessage("Setting Pilot Icon Image!");
+                    SVGAsset svgAsset = PilotUiManager.Instance.GetSvgAsset(pilotIcon.svgAssetId);
+                    ___roninIcon.gameObject.SetActive((UnityEngine.Object) svgAsset != (UnityEngine.Object) null);
+                    ___roninIcon.vectorGraphics = svgAsset;
                 }
+                
+                if (pilotIcon.HasDescription())
+                {
+                    Main.modLog.LogMessage("Setting Pilot Icon Description!");
+                    BaseDescriptionDef def =
+                        UnityGameInstance.BattleTechGame.DataManager.BaseDescriptionDefs
+                            .Get(pilotIcon.descriptionDefId);
+                    ___RoninTooltip.SetDefaultStateData(TooltipUtilities.GetStateDataFromObject(def));
+                
+                }
+                
             }
 
             if (Main.settings.enablePilotQuirks)

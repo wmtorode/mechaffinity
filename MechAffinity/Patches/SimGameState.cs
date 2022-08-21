@@ -44,6 +44,15 @@ namespace MechAffinity.Patches
             }
         }
     }
+    
+    [HarmonyPatch(typeof(SimGameState), "_OnAttachUXComplete")]
+    class SimGameState_OnAttachUXComplete
+    {
+        public static void Postfix(SimGameState __instance)
+        {
+            PilotUiManager.Instance.issueLoadRequests();
+        }
+    }
 
     [HarmonyPatch(typeof(SimGameState), "InitCompanyStats")]
     class SimGameState_InitCompanyStatsPatch

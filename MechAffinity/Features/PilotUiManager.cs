@@ -1,8 +1,10 @@
 using System.Collections.Generic;
 using BattleTech;
+using BattleTech.Data;
 using BattleTech.UI;
 using MechAffinity.Data;
 using UnityEngine;
+using SVGImporter;
 
 namespace MechAffinity
 {
@@ -12,6 +14,7 @@ namespace MechAffinity
         
         private Dictionary<string, PilotIcon> iconMap;
         private PilotUiSettings settings;
+        private DataManager dataManager;
 
         public static PilotUiManager Instance
         {
@@ -26,16 +29,35 @@ namespace MechAffinity
         public void initialize(PilotUiSettings pilotUiSettings)
         {
             if(hasInitialized) return;
+            dataManager = UnityGameInstance.BattleTechGame.DataManager;
             iconMap = new Dictionary<string, PilotIcon>();
             settings = pilotUiSettings;
+            LoadRequest loadRequest = dataManager.CreateLoadRequest();
+            iconMap.Clear();
             foreach (PilotIcon pilotIcon in settings.pilotIcons)
             {
-                iconMap.Clear();
                 if (iconMap.ContainsKey(pilotIcon.tag)) continue;
                 iconMap.Add(pilotIcon.tag, pilotIcon);
+                if (pilotIcon.HasIcon()) loadRequest.AddLoadRequest<SVGAsset>(BattleTechResourceType.SVGAsset, pilotIcon.svgAssetId, null);
+                if (pilotIcon.HasDescription()) loadRequest.AddLoadRequest<BaseDescriptionDef>(BattleTechResourceType.BaseDescriptionDef, pilotIcon.descriptionDefId, null);
             }
+            
+            loadRequest.ProcessRequests();
 
             hasInitialized = true;
+        }
+
+        public void issueLoadRequests()
+        {
+            Main.modLog.LogMessage("Issuing Load requests!");
+            LoadRequest loadRequest = dataManager.CreateLoadRequest();
+            foreach (PilotIcon pilotIcon in settings.pilotIcons)
+            {
+                if (pilotIcon.HasIcon()) loadRequest.AddLoadRequest<SVGAsset>(BattleTechResourceType.SVGAsset, pilotIcon.svgAssetId, null);
+                if (pilotIcon.HasDescription()) loadRequest.AddLoadRequest<BaseDescriptionDef>(BattleTechResourceType.BaseDescriptionDef, pilotIcon.descriptionDefId, null);
+            }
+            
+            loadRequest.ProcessRequests();
         }
 
         public PilotIcon GetPilotIcon(Pilot pilot)
@@ -52,6 +74,11 @@ namespace MechAffinity
 
             return null;
 
+        }
+
+        public SVGAsset GetSvgAsset(string iconId)
+        {
+            return dataManager.GetObjectOfType<SVGAsset>(iconId, BattleTechResourceType.SVGAsset);
         }
 
     }
