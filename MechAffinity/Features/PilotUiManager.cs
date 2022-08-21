@@ -38,20 +38,21 @@ namespace MechAffinity
             hasInitialized = true;
         }
 
-        public void SetPilotIcon(Pilot pilot, UIColorRefTracker pilotTypeBackground)
+        public PilotIcon GetPilotIcon(Pilot pilot)
         {
             foreach (string tag in pilot.pilotDef.PilotTags)
             {
                 Main.modLog.LogMessage($"checking tag: {tag}: {iconMap.ContainsKey(tag)}");
                 if (iconMap.ContainsKey(tag))
                 {
-                    Main.modLog.LogMessage("Setting Pilot Icon Colour!");
-                    pilotTypeBackground.SetUIColor(UIColor.Custom);
-                    pilotTypeBackground.OverrideWithColor(iconMap[tag].GetColor());
-                    break;
+                    Main.modLog.LogMessage($"Found IconData for: {tag}!");
+                    return iconMap[tag];
                 }
             }
+
+            return null;
+
         }
-        
+
     }
 }

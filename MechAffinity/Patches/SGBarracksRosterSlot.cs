@@ -10,13 +10,14 @@ using BattleTech.UI.Tooltips;
 using Harmony;
 using MechAffinity;
 using MechAffinity.Data;
+using SVGImporter;
 
 namespace MechAffinity.Patches
 {
     [HarmonyPatch(typeof(SGBarracksRosterSlot), "Refresh")]
     public static class SGBarracksRosterSlot_Refresh_Patch
     {
-        public static void Postfix(SGBarracksRosterSlot __instance, UIColorRefTracker ___pilotTypeBackground)
+        public static void Postfix(SGBarracksRosterSlot __instance, UIColorRefTracker ___pilotTypeBackground, SVGImage ___roninIcon)
         {
             if (__instance.Pilot == null)
                 return;
@@ -38,7 +39,22 @@ namespace MechAffinity.Patches
                 }
             }
 
-            PilotUiManager.Instance.SetPilotIcon(pilot, ___pilotTypeBackground);
+            PilotIcon pilotIcon = PilotUiManager.Instance.GetPilotIcon(pilot);
+
+            if (pilotIcon != null)
+            {
+                if (pilotIcon.HasColour())
+                {
+                    Main.modLog.LogMessage("Setting Pilot Icon Colour!");
+                    ___pilotTypeBackground.SetUIColor(UIColor.Custom);
+                    ___pilotTypeBackground.OverrideWithColor(pilotIcon.GetColor());
+                }
+
+                if (pilotIcon.HasIcon())
+                {
+                    SVGAsset svgAsset = UnityGameInstance.BattleTechGame.Simulation.DataManager.SVGCache.GetAsset(pilotIcon.svgAssetId);
+                }
+            }
 
             if (Main.settings.enablePilotQuirks)
             {
