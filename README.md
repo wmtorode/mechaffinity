@@ -22,31 +22,33 @@ example:
   "legacyData": {}
 }
 ```
-`version`: used to determine if this settings file is compatible with the build, always set to `2`
+- `version`: used to determine if this settings file is compatible with the build, always set to `2`
+- `debug` : when true enable debug logging
+- `enablePilotAffinity` : When true, Pilots will build affinity with a mech each time they use that chassis,  with enough affinity they will get affinity Defs applied to earn bonuses on deployments
+- `enablePilotQuirks` : when true, pilot quirk feaures will be enabled **Warning: This will conflict with Pilot Quirks mod**
+- `enablePilotSelect` : when `true` allow set or random ronin to be part of the initial career start pilot roster. you must setup [Pilot Select Settings](#pilot-select-settings) in `pilotselectsettings.json` for this to work
+- `enableMonthlyMoraleReset`: when `true` morale will be reset on the start of each month and then recalculated based on argo upgrades and pilot quirks
+- `enableStablePiloting`: when `true` enables 'Stable Piloting' features
+- `affinitySettings` : an [Affinity Settings](#affinity-settings) Object, this controls all settings for Affinity features
+- `quirkSettings` : a [Pilot Quirk Settings](#pilot-quirk-settings) Object, this controls all settings for Pilot Quirks features
+- `stablePilotingSettings` : a [Stable Piloting Settings](#stable-piloting-settings) object for controlling Stable Piloting features
+- `pilotUiSettings`: a [Pilot UI Settings](#pilot-ui-settings) Object, this controls all settings and configuration for Pilot UI features
+- `legacyData` : a `Legacy Data Settings` object, controls various options for outputting legacy versions of the settings file for compatibility with some third party tools
 
-`debug` : when true enable debug logging
+## Mech-Pilot Affinity
 
-`enablePilotAffinity` : When true, Pilots will build affinity with a mech each time they use that chassis,  with enough affinity they will get affinity Defs applied to earn bonuses on deployments
+Affinity is a representation of a pilot's familiarity with a given mech chassis. As a pilot gets to know that mech better, they learn its quirks and how to squeeze some extra power out of it, however this experience may not translate to another
+class of chassis, so for example a pilot who has spent years piloting a ShadowHawk, may fair poorly in a Vindicator.
 
-`enablePilotQuirks` : when true, pilot quirk feaures will be enabled **Warning: This will conflict with Pilot Quirks mod**
+Each deployment with a mech increases a pilot's affinity for that chassis by a single point, upon reaching enough deployments they will start to be granted 'affinities' until they have obtained all that can be obtained with that unit.
+Affinities can come in the form of Buffs or Malus depending on the setup.
 
-`enablePilotSelect` : when `true` allow set or random ronin to be part of the initial career start pilot roster. you must setup `Pilot Select Settings` in `pilotselectsettings.json` for this to work
+Depending on the setup of the below settings, affinities may decay overtime as a way to represent a pilot losing familiarity with that unit until it reaches a defined minimum threshold or is forgotten entirely. These thresholds can be setup to always come from
+the settings file or can be tracked by stats that in-game events or argo upgrades may modify as required.
 
-`enableMonthlyMoraleReset`: when `true` morale will be reset on the start of each month and then recalculated based on argo upgrades and pilot quirks
+**Note: Pilots will receive ALL affinities that they qualify for, not just the highest available to them**
 
-`enableStablePiloting`: when `true` enables 'Stable Piloting' features
-
-`affinitySettings` : an `Affinity Settings` Object, this controls all settings for Affinity features
-
-`quirkSettings` : a `Pilot Quirk Settings` Object, this controls all settings for Pilot Quirks features
-
-`stablePilotingSettings` : a `Stable Piloting Settings` object for controlling Stable Piloting features
-
-`pilotUiSettings`: a `Pilot UI Settings` Object, this controls all settings and configuration for Pilot UI features
-
-`legacyData` : a `Legacy Data Settings` object, controls various options for outputting legacy versions of the settings file for compatibility with some third party tools
-
-## Affinity Settings
+### Affinity Settings
 
 **These settings only apply when `enablePilotAffinity` is true**
 
@@ -70,37 +72,463 @@ example:
 }
 ```
 
-`missionsBeforeDecay` : the number of deployments a pilot can not use a chassis before their experience on that chassis begins to be lost, set to `-1` to disable
-
-`removeAffinityAfter` : the number of deployments a pilot can not use a chassis before all experience on that chassis is lost, this is used to clean up save data tracking, set to `-1` to disable
-
-`lowestPossibleDecay` : the lowest amount of a pilots experience with a chassis can decay to `removeAffinityAfter` overrides this value. this is counted in deployements when `trackLowestDecayByStat` is `false` the number in this settings will always be used. 
-if `trackLowestDecayByStat` is `true` this number becomes part of the save and cannot be changed from settings later. events or argo upgrades can
+- `missionsBeforeDecay` : the number of deployments a pilot can not use a chassis before their experience on that chassis begins to be lost, set to `-1` to disable
+- `removeAffinityAfter` : the number of deployments a pilot can not use a chassis before all experience on that chassis is lost, this is used to clean up save data tracking, set to `-1` to disable
+- `lowestPossibleDecay` : the lowest amount of a pilots experience with a chassis can decay to `removeAffinityAfter` overrides this value. this is counted in deployements when `trackLowestDecayByStat` is `false` the number in this settings will always be used. 
+- if `trackLowestDecayByStat` is `true` this number becomes part of the save and cannot be changed from settings later. events or argo upgrades can
 manipulate this value by changing the company stat `MaLowestDecay`
-
-`maxAffinityPoints` : the max amount of affinity that can be obtained for a unit once a pilot reaches this number with a chassis, further points will not be obtained
-
-`decayByModulo` : when set to true, decay is changed to 1 point for every `missionsBeforeDecay` instead of 1 point for every mission after `missionsBeforeDecay` missions
-
-`debugForceTag` : force affinity to process pilots as if they had this tag, for debugging use only
-
-`defaultDaysBeforeSimDecay` : the default number of days that can elapse before a pilot's affinities begin to decay. when `trackSimDecayByStat` is `true` this number becomes part of the save and cannot be changed from settings later. events or argo upgrades can
+- `maxAffinityPoints` : the max amount of affinity that can be obtained for a unit once a pilot reaches this number with a chassis, further points will not be obtained
+- `decayByModulo` : when set to true, decay is changed to 1 point for every `missionsBeforeDecay` instead of 1 point for every mission after `missionsBeforeDecay` missions
+- `debugForceTag` : force affinity to process pilots as if they had this tag, for debugging use only
+- `defaultDaysBeforeSimDecay` : the default number of days that can elapse before a pilot's affinities begin to decay. when `trackSimDecayByStat` is `true` this number becomes part of the save and cannot be changed from settings later. events or argo upgrades can
 manipulate this value by changing the company stat `MaSimDaysDecayModulator`. setting this stat to -1 will stop decay from occuring when a day passes. deploying a pilot into a mission will reset that pilots counter. when `trackSimDecayByStat` is `false` this 
 setting value will always be used
+- `topAffinitiesInTooltipCount` : the number of mechs to show affinity about in the pilot tooltip, if the pilot has affinities with more mechs than this, mechs with the fewest affinities will be dropped from display
+- `showQuirks` : when true, quirk affinities that are assiocated with a mech will be shown in the mechbay description of the mech in addition to any chassis specific affinities
+- `showDescriptionsOnChassis` : when true, affinitys will be shown for chassis in the on hover chassis description in the mechbay storage screen
+- `showAllPilotAffinities` : when true, the pilot dossier will show every affinity the pilot has with every chassis, when false only the highest level affininty will be show for a given chassis
+- `affinityGroups` : a list of [AffinityGroup](#affinitygroup-objects) objects. These allow you to treat a group of prefabs/assembly IDs as a single ID
+- `prefabOverrides`: a list of [PrefabOveride](#prefaboveride-objects) objects. These allow you to correct UI display issues caused by some of the game's "Dummy Units"
 
-`topAffinitiesInTooltipCount` : the number of mechs to show affinity about in the pilot tooltip, if the pilot has affinities with more mechs than this, mechs with the fewest affinities will be dropped from display
+#### AffinityGroup objects
 
-`showQuirks` : when true, quirk affinities that are assiocated with a mech will be shown in the mechbay description of the mech in addition to any chassis specific affinities
+affinity groups allow you to re-map prefab ids to be treated as one specific ID
 
-`showDescriptionsOnChassis` : when true, affinitys will be shown for chassis in the on hover chassis description in the mechbay storage screen
+```json
+{
+  "affinityId" : "",
+  "assemblyGroup" : []
+}
+```
 
-`showAllPilotAffinities` : when true, the pilot dossier will show every affinity the pilot has with every chassis, when false only the highest level affininty will be show for a given chassis
+- `affinityId` : the ID you want the mentioned IDs to be mapped to. this is the ID you should use in affinities you want to assign
+- `assemblyGroup` : the prefab/assemblyvariants you want to be remapped to the `affinityId`
 
-`affinityGroups` : a list of `AffinityGroup` objects. These allow you to treat a group of prefabs/assembly IDs as a single ID
+#### PrefabOveride objects
 
-`prefabOverrides`: a list of `PrefabOveride` objects. These allow you to correct UI display issues caused by some of the game's "Dummy Units"
+Prefab overrides allow you to correct some UI display issues that may occur with affinities showing the wrong Mech name. the principle cause for this in vanilla is a few 'Dummy Mechs' within the game files used for the campaign tutorial
 
-## Pilot Quirk Settings
+```json
+{
+  "prefabId" : "",
+  "overrideName" : ""
+}
+```
+
+- `prefabId` : the prefab ID that is causing an issue
+- `overrideName` : the name to display in the UI instead of the auto-detected name
+
+### AffinityDef Objects
+
+Affinity Definitions (AffinityDefs) are JSON files loaded into the via ModTek's custom resource (Manifest entry of: `AffinityDef`)
+
+these definitions are matched to the appropriate pilots on deployment of a mission.
+
+```json
+{
+  "id": "",
+  "affinityType": "Global",
+  "affinityData": {}
+}
+```
+
+- `id`: The affinity ID, this must be unique and must match the file name of the affinityDef (minus the .json file extension)
+- `affinityType`: The type of affinity this definition is for. Valid values are:
+  - `Global`: Affinities of this class are available on all chassis's (Note: experience on one chassis does not transfer to another)
+  - `Chassis`: Affinities of this class are available only the chassis's named by the affinity 
+  - `Tag`: Similar to Chassis affinities, but also requires the pilot to have a matching tag named by the affinity. This could be used to grant special affinities to pilots of a certain descent on chassis's of their homelands for example.
+  - `Quirk`: Affinities of this class are available only to chassis that mount the equipment/weapon named in the affinity as fixed equipment (equipment that cannot be removed from that mech)
+- `affinityData` A JSON object that represents the affinity, the exact schema of this will vary depending on the `affinityType`. see below for their definitions and schemas
+
+#### GlobalAffinity objects
+
+global Affinity Objects are simply [AffinityLevel](#affinitylevel-objects) objects, see their schema for how to layout a global affinity
+
+#### Example Global Affinity AffinityDef
+```json
+{
+  "id": "AffinityDef_global_Veteran",
+  "affinityType": "Global",
+  "affinityData": {
+    "missionsRequired": 10,
+    "levelName": "Veteran",
+    "decription": "+1 Guts Boost",
+    "affinities": [
+      {
+        "type": "Guts",
+        "bonus": 1
+      }
+    ],
+    "effectData": []
+  }
+}
+```
+
+#### ChassisAffinity objects
+
+```json
+{
+  "chassisNames" : [],
+  "affinityLevels" : [],
+  "idType" : "AssemblyVariant",
+  "altMaps": []
+}
+```
+
+- `chassisNames` : a list of chassis this affinity is available to. 
+- `affinityLevels` : a list of [affinityLevel](#affinitylevel-objects) objects to be considered for this affinity
+- `idType` : This value defines how the values in `chassisNames` are interpreted Valid values:
+  - `ChassisId`: The Chassis ID of the mech (from its chassisdef file).
+  - `AssemblyVariant`: (the default), only useful when paired with the CustomSalvage mod. This uses CS's `AssemblyVarient` to pair mechs to this, if CS is not available, this falls back to the PrefabId method
+  - `PrefabId`: the chassis name is the prefab name followed by a `-` and the tonnage of the mech. example chassis name for the assassin `chrPrfMech_assassinBase-001_40`
+- `altMaps`: provides a way to map chassis to this affinity that use a different ID type. this is a list of [ChassisTypeMap](#chassistypemap-objects) objects
+
+##### ChassisTypeMap Objects
+
+```json
+{
+  "chassisIds": [],
+  "idType": "AssemblyVariant"
+}
+```
+
+- `chassisIds` : a list of chassis this affinity is available to.
+- `idType` : This value defines how the values in `chassisIds` this is the same as [ChassisAffinity](#chassisaffinity-objects) 
+
+#### Example Chassis Affinity AffinityDef
+```json
+{
+  "id": "AffinityDef_chassis_Ambusher",
+  "affinityType": "Chassis",
+  "affinityData": {
+    "chassisNames": [
+      "TechieS",
+      "TechieM",
+      "TechieL",
+      "phantasm_45",
+      "wasp_20",
+      "laohu_75",
+      "Archangel_100",
+      "Spector_35",
+      "Chameleon_50",
+      "Wight_35",
+      "Stealth_45",
+      "xenorauder_75",
+      "xenoqueen_200",
+      "Gestalt_45",
+      "assassin_40",
+      "exterminator_65",
+      "RaptorIII_40",
+      "RaptorII_40",
+      "Imiut_45",
+      "Aswang_40",
+      "AssassinII_40",
+      "Menshen_55",
+      "Anubis_30",
+      "cephalus_25",
+      "shayu_40",
+      "hermitcrab_25",
+      "blueflame_45"
+    ],
+    "idType": "AssemblyVariant",
+    "altMaps": [],
+    "affinityLevels": [
+      {
+        "missionsRequired": 20,
+        "levelName": "Ambusher",
+        "decription": "-15% Signature and Visibility and +1 Local ECM",
+        "affinities": [],
+        "effectData": [
+          {
+            "Description": {
+              "Details": "Pilot has Mastered the Chassis.",
+              "Icon": "UixSvgIcon_specialEquip_System",
+              "Id": "Affinity_Predator_Signature",
+              "Name": "BattleMechAffinity"
+            },
+            "durationData": {
+              "duration": -1,
+              "stackLimit": -1
+            },
+            "effectType": "StatisticEffect",
+            "nature": "Buff",
+            "statisticData": {
+              "statName": "SensorSignatureModifier",
+              "operation": "Float_Multiply",
+              "modValue": "0.85",
+              "modType": "System.Single",
+              "targetAmmoCategory": "NotSet",
+              "targetCollection": "NotSet",
+              "targetWeaponCategory": "NotSet",
+              "targetWeaponSubType": "NotSet",
+              "targetWeaponType": "NotSet"
+            },
+            "targetingData": {
+              "effectTargetType": "Creator",
+              "effectTriggerType": "Passive",
+              "hideApplicationFloatie": true,
+              "showInStatusPanel": false,
+              "showInTargetPreview": false
+            }
+          },
+          {
+            "Description": {
+              "Details": "Pilot has Mastered the Chassis.",
+              "Icon": "UixSvgIcon_specialEquip_System",
+              "Id": "Affinity_Predator_Visibility",
+              "Name": "BattleMechAffinity"
+            },
+            "durationData": {
+              "duration": -1,
+              "stackLimit": -1
+            },
+            "effectType": "StatisticEffect",
+            "nature": "Buff",
+            "statisticData": {
+              "statName": "SpottingVisibilityMultiplier",
+              "operation": "Float_Multiply",
+              "modValue": "0.85",
+              "modType": "System.Single",
+              "targetAmmoCategory": "NotSet",
+              "targetCollection": "NotSet",
+              "targetWeaponCategory": "NotSet",
+              "targetWeaponSubType": "NotSet",
+              "targetWeaponType": "NotSet"
+            },
+            "targetingData": {
+              "effectTargetType": "Creator",
+              "effectTriggerType": "Passive",
+              "hideApplicationFloatie": true,
+              "showInStatusPanel": false,
+              "showInTargetPreview": false
+            }
+          },
+          {
+            "Description": {
+              "Details": "Pilot has Mastered the Chassis.",
+              "Icon": "UixSvgIcon_specialEquip_System",
+              "Id": "Affinity_Predator_ECM",
+              "Name": "BattleMechAffinity"
+            },
+            "durationData": {
+              "duration": -1,
+              "stackLimit": -1
+            },
+            "effectType": "StatisticEffect",
+            "nature": "Buff",
+            "statisticData": {
+              "statName": "LV_ECM_SHIELD",
+              "operation": "Int_Add",
+              "modValue": "1",
+              "modType": "System.Int32",
+              "targetAmmoCategory": "NotSet",
+              "targetCollection": "NotSet",
+              "targetWeaponCategory": "NotSet",
+              "targetWeaponSubType": "NotSet",
+              "targetWeaponType": "NotSet"
+            },
+            "targetingData": {
+              "effectTargetType": "Creator",
+              "effectTriggerType": "Passive",
+              "hideApplicationFloatie": true,
+              "showInStatusPanel": false,
+              "showInTargetPreview": false
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+#### QuirkAffinity objects
+
+```json
+{
+  "quirkNames" : [],
+  "affinityLevels" : []
+}
+```
+
+- `quirkNames` : a list of fixed equipment on a chassis that this affinity should be applied to. use the items ComponentDefID for this field. a pilot can qualify for multiple quirk affinities, ideally this is used for mech quirks, but other fixed gear can also be used
+- `affinityLevels` : a list of `affinityLevel` objects to be considered for this affinity
+
+##### Example Quirk Affinity AffinityDef
+```json
+{
+  "id": "AffinityDef_quirk_Afterburner",
+  "affinityType": "Quirk",
+  "affinityData": {
+    "quirkNames": [
+      "Gear_LegJet_Queen_Upper",
+      "Gear_JumpJet_Extended_Superheavy",
+      "Gear_JumpJet_Generic_Assault",
+      "Gear_JumpJet_Generic_Heavy",
+      "Gear_JumpJet_Generic_Standard",
+      "Gear_JumpJet_Quad_FrontLeg_Assault",
+      "Gear_JumpJet_Quad_FrontLeg_Heavy",
+      "Gear_JumpJet_Quad_FrontLeg_Standard",
+      "Gear_JumpJet_Prototype_Assault",
+      "Gear_JumpJet_Prototype_Heavy",
+      "Gear_JumpJet_Prototype_Standard",
+      "Gear_JumpJet_Proto_Standard",
+      "Gear_JumpJet_Proto_Superheavy",
+      "Gear_JumpJet_SyberianHeavy",
+      "Gear_LegJet_Assault_Upper",
+      "Gear_JumpJet_Booster_clan",
+      "Gear_JumpJet_Directional_MAD-DER",
+      "Gear_JumpJet_Improved_Standard",
+      "Gear_JumpJet_Improved_Heavy",
+      "Gear_JumpJet_Improved_Assault",
+      "Gear_JumpJet_Improved_Quad_FrontLeg_Standard",
+      "Gear_JumpJet_Improved_Quad_FrontLeg_Heavy",
+      "Gear_JumpJet_Improved_Quad_FrontLeg_Assault",
+      "RedLabmorBoostpack",
+      "Proto_JumpJetsHeavyCU3",
+      "Proto_JumpJetsHeavyCU4",
+      "Proto_JumpJetsHeavyCU5",
+      "Proto_JumpJetsHeavyExtendedCU5",
+      "Proto_JumpJetsHeavyExtendedCU6",
+      "Proto_JumpJetsHeavyExtendedCU8",
+      "Proto_JumpJetsLightCU3",
+      "Proto_JumpJetsLightCU4",
+      "Proto_JumpJetsLightCU5",
+      "Proto_JumpJetsLightCU6",
+      "Proto_JumpJetsLightCU7",
+      "Proto_JumpJetsLightExtendedCU9",
+      "Proto_JumpJetsUltraHeavyCU3",
+      "Proto_JumpJetsUltraHeavyCU5",
+      "Proto_JumpJetsUltraHeavyExtendedCU5",
+      "Proto_JumpJetsUltraHeavyExtendedCU8"
+    ],
+    "affinityLevels": [
+      {
+        "missionsRequired": 150,
+        "levelName": "Afterburner",
+        "decription": "+5% Jump Distance",
+        "affinities": [],
+        "effectData": [
+          {
+            "durationData": {
+              "duration": -1,
+              "stackLimit": -1
+            },
+            "targetingData": {
+              "effectTriggerType": "Passive",
+              "specialRules": "NotSet",
+              "effectTargetType": "Creator",
+              "showInTargetPreview": false,
+              "showInStatusPanel": false
+            },
+            "effectType": "StatisticEffect",
+            "Description": {
+              "Id": "AFTAHBURNAH",
+              "Name": "CLAN TTS",
+              "Details": "+2Acc, +50% Crit, +30% Range, -50%MinRange for ALL Weapons.",
+              "Icon": "AdvancedTC"
+            },
+            "nature": "Buff",
+            "statisticData": {
+              "statName": "JumpDistanceMultiplier",
+              "operation": "Float_Multiply",
+              "modValue": "1.05",
+              "modType": "System.Single"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+#### TaggedAffinity objects
+
+```json
+{
+  "tag" : "",
+  "idType" : "AssemblyVariant",
+  "chassisNames" : [],
+  "affinityLevels" : []
+}
+```
+
+`tag` : a tag that the pilot must have for this affinity to be considered
+`chassisNames` : a list of chassis this affinity is available to.
+`affinityLevels` : a list of `affinityLevel` objects to be considered for this affinity
+`idType` : where the chassisNames are prefab ids or chassis IDs. same as [Chassis Affinities](#chassisaffinity-objects)
+
+#### AffinityLevel objects
+
+```json
+{
+  "missionsRequired" : 1,
+  "levelName" : "Professional",
+  "decription" : "Get A Major Gunnery Boost",
+  "affinities" : [],
+  "effectData" : []
+}
+```
+
+- `missionsRequired` : the number of deployments required to receive this affinity
+- `levelName` : the name of this affinity level
+- `decription` : a description of this level
+- `affinities` : a list of [affinity](#affinity-objects) objects this level applies
+- `effectData` : a list of status effects that this level applies
+
+### affinity objects
+
+Affinity objects provide a direct boost to a pilot's stats.
+
+**Note: This provides a raw stat boost only, it does not confer additional abilities or traits that come with naturely leveling the pilot's skill up**
+
+```json
+{
+  "type" : "Gunnery",
+  "bonus" : 5
+}
+```
+
+- `type` : the affinity type one of:
+  - `Gunnery`
+  - `Guts`
+  - `Tactics`
+  - `Piloting`
+- `bonus` : the bonus to be applied to this skill
+
+### Giving AI Pilots Affinities
+
+non player pilots can also be setup to receive affinities. to do this add a pilot tag of `affinityLevel_X` where X is the number of deployments that should be granted to the pilot. pilots with this tag will be able to receive all affinities (Global, Chassis, Quirk & Tagged) that a player pilot of equal deployments is applicable for
+
+### Affinities By Tags
+
+pilots may be granted experience towards affinities (of all types) by having special tags. there are 2 variants Permanent tags and Consumable tags. These tags can be part of a pilotdef when a pilot is generated
+or added by events.
+
+Permanent Tags: These tags provide the pilot with a permanent boost to their affinity count for a given chassis (unless they lose the tag).
+permanent tags follow this scheme `MaPermAffinity_X=prefabId` where X is the number of deployments to be given, and prefabId is the chassis that this boost should be given to.
+
+Example: Pilot Raza has been given the tag `MaPermAffinity_6=chrPrfMech_urbanmechBase-001_30` this means Raza has a permanent 6 points added when using the chassis `chrPrfMech_urbanmechBase-001_30` (the UrbanMech)
+
+Consumable Tags: These tags provide the pilot with a boost to their affinity count for a given chassis. when a day passes this tag will be removed and the number of points will be added to the tracking stat.
+these boosts are therefore subject to decay as normal affinity points are.
+Consumable tags follow this scheme `MaConsumableAffinity_X=prefabId` where X is the number of deployments to be given, and prefabId is the chassis that this boost should be given to.
+
+Example: Pilot Raza has been given the tag `MaConsumableAffinity_5=chrPrfMech_urbanmechBase-001_30` this means Raza has a 5 point boost added when using the chassis `chrPrfMech_urbanmechBase-001_30` (the UrbanMech),
+overtime this may decay if Raza decides to pilot another mech.
+
+## Pilot Quirks
+
+Pilot quirks represent innate quirks of a pilot based on their physical, mental, socioeconomic backgrounds & behaviours. These quirks can manifest themselves in numerous active or passive ways.
+
+Quirks may be used to grant buffs or malus's or both to a pilot. Quirks offer a wide range of options that can affect both sim-game and combat itself. In the event that the quirk's actual behaviour is provided
+by another mod, making a QuirkDef may still be useful as a means to inform the user of that quirk, even if the actual implementation is elsewhere. For Example: Pilot Fiona's quirk grants her access to Airstrike abilities.
+The actual implementation of this quirk is provided by a combination of mods and not MechAffinity itself, but the quirkDef is still created to display to the user and provide the extra monthly cost for employing such a powerful pilot.
+
+Quirks may have their various features adjusted using the below settings.
+
+### Pilot Quirk Settings
 
 **These settings only apply when `enablePilotQuirks` is true**
 
@@ -116,242 +544,51 @@ setting value will always be used
 }
 ```
 
-`quirkPools` : a list of `QuirkPool` objects.
+- `quirkPools` : a list of [QuirkPool](#quirkpool-objects) objects.
+- `playerQuirkPools` : when `true` player pilots can also use quirk pools.
+- `argoAdditive` : when `true` argo upgrade modifiers are processed using an additive model, when `false` a multiplicative model is used instead
+- `argoMin` : the lowest possible argo upgrade modifier, defaults to 0.0
+- `argoMultiAutoAdjust` : when `true` auto normalize modifiers for the multiplicative model (by adding 1.0 to the modifier before its factored in) instead of directly applying the modifier
+- `tooltipTags` : a list of [PilotTooltipTag](#pilottooltiptag-objects) objects. These will be used for tooltips, this can be used for TBAS or for legacy functions of PilotQuirks for PilotFatigue support
+- `addTags` : a list of pilot tags. When Quirks are enabled, these tags will be automatically added to any pilot in your roster
 
-`playerQuirkPools` : when `true` player pilots can also use quirk pools.
+#### QuirkPool objects
 
-`argoAdditive` : when `true` argo upgrade modifiers are processed using an additive model, when `false` a multiplicative model is used instead
+A quirk pool provides a way to randomly assign quirks to a pilot based on the presence of a tag. This is primarily useful for granting AI Pilots a random selection of quirks.
 
-`argoMin` : the lowest possible argo upgrade modifier, defaults to 0.0
-
-`argoMultiAutoAdjust` : when `true` auto normalize modifiers for the multiplicative model (by adding 1.0 to the modifier before its factored in) instead of directly applying the modifier
-
-`tooltipTags` : a list of `PilotTooltipTag` objects. These will be used for tooltips, this can be used for TBAS or for legacy functions of PilotQuirks for PilotFatigue support
-
-`addTags` : a list of pilot tags. When Quirks are enabled, these tags will be automatically added to any pilot in your roster
-
-## Pilot Select Settings
-
-**These settings only apply when `enablePilotSelect` is true**
-
-These settings control how many of each type of pilot to include in the initial pilot roster for a career.
-
-**Note: This is a port of `https://github.com/BattletechModders/SelectPilots` to fix a conflict between the two mods, as such they will conflict when this is enabled**
+**Note: Pilots can qualify and use more than one quirk pool**
 
 ```json
 {
-  "PossibleStartingRonin": [],
-  "RoninFromList": 0,
-  "ProceduralPilots": 4,
-  "RandomRonin": 4
+  "tag" : "",
+  "quirksToPick": 0,
+  "quirksAvailable" : []
+}
+```
+- `tag` : the tag that activates this quirk pool
+- `quirksToPick` : the number of quirks to select from this pool
+- `quirksAvailable` : a list of quirk tags this pool can select
+
+#### PilotTooltipTag objects
+```json
+{
+  "tag" : "",
+  "tooltipText" : ""
 }
 ```
 
-`PossibleStartingRonin` : a list of ronin pilot IDs that can be selected when drawing from the list
+- `tag` : the tag that activates this tooltip text
+- `tooltipText` : the text for the tooltip, Note: a double new line will be automatically added to the end
 
-example list for vanilla pilots:
-```json
-[
-  "pilot_sim_starter_medusa",
-  "pilot_sim_starter_behemoth",
-  "pilot_sim_starter_dekker",
-  "pilot_sim_starter_glitch"
-]
-```
+### QuirkDef Objects
 
-`RoninFromList` : the number of ronin to randomly select from the list
-`RandomRonin` : the number of ronin to randomly select from the entire pool of ronin in the game
-`ProceduralPilots`: the number of procedural pilots to generate to fill out the rest of the roster
+Quirk Definitions (QuirkDefs) are JSON files loaded into the via ModTek's custom resource (Manifest entry of: `QuirkDef`)
 
-## Stable Piloting Settings
-
-**These settings only apply when `enableStablePiloting` is true**
-
-These settings control the 'Stable Piloting' feature set.
-
-Stable Piloting allows for various modifications to stability damage taken by pilots.
+these definitions are matched to the appropriate pilots on deployment of a mission.
 
 ```json
 {
-  "reductionPerPiloting" : 0.02,
-  "increasePerInjury" : 0.05,
-  "InverseMax" : 20,
-  "tagEffects" : []
-}
-```
-
-`reductionPerPiloting`: the reduction of stability damage taken, per point of Piloting of a pilot. default setting is 2% reduction per level.
-`increasePerInjury`: the increase of stability damage taken, per injury on a pilot.
-`InverseMax`: The maximum Piloting skill level to use for Inverse tag effects. default is 20
-`tagEffects`: a list of `PilotTagStabilityEffect` objects
-
-### PilotTagStabilityEffect Objects
-
-These objects define stability reductions or penalties for pilots possessing matching tags. A pilot with multiple matching tags will receive the benefits (or penalties) for all applicable tags.
-
-```json
-{
-  "tag" : "pilot_klutz",
-  "effect": 0.01,
-  "type" : "Piloting"
-}
-```
-
-`tag`: the pilot tag required to apply this effect
-`effect`: the magnitude for this effect. Note that exactly how this is applied is based on the type. a positive value is a penalty (increase in stability damage taken), a negative is a boost (reduction in stability damage taken)
-
-`type`: This determines how `effect` is apllied. Valid values for this field are:
-- `Flat`: the default value, the magnitude of this effect is simply the value of `effect`
-- `Piloting` : the magnitude of this effect is the `effect` value multiplied by the Piloting skill of the pilot.
-- `PilotingInverse` : the magnitude of this effect is the `effect` value multiplied by the `InverseMax` minus the Piloting skill of the pilot. When piloting reaches the Inverse Max or greater, this effect will become 0. This mode is best used to reduce a penalty as Piloting Skill grows.
-
-
-## Pilot UI Settings
-
-```json
-{
-  "pilotIcons" : []
-}
-```
-Mech Affinity allows you to differentiate various pilots by altering their pilot icons in a similar manner to how vanilla Ronin or Kickstarter back pilots are distinguished.
-
-example: [RTO Pilot!](PilotUiExample.png)
-
-`iconColours`: a list of `PilotIcon` objects
-
-### Pilot Icon Objects
-
-```json
-{
-  "colour" : "#f21c1c",
-  "tag" : "pilot_rtolegend",
-  "descriptionDefId": "",
-  "svgAssetId": ""
-}
-```
-
-PilotIconColour objects allow you to change the pilot type's background colour to the specified colour, based on tags the pilot has.
-*Note: if a pilot qualifies for multiple colour's only the first one will be applied*
-
-- `colour`: the colour to set the background to
-- `tag`: the tag the pilot must have to use this colour
-
-
-`globalAffinities` : a list of `affinityLevel` objects. these will aplly to all pilot-chassis combos. Note that affinity levels are additive
-
-`chassisAffinities` : a list of `ChassisAfinity` objects. These apply only to pilots-chassis combos that are called out by the affinity. Note these are additive with all other affinities.
-
-`quirkAffinities` : a list of `QuirkAffinity` objects. These apply only to pilots-chassis combos equiped with the defined gear that are called out by the affinity. Note these are additive with all other affinities.
-
-`taggedAffinities` : a list of `TaggedAffinity` objects. These will only apply to pilot-chassis combos that are called out by the affinity, when the pilot has the specificed tag. Note these are additive with all other affinities.
-
-
-### affinityLevel objects
-
-```json
-{
-    "missionsRequired" : 1,
-    "levelName" : "Professional",
-    "decription" : "Get A Major Gunnery Boost",
-    "affinities" : [],
-    "effectData" : []
-}
-```
-
-`missionsRequired` : the number of deployments required to recieve this affinity
-
-`levelName` : the name of this affinity level
-
-`decription` : a description of this level
-
-`affinities` : a list of `affinity` objects this level applies
-
-`effectData` : a list of status effects that this level applies
-
-### affinity objects
-
-```json
-{
-    "type" : "Gunnery",
-    "bonus" : 5
-}
-```
-
-`type` : the affinity type one of:
-
-- Gunnery
-- Guts
-- Tactics
-- Piloting
-
-`bonus` : the bonus to be applyed to this skill
-
-### ChassisAffinity objects
-
-```json
-{
-    "chassisNames" : [],
-    "affinityLevels" : [],
-    "idType" : "AssemblyVariant"
-}
-```
-
-`chassisNames` : a list of chassis this affinity is available to. the chassis name is the prefab name followed by a `-` and the tonnage of the mech. In the event a the chassis has an assembly variant (from custom salvage), this will be used instead of the prefab. example chassis name for the assassin `chrPrfMech_assassinBase-001_40`
-
-`affinityLevels` : a list of `affinityLevel` objects to be considered for this affinity
-
-`idType` : where the chassisNames are prefab ids or chassis IDs. possible values `AssemblyVariant` (the default) or `ChassisId`
-
-### QuirkAffinity objects
-
-```json
-{
-    "quirkNames" : [],
-    "affinityLevels" : []
-}
-```
-
-`quirkNames` : a list of fixed equipment on a chassis that this affinity should be applied to. use the items ComponentDefID for this field. a pilot can qualify for multiple quirk affinities, ideally this is used for mech quirks, but other fixed gear can also be used
-
-`affinityLevels` : a list of `affinityLevel` objects to be considered for this affinity
-
-### TaggedAffinity objects
-
-```json
-{
-    "tag" : "",
-    "idType" : "AssemblyVariant",
-    "chassisNames" : [],
-    "affinityLevels" : []
-}
-```
-
-`tag` : a tag that the pilot must have for this affinity to be considered
-
-`chassisNames` : a list of chassis this affinity is available to. the chassis name is the prefab name followed by a `-` and the tonnage of the mech. In the event a the chassis has an assembly variant (from custom salvage), this will be used instead of the prefab. example chassis name for the assassin `chrPrfMech_assassinBase-001_40`
-
-`affinityLevels` : a list of `affinityLevel` objects to be considered for this affinity
-
-`idType` : where the chassisNames are prefab ids or chassis IDs. possible values `AssemblyVariant` (the default) or `ChassisId`
-
-### AffinityGroup objects
-
-affinity groups allow you to re-map prefab ids to be treated as one specific ID
-
-```json
-{
-  "affinityId" : "",
-  "assemblyGroup" : []
-}
-```
-
-`affinityId` : the ID you want the mentioned IDs to be mapped to. this is the ID you should use in affinities you want to assign
-`assemblyGroup` : the prefab/assemblyvariants you want to be remapped to the `affinityId`
-
-### PilotQuirk objects
-
-```json
-{
+    "id": "",
     "tag" : "",
     "quirkName" : "",
     "description" : "",
@@ -359,19 +596,16 @@ affinity groups allow you to re-map prefab ids to be treated as one specific ID
     "quirkEffects" : []
 }
 ```
-
-`tag` : a tag that the pilot must have for to be awarded this quirk
-
-`quirkName` : a human-readable name for this quirk, will be used in tooltips
-
-`description` : a description about what this quirk does
-
-`effectData` : a list of status effects that this quirk applies
-
-`quirkEffects` : a list of `QuirkEffect` objects that will be applied to this quirk
+- `id`: The Quirk ID, this must be unique and must match the file name of the QuirkDef (minus the .json file extension)
+- `tag` : a tag that the pilot must have for to be awarded this quirk
+- `quirkName` : a human-readable name for this quirk, will be used in tooltips
+- `description` : a description about what this quirk does
+- `effectData` : a list of status effects that this quirk applies
+- `quirkEffects` : a list of [QuirkEffect](#quirkeffect-objects) objects that will be applied to this quirk
 
 
-### QuirkEffect objects
+### QuirkEffect Objects
+
 
 ```json
 {
@@ -389,81 +623,291 @@ pilots with multiple quirk effects of the same type are additive
 available types:
 
 - `MedTech`, `MechTech` and `Morale`
-These types are used to modify the companies MedTech or MechTech or Morale levels respectively by the amount specified by `modifier`. this can be an int or a float
-and can increment or decrement these levels for example one quirk could add `0.6` mechtech points while another could add `1.4` and a third could add `-0.1`
-this would net an overall boost of 1, with 0.9 leftover and stored for when the pilot roster changes
+  These types are used to modify the companies MedTech or MechTech or Morale levels respectively by the amount specified by `modifier`. this can be an int or a float
+  and can increment or decrement these levels for example one quirk could add `0.6` mechtech points while another could add `1.4` and a third could add `-0.1`
+  this would net an overall boost of 1, with 0.9 leftover and stored for when the pilot roster changes
 
 - `PilotCostFactor`
-This type modifies the amount it costs to hire and monthly pay of a pilot. this works as a multiplier to the standard costs of the pilot by the amount 
-specified by `modifier` field. A modifier that is postive increases a pilots cost, while a negative decreases costs. 
-examples: a modifier of `0.3` with increase the cost of a pilot by 30%, while a value of `-0.25` will decrease the pilots cost by 25%
+  This type modifies the amount it costs to hire and monthly pay of a pilot. this works as a multiplier to the standard costs of the pilot by the amount
+  specified by `modifier` field. A modifier that is postive increases a pilots cost, while a negative decreases costs.
+  examples: a modifier of `0.3` with increase the cost of a pilot by 30%, while a value of `-0.25` will decrease the pilots cost by 25%
 
 - `CriminalEffect` and `CriminalEffect2`
-This type introduces a pilot's ability to steal either for you or from you. When a day passes all pilots with this effect make a roll. on a successful 
-roll they will steal a specified amount. the chance to steal is governed by `modifier` which specifies the percentage (as an int) to successfully roll
-a steal. `secondaryModifier` specifies the amount of cbills to steal when a successful roll is made, a postive amount steals from you, a negative amount
-steals from you. for example a modifier of `9` and a secondaryModifier with a value of 500 gives the pilot a 9% chance to steal 500 cbills from you
-when a day passes. `CriminalEffect2` is functionally identical, just used to make a second independant roll.
+  This type introduces a pilot's ability to steal either for you or from you. When a day passes all pilots with this effect make a roll. on a successful
+  roll they will steal a specified amount. the chance to steal is governed by `modifier` which specifies the percentage (as an int) to successfully roll
+  a steal. `secondaryModifier` specifies the amount of cbills to steal when a successful roll is made, a postive amount steals from you, a negative amount
+  steals from you. for example a modifier of `9` and a secondaryModifier with a value of 500 gives the pilot a 9% chance to steal 500 cbills from you
+  when a day passes. `CriminalEffect2` is functionally identical, just used to make a second independant roll.
 
 - `ArgoUpgradeFactor` and `ArgoUpkeepFactor`
-These types affect the pilots ability to reduce or increase the upfront cost or the monthly upkeep of an argo upgrade. the `modifier` field is a float that acts as a multiplier
-to the base/upkeep cost of the upgrade. `affectedIds` is a list of argo upgrade IDs that this quirk affects. to affect all upgrades a value of `PqAllArgoUpgrades` can be 
-added to this list. example: `ArgoUpgradeFactor` with a modifier of `-0.3` and affectedIds list equal to `[PqAllArgoUpgrades]` will give a 30% cost reduction to 
-the purchase cost of all upgrades. while a `ArgoUpkeepFactor` with a modifier of `0.15` will increase the monthly upkeep of all affected upgrades.
-  
+  These types affect the pilots ability to reduce or increase the upfront cost or the monthly upkeep of an argo upgrade. the `modifier` field is a float that acts as a multiplier
+  to the base/upkeep cost of the upgrade. `affectedIds` is a list of argo upgrade IDs that this quirk affects. to affect all upgrades a value of `PqAllArgoUpgrades` can be
+  added to this list. example: `ArgoUpgradeFactor` with a modifier of `-0.3` and affectedIds list equal to `[PqAllArgoUpgrades]` will give a 30% cost reduction to
+  the purchase cost of all upgrades. while a `ArgoUpkeepFactor` with a modifier of `0.15` will increase the monthly upkeep of all affected upgrades.
+
 - `PilotHealth`
-This type is used to add or remove health from a pilot
+  This type is used to add or remove health from a pilot
 
-### QuirkPool objects
+- `Immortality`
+  This type is used to grant a pilot the same plot-armour that your company-commander has been granted. Pilots granted immortality cannot be killed on the battlefield (although they may still be subject to death from events or from other mods)
 
+#### Example QuirkDef:
 ```json
 {
-  "tag" : "",
-  "quirksToPick": 0,
-  "quirksAvailable" : []
+  "id": "pilotQuirkDef_pilot_blameMe",
+  "tag": "pilot_blameMe",
+  "quirkName": "Always Blamed",
+  "description": "+2 Initiative. +1 Evasion Gained & Max. -1 Defense. +30% Upkeep",
+  "effectData": [
+    {
+      "durationData": {
+        "duration": -1,
+        "stackLimit": -1
+      },
+      "targetingData": {
+        "effectTriggerType": "Passive",
+        "triggerLimit": 0,
+        "extendDurationOnTrigger": 0,
+        "specialRules": "NotSet",
+        "effectTargetType": "Creator",
+        "range": 0,
+        "forcePathRebuild": false,
+        "forceVisRebuild": false,
+        "showInTargetPreview": false,
+        "showInStatusPanel": false
+      },
+      "effectType": "StatisticEffect",
+      "Description": {
+        "Id": "MechwarriorQuirkInitiative",
+        "Name": "Command Consoles",
+        "Details": "Provides + 2 Initiative and several buffs.",
+        "Icon": "uixSvgIcon_equipment_Cockpit"
+      },
+      "nature": "Buff",
+      "statisticData": {
+        "statName": "SBI_MOD_MISC",
+        "operation": "Int_Add",
+        "modValue": "2",
+        "modType": "System.Int32"
+      }
+    },
+    {
+      "durationData": {
+        "duration": -1,
+        "stackLimit": -1
+      },
+      "targetingData": {
+        "effectTriggerType": "Passive",
+        "effectTargetType": "Creator"
+      },
+      "effectType": "StatisticEffect",
+      "Description": {
+        "Id": "MaxEvasion",
+        "Name": "EVASIVE MOVE",
+        "Details": "This unit generates an extra EVASIVE charge from movement actions (up to its maximum).",
+        "Icon": "uixSvgIcon_action_evasivemove"
+      },
+      "statisticData": {
+        "statName": "MaxEvasivePips",
+        "operation": "Int_Add",
+        "modValue": "1",
+        "modType": "System.Int32"
+      },
+      "nature": "Buff"
+    },
+    {
+      "durationData": {
+        "duration": -1,
+        "stackLimit": -1
+      },
+      "targetingData": {
+        "effectTriggerType": "Passive",
+        "effectTargetType": "Creator",
+        "showInStatusPanel": false
+      },
+      "effectType": "StatisticEffect",
+      "Description": {
+        "Id": "GainEvasion",
+        "Name": "EVASIVE MOVE",
+        "Details": "This unit generates an extra EVASIVE charge from movement actions (up to its maximum).",
+        "Icon": "uixSvgIcon_action_evasivemove"
+      },
+      "statisticData": {
+        "statName": "EvasivePipsGainedAdditional",
+        "operation": "Int_Add",
+        "modValue": "1",
+        "modType": "System.Int32"
+      },
+      "nature": "Buff"
+    },
+    {
+      "durationData": {
+        "duration": -1,
+        "stackLimit": -1
+      },
+      "targetingData": {
+        "effectTriggerType": "Passive",
+        "effectTargetType": "Creator",
+        "showInTargetPreview": false,
+        "showInStatusPanel": false
+      },
+      "effectType": "StatisticEffect",
+      "Description": {
+        "Id": "StatusEffect-Defense_ToHit-T3",
+        "Name": "HARDER TO HIT",
+        "Details": "Provides a penalty to all attacks against this unit.",
+        "Icon": "uixSvgIcon_equipment_Gyro"
+      },
+      "nature": "Buff",
+      "statisticData": {
+        "statName": "ToHitThisActor",
+        "operation": "Float_Add",
+        "modValue": "-1.0",
+        "modType": "System.Single"
+      }
+    }
+  ],
+  "quirkEffects": [
+    {
+      "type": "PilotCostFactor",
+      "modifier": 0.3,
+      "secondaryModifier": 0.0,
+      "affectedIds": []
+    }
+  ]
 }
 ```
-- `tag` : the tag that activates this quirk pool
 
-- `quirksToPick` : the number of quirks to select from this pool
-
-- `quirksAvailable` : a list of quirk tags this pool can select
-
-### PilotTooltipTag objects
-```json
-{
-  "tag" : "",
-  "tooltipText" : ""
-}
-```
-
-- `tag` : the tag that activates this tooltip text
-
-- `tooltipText` : the text for the tooltip, Note: a double new line will be automatically added to the end
-
-## Giving AI Pilots Affinities
-
-non player pilots can also be setup to recieve affinities. to do this add a pliot tag of `affinityLevel_X` where X is the number of deployments that should be granted to the pilot. pilots with this tag will be able to recieve all affinites (Global, Chassis, Quirk & Tagged) that a player pilot of equal deployments is applicable for
-
-## Giving AI Pilots Quirks
+### Giving AI Pilots Quirks
 
 non player pilots can be setup to get randomized quirks. To do this add quirk pools and make sure all AI pilots that should get quirks have at least one of the tags used by a quirk pool.
 
-## Affinities By Tags
+## Pilot Select
 
-pilots may be granted experience towards affinities (of all types) by having special tags. there are 2 variants Permanent tags and Consumable tags. These tags can be part of a pilotdef when a pilot is generated
-or added by events.
+Pilot Select allows a user to change how pilots are selected for the initial pilot roster on a new career.
 
-Permanent Tags: These tags provide the pilot with a permanent boost to their affinity count for a given chassis (unless they lose the tag).
-permanant tags follow this scheme `MaPermAffinity_X=prefabId` where X is the number of deployments to be given, and prefabId is the chassis that this boost should be given to.
+It enables you to select specific Ronin, a random selection of Ronin, a number of procedural pilots or a combination for your career.
 
-Example: Pilot Raza has been given the tag `MaPermAffinity_6=chrPrfMech_urbanmechBase-001_30` this means Raza has a permanent 6 points added when using the chassis `chrPrfMech_urbanmechBase-001_30` (the UrbanMech)
+**Note: This is a port of [Select Pilots](https://github.com/BattletechModders/SelectPilots) to fix a conflict between the two mods, as such they will conflict when this is enabled**
 
-Consumable Tags: These tags provide the pilot with a boost to their affinity count for a given chassis. when a day passes this tag will be removed and the number of points will be added to the tracking stat.
-these boosts are therefore subject to decay as normal affinity points are.
-Consumable tags follow this scheme `MaConsumableAffinity_X=prefabId` where X is the number of deployments to be given, and prefabId is the chassis that this boost should be given to.
+### Pilot Select Settings
 
-Example: Pilot Raza has been given the tag `MaConsumableAffinity_5=chrPrfMech_urbanmechBase-001_30` this means Raza has a 5 point boost added when using the chassis `chrPrfMech_urbanmechBase-001_30` (the UrbanMech),
-overtime this may decay if Raza decides to pilot another mech.
+**These settings only apply when `enablePilotSelect` is true**
 
+These settings control how many of each type of pilot to include in the initial pilot roster for a career.
+
+```json
+{
+  "PossibleStartingRonin": [],
+  "RoninFromList": 0,
+  "ProceduralPilots": 4,
+  "RandomRonin": 4
+}
+```
+
+- `PossibleStartingRonin` : a list of ronin pilot IDs that can be selected when drawing from the list
+
+example list for vanilla pilots:
+```json
+[
+  "pilot_sim_starter_medusa",
+  "pilot_sim_starter_behemoth",
+  "pilot_sim_starter_dekker",
+  "pilot_sim_starter_glitch"
+]
+```
+
+- `RoninFromList` : the number of ronin to randomly select from the list
+- `RandomRonin` : the number of ronin to randomly select from the entire pool of ronin in the game
+- `ProceduralPilots`: the number of procedural pilots to generate to fill out the rest of the roster
+
+## Stable Piloting
+
+Stable Piloting allows you to modify the incoming stability damage to a mech and adjust it depending on a pilot's piloting skill.
+
+It can further modify the stability damage based on the tags a pilot has.
+
+**Note: This is a re-imagining and expansion of the [Stabile Piloting](https://github.com/donZappo/StabilePiloting) feature set along with a bug fixes that prevented the original from really working and will conflict with it when enabled**
+
+### Stable Piloting Settings
+
+**These settings only apply when `enableStablePiloting` is true**
+
+These settings control the 'Stable Piloting' feature set.
+
+Stable Piloting allows for various modifications to stability damage taken by pilots.
+
+```json
+{
+  "reductionPerPiloting" : 0.02,
+  "increasePerInjury" : 0.05,
+  "InverseMax" : 20,
+  "tagEffects" : []
+}
+```
+
+- `reductionPerPiloting`: the reduction of stability damage taken, per point of Piloting of a pilot. default setting is 2% reduction per level.
+- `increasePerInjury`: the increase of stability damage taken, per injury on a pilot.
+- `InverseMax`: The maximum Piloting skill level to use for Inverse tag effects. default is 20
+- `tagEffects`: a list of [PilotTagStabilityEffect](#pilottagstabilityeffect-objects) objects
+
+#### PilotTagStabilityEffect Objects
+
+These objects define stability reductions or penalties for pilots possessing matching tags. A pilot with multiple matching tags will receive the benefits (or penalties) for all applicable tags.
+
+
+```json
+{
+  "tag" : "pilot_klutz",
+  "effect": 0.01,
+  "type" : "Piloting"
+}
+```
+
+- `tag`: the pilot tag required to apply this effect
+- `effect`: the magnitude for this effect. Note that exactly how this is applied is based on the type. a positive value is a penalty (increase in stability damage taken), a negative is a boost (reduction in stability damage taken)
+
+- `type`: This determines how `effect` is applied. Valid values for this field are:
+  - `Flat`: the default value, the magnitude of this effect is simply the value of `effect`
+  - `Piloting` : the magnitude of this effect is the `effect` value multiplied by the Piloting skill of the pilot.
+  - `PilotingInverse` : the magnitude of this effect is the `effect` value multiplied by the `InverseMax` minus the Piloting skill of the pilot. When piloting reaches the Inverse Max or greater, this effect will become 0. This mode is best used to reduce a penalty as Piloting Skill grows.
+
+
+## Pilot UI Modifications
+
+Mech Affinity allows you to differentiate various pilots by altering their pilot icons in a similar manner to how vanilla Ronin or Kickstarter back pilots are distinguished.
+
+example:
+
+![RTO Pilot](PilotUiExample.png)
+
+### Pilot UI Settings
+
+```json
+{
+  "pilotIcons" : []
+}
+```
+
+`iconColours`: a list of `PilotIcon` objects
+
+#### Pilot Icon Objects
+
+```json
+{
+  "colour" : "#f21c1c",
+  "tag" : "pilot_rtolegend",
+  "descriptionDefId": "",
+  "svgAssetId": ""
+}
+```
+
+PilotIconColour objects allow you to change the pilot type's background colour to the specified colour, based on tags the pilot has.
+
+*Note: if a pilot qualifies for multiple icons only the first one will be applied*
+
+- `colour`: when not blank, pilots with the matching tag will have their pilot type icon background set to this colour, use HTML RGB Colour encoding
+- `tag`: the tag the pilot must have for this icon updates to be applied
+- `descriptionDefId`: when not blank, the pilot type tool tip text will be updated to use the `BaseDescriptionDef` with the matching ID, Mech Affinity or another mod must load this description via the mod.json manifest
+- `svgAssetId`: when not blank, the pilot type icon will have the foreground icon replaced by the SVG Asset matching this ID, Mech Affinity or another mod must load this SVGAsset via the mod.json manifest
 
