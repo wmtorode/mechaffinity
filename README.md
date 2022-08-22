@@ -8,42 +8,67 @@ example:
 
 ```json
 {
-    "debug" : true,
-    "missionsBeforeDecay" : -1,
-    "removeAffinityAfter" : 100,
-    "lowestPossibleDecay" : 0,
-    "maxAffinityPoints" : 1000,
-    "decayByModulo" : false,
-    "defaultDaysBeforeSimDecay" : -1,
-    "topAffinitiesInTooltipCount" : 3,
-    "showQuirks" : false,
-    "showDescriptionsOnChassis" : false,
-    "trackSimDecayByStat" : true,
-    "trackLowestDecayByStat": false,
-    "showAllPilotAffinities" : true,
-    "enablePilotQuirks" : false, 
-    "globalAffinities" : [],
-    "chassisAffinities" : [],
-    "quirkAffinities" : [],
-    "taggedAffinities" : [],
-    "affinityGroups" : [],
-    "pilotQuirks" : [],
-    "quirkPools" : [],
-    "playerQuirkPools" : false,
-    "pqArgoAdditive" : true,
-    "pqArgoMultiAutoAdjust" : true,
-    "pqArgoMin" : 0.0,
-    "pqTooltipTags" : [],
-    "enablePilotSelect" : false,
-    "enableMonthlyMoraleReset": false,
-    "iconColours" : [],
-    "pilotingMitigatesStabilityDmg" : false,
-    "stabilityDmgReductionPerPiloting" : 0.02,
-    "addTags" : []
+  "version": 2,
+  "debug": false,
+  "enablePilotAffinity": true,
+  "enablePilotSelect": false,
+  "enablePilotQuirks": false,
+  "enableMonthlyMoraleReset": false,
+  "enableStablePiloting": false,
+  "affinitySettings": {},
+  "quirkSettings": {},
+  "stablePilotingSettings": {},
+  "pilotUiSettings": {},
+  "legacyData": {}
 }
 ```
+`version`: used to determine if this settings file is compatible with the build, always set to `2`
 
 `debug` : when true enable debug logging
+
+`enablePilotAffinity` : When true, Pilots will build affinity with a mech each time they use that chassis,  with enough affinity they will get affinity Defs applied to earn bonuses on deployments
+
+`enablePilotQuirks` : when true, pilot quirk feaures will be enabled **Warning: This will conflict with Pilot Quirks mod**
+
+`enablePilotSelect` : when `true` allow set or random ronin to be part of the initial career start pilot roster. you must setup `Pilot Select Settings` in `pilotselectsettings.json` for this to work
+
+`enableMonthlyMoraleReset`: when `true` morale will be reset on the start of each month and then recalculated based on argo upgrades and pilot quirks
+
+`enableStablePiloting`: when `true` enables 'Stable Piloting' features
+
+`affinitySettings` : an `Affinity Settings` Object, this controls all settings for Affinity features
+
+`quirkSettings` : a `Pilot Quirk Settings` Object, this controls all settings for Pilot Quirks features
+
+`stablePilotingSettings` : a `Stable Piloting Settings` object for controlling Stable Piloting features
+
+`pilotUiSettings`: a `Pilot UI Settings` Object, this controls all settings and configuration for Pilot UI features
+
+`legacyData` : a `Legacy Data Settings` object, controls various options for outputting legacy versions of the settings file for compatibility with some third party tools
+
+## Affinity Settings
+
+**These settings only apply when `enablePilotAffinity` is true**
+
+```json
+{
+  "missionsBeforeDecay": -1,
+  "lowestPossibleDecay": 0,
+  "removeAffinityAfter": 100,
+  "maxAffinityPoints": 1000,
+  "decayByModulo": false,
+  "debugForceTag": "",
+  "defaultDaysBeforeSimDecay": -1,
+  "showDescriptionsOnChassis": false,
+  "trackSimDecayByStat": true,
+  "trackLowestDecayByStat": false,
+  "showAllPilotAffinities": true,
+  "topAffinitiesInTooltipCount": 3,
+  "showQuirks": false,
+  "affinityGroups": [],
+  "prefabOverrides": []
+}
+```
 
 `missionsBeforeDecay` : the number of deployments a pilot can not use a chassis before their experience on that chassis begins to be lost, set to `-1` to disable
 
@@ -57,6 +82,8 @@ manipulate this value by changing the company stat `MaLowestDecay`
 
 `decayByModulo` : when set to true, decay is changed to 1 point for every `missionsBeforeDecay` instead of 1 point for every mission after `missionsBeforeDecay` missions
 
+`debugForceTag` : force affinity to process pilots as if they had this tag, for debugging use only
+
 `defaultDaysBeforeSimDecay` : the default number of days that can elapse before a pilot's affinities begin to decay. when `trackSimDecayByStat` is `true` this number becomes part of the save and cannot be changed from settings later. events or argo upgrades can
 manipulate this value by changing the company stat `MaSimDaysDecayModulator`. setting this stat to -1 will stop decay from occuring when a day passes. deploying a pilot into a mission will reset that pilots counter. when `trackSimDecayByStat` is `false` this 
 setting value will always be used
@@ -69,7 +96,115 @@ setting value will always be used
 
 `showAllPilotAffinities` : when true, the pilot dossier will show every affinity the pilot has with every chassis, when false only the highest level affininty will be show for a given chassis
 
-`enablePilotQuirks` : when true, pilot quirk patches will be enabled **Warning: This will conflict with Pilot Quirks mod**
+`affinityGroups` : a list of `AffinityGroup` objects. These allow you to treat a group of prefabs/assembly IDs as a single ID
+
+`prefabOverrides`: a list of `PrefabOveride` objects. These allow you to correct UI display issues caused by some of the game's "Dummy Units"
+
+## Pilot Quirk Settings
+
+**These settings only apply when `enablePilotQuirks` is true**
+
+```json
+{
+  "playerQuirkPools": false,
+  "argoAdditive": true,
+  "argoMultiAutoAdjust": true,
+  "argoMin": 0.0,
+  "quirkPools":[],
+  "tooltipTags":[],
+  "addTags":[]
+}
+```
+
+`quirkPools` : a list of `QuirkPool` objects.
+
+`playerQuirkPools` : when `true` player pilots can also use quirk pools.
+
+`argoAdditive` : when `true` argo upgrade modifiers are processed using an additive model, when `false` a multiplicative model is used instead
+
+`argoMin` : the lowest possible argo upgrade modifier, defaults to 0.0
+
+`argoMultiAutoAdjust` : when `true` auto normalize modifiers for the multiplicative model (by adding 1.0 to the modifier before its factored in) instead of directly applying the modifier
+
+`tooltipTags` : a list of `PilotTooltipTag` objects. These will be used for tooltips, this can be used for TBAS or for legacy functions of PilotQuirks for PilotFatigue support
+
+`addTags` : a list of pilot tags. When Quirks are enabled, these tags will be automatically added to any pilot in your roster
+
+## Pilot Select Settings
+
+These settings control how many of each type of pilot to include in the initial pilot roster for a career.
+
+**Note: This is a port of `https://github.com/BattletechModders/SelectPilots` to fix a conflict between the two mods, as such they will conflict when this is enabled**
+
+```json
+{
+  "PossibleStartingRonin": [],
+  "RoninFromList": 0,
+  "ProceduralPilots": 4,
+  "RandomRonin": 4
+}
+```
+
+`PossibleStartingRonin` : a list of ronin pilot IDs that can be selected when drawing from the list
+
+example list for vanilla pilots:
+```json
+[
+  "pilot_sim_starter_medusa",
+  "pilot_sim_starter_behemoth",
+  "pilot_sim_starter_dekker",
+  "pilot_sim_starter_glitch"
+]
+```
+
+`RoninFromList` : the number of ronin to randomly select from the list
+`RandomRonin` : the number of ronin to randomly select from the entire pool of ronin in the game
+`ProceduralPilots`: the number of procedural pilots to generate to fill out the rest of the roster
+
+## Stable Piloting Settings
+
+These settings control the 'Stable Piloting' feature set.
+
+Stable Piloting allows for various modifications to stability damage taken by pilots.
+
+```json
+{
+  "reductionPerPiloting" : 0.02,
+  "increasePerInjury" : 0.05,
+  "InverseMax" : 20,
+  "tagEffects" : []
+}
+```
+
+`reductionPerPiloting`: the reduction of stability damage taken, per point of Piloting of a pilot. default setting is 2% reduction per level.
+`increasePerInjury`: the increase of stability damage taken, per injury on a pilot.
+`InverseMax`: The maximum Piloting skill level to use for Inverse tag effects. default is 20
+`tagEffects`: a list of `PilotTagStabilityEffect` objects
+
+### PilotTagStabilityEffect Objects
+
+These objects define stability reductions or penalties for pilots possessing matching tags. A pilot with multiple matching tags will receive the benefits (or penalties) for all applicable tags.
+
+```json
+{
+  "tag" : "pilot_klutz",
+  "effect": 0.01,
+  "type" : "Piloting"
+}
+```
+
+`tag`: the pilot tag required to apply this effect
+`effect`: the magnitude for this effect. Note that exactly how this is applied is based on the type. a positive value is a penalty (increase in stability damage taken), a negative is a boost (reduction in stability damage taken)
+
+`type`: This determines how `effect` is apllied. Valid values for this field are:
+- `Flat`: the default value, the magnitude of this effect is simply the value of `effect`
+- `Piloting` : the magnitude of this effect is the `effect` value multiplied by the Piloting skill of the pilot.
+- `PilotingInverse` : the magnitude of this effect is the `effect` value multiplied by the `InverseMax` minus the Piloting skill of the pilot. When piloting reaches the Inverse Max or greater, this effect will become 0. This mode is best used to reduce a penalty as Piloting Skill grows.
+
+
+
+
+`iconColours`: a list of `PilotIconColour` objects
 
 `globalAffinities` : a list of `affinityLevel` objects. these will aplly to all pilot-chassis combos. Note that affinity levels are additive
 
@@ -79,33 +214,6 @@ setting value will always be used
 
 `taggedAffinities` : a list of `TaggedAffinity` objects. These will only apply to pilot-chassis combos that are called out by the affinity, when the pilot has the specificed tag. Note these are additive with all other affinities.
 
-`affinityGroups` : a list of `AffinityGroup` objects. These allow you to treat a group of prefabs/assembly IDs as a single ID
-
-`pilotQuirks` : a list of `PilotQuirk` objects. These will only be used if `enablePilotQuirks` is set to `true`
-
-`quirkPools` : a list of `QuirkPool` objects. These will only be used if `enablePilotQuirks` is set to `true`
-
-`playerQuirkPools` : when `true` player pilots can also use quirk pools. Can only be used if `enablePilotQuirks` is set to `true`
-
-`pqArgoAdditive` : when `true` argo upgrade modifiers are processed using an additive model, when `false` a multiplicative model is used instead
-
-`pqArgoMin` : the lowest possible argo upgrade modifier, defaults to 0.0
-
-`pqArgoMultiAutoAdjust` : when `true` auto normalize modifiers for the multiplicative model (by adding 1.0 to the modifier before its factored in) instead of directly applying the modifier
-
-`pqTooltipTags` : a list of `PilotTooltipTag` objects. These will be used for tooltips, this can be used for TBAS or for legacy functions of PilotQuirks for PilotFatigue support
-
-`enablePilotSelect` : when `true` allow set or random ronin to be part of the initial career start pilot roster. you must setup `Pilot Select Settings` in `pilotselectsettings.json` for this to work
-
-`enableMonthlyMoraleReset`: when `true` morale will be reset on the start of each month and then recalculated based on argo upgrades and pilot quirks
-
-`iconColours`: a list of `PilotIconColour` objects
-
-`enableStablePiloting`: when `true` enables 'Stable Piloting' features
-
-`stablePilotingSettings` : settings object for Stable Piloting
-
-`addTags` : a list of pilot tags. When Quirks are enabled, these tags will be automatically added to any pilot in your roster
 
 ### affinityLevel objects
 
@@ -340,76 +448,5 @@ Consumable tags follow this scheme `MaConsumableAffinity_X=prefabId` where X is 
 
 Example: Pilot Raza has been given the tag `MaConsumableAffinity_5=chrPrfMech_urbanmechBase-001_30` this means Raza has a 5 point boost added when using the chassis `chrPrfMech_urbanmechBase-001_30` (the UrbanMech),
 overtime this may decay if Raza decides to pilot another mech.
-
-## Pilot Select Settings
-
-These settings control how many of each type of pilot to include in the initial pilot roster for a career.
-
-**Note: This is a port of `https://github.com/BattletechModders/SelectPilots` to fix a conflict between the two mods, as such they will conflict when this is enabled**
-
-```json
-{
-  "PossibleStartingRonin": [],
-  "RoninFromList": 0,
-  "ProceduralPilots": 4,
-  "RandomRonin": 4
-}
-```
-
-`PossibleStartingRonin` : a list of ronin pilot IDs that can be selected when drawing from the list
-
-example list for vanilla pilots: 
-```json
-[
-  "pilot_sim_starter_medusa",
-  "pilot_sim_starter_behemoth",
-  "pilot_sim_starter_dekker",
-  "pilot_sim_starter_glitch"
-]
-```
-
-`RoninFromList` : the number of ronin to randomly select from the list
-`RandomRonin` : the number of ronin to randomly select from the entire pool of ronin in the game
-`ProceduralPilots`: the number of procedural pilots to generate to fill out the rest of the roster
-
-## Stable Piloting Settings
-
-These settings control the 'Stable Piloting' feature set.
-
-Stable Piloting allows for various modifications to stability damage taken by pilots.
-
-```json
-{
-  "reductionPerPiloting" : 0.02,
-  "increasePerInjury" : 0.05,
-  "InverseMax" : 20,
-  "tagEffects" : []
-}
-```
-
-`reductionPerPiloting`: the reduction of stability damage taken, per point of Piloting of a pilot. default setting is 2% reduction per level.
-`increasePerInjury`: the increase of stability damage taken, per injury on a pilot.
-`InverseMax`: The maximum Piloting skill level to use for Inverse tag effects. default is 20
-`tagEffects`: a list of `PilotTagStabilityEffect` objects
-
-### PilotTagStabilityEffect Objects
-
-These objects define stability reductions or penalties for pilots possessing matching tags. A pilot with multiple matching tags will receive the benefits (or penalties) for all applicable tags.
-
-```json
-{
-  "tag" : "pilot_klutz",
-  "effect": 0.01,
-  "type" : "Piloting"
-}
-```
-
-`tag`: the pilot tag required to apply this effect
-`effect`: the magnitude for this effect. Note that exactly how this is applied is based on the type. a positive value is a penalty (increase in stability damage taken), a negative is a boost (reduction in stability damage taken)
-
-`type`: This determines how `effect` is apllied. Valid values for this field are:
-- `Flat`: the default value, the magnitude of this effect is simply the value of `effect`
-- `Piloting` : the magnitude of this effect is the `effect` value multiplied by the Piloting skill of the pilot.
-- `PilotingInverse` : the magnitude of this effect is the `effect` value multiplied by the `InverseMax` minus the Piloting skill of the pilot. When piloting reaches the Inverse Max or greater, this effect will become 0. This mode is best used to reduce a penalty as Piloting Skill grows.
 
 
