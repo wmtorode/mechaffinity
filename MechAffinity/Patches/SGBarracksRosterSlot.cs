@@ -49,24 +49,6 @@ namespace MechAffinity.Patches
                     ___pilotTypeBackground.SetUIColor(UIColor.Custom);
                     ___pilotTypeBackground.OverrideWithColor(pilotIcon.GetColor());
                 }
-
-                if (pilotIcon.HasIcon())
-                {
-                    Main.modLog.LogMessage("Setting Pilot Icon Image!");
-                    SVGAsset svgAsset = PilotUiManager.Instance.GetSvgAsset(pilotIcon.svgAssetId);
-                    ___roninIcon.gameObject.SetActive((UnityEngine.Object) svgAsset != (UnityEngine.Object) null);
-                    ___roninIcon.vectorGraphics = svgAsset;
-                }
-                
-                if (pilotIcon.HasDescription())
-                {
-                    Main.modLog.LogMessage("Setting Pilot Icon Description!");
-                    BaseDescriptionDef def =
-                        UnityGameInstance.BattleTechGame.DataManager.BaseDescriptionDefs
-                            .Get(pilotIcon.descriptionDefId);
-                    ___RoninTooltip.SetDefaultStateData(TooltipUtilities.GetStateDataFromObject(def));
-                
-                }
                 
             }
 

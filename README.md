@@ -132,6 +132,8 @@ setting value will always be used
 
 ## Pilot Select Settings
 
+**These settings only apply when `enablePilotSelect` is true**
+
 These settings control how many of each type of pilot to include in the initial pilot roster for a career.
 
 **Note: This is a port of `https://github.com/BattletechModders/SelectPilots` to fix a conflict between the two mods, as such they will conflict when this is enabled**
@@ -162,6 +164,8 @@ example list for vanilla pilots:
 `ProceduralPilots`: the number of procedural pilots to generate to fill out the rest of the roster
 
 ## Stable Piloting Settings
+
+**These settings only apply when `enableStablePiloting` is true**
 
 These settings control the 'Stable Piloting' feature set.
 
@@ -202,9 +206,36 @@ These objects define stability reductions or penalties for pilots possessing mat
 - `PilotingInverse` : the magnitude of this effect is the `effect` value multiplied by the `InverseMax` minus the Piloting skill of the pilot. When piloting reaches the Inverse Max or greater, this effect will become 0. This mode is best used to reduce a penalty as Piloting Skill grows.
 
 
+## Pilot UI Settings
 
+```json
+{
+  "pilotIcons" : []
+}
+```
+Mech Affinity allows you to differentiate various pilots by altering their pilot icons in a similar manner to how vanilla Ronin or Kickstarter back pilots are distinguished.
 
-`iconColours`: a list of `PilotIconColour` objects
+example: [RTO Pilot!](PilotUiExample.png)
+
+`iconColours`: a list of `PilotIcon` objects
+
+### Pilot Icon Objects
+
+```json
+{
+  "colour" : "#f21c1c",
+  "tag" : "pilot_rtolegend",
+  "descriptionDefId": "",
+  "svgAssetId": ""
+}
+```
+
+PilotIconColour objects allow you to change the pilot type's background colour to the specified colour, based on tags the pilot has.
+*Note: if a pilot qualifies for multiple colour's only the first one will be applied*
+
+- `colour`: the colour to set the background to
+- `tag`: the tag the pilot must have to use this colour
+
 
 `globalAffinities` : a list of `affinityLevel` objects. these will aplly to all pilot-chassis combos. Note that affinity levels are additive
 
@@ -409,20 +440,6 @@ This type is used to add or remove health from a pilot
 - `tag` : the tag that activates this tooltip text
 
 - `tooltipText` : the text for the tooltip, Note: a double new line will be automatically added to the end
-
-### PilotIconColour objects
-```json
-{
-  "colour" : "#f21c1c",
-  "tag" : "pilot_rtolegend"
-}
-```
-
-PilotIconColour objects allow you to change the pilot type's background colour to the specified colour, based on tags the pilot has. 
-*Note: if a pilot qualifies for multiple colour's only the first one will be applied*
-
-- `colour`: the colour to set the background to
-- `tag`: the tag the pilot must have to use this colour
 
 ## Giving AI Pilots Affinities
 

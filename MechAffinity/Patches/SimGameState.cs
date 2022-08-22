@@ -6,8 +6,11 @@ using System.Threading.Tasks;
 using Harmony;
 using BattleTech;
 using BattleTech.Save;
+using BattleTech.UI.Tooltips;
 using Localize;
 using MechAffinity;
+using MechAffinity.Data;
+using SVGImporter;
 using UnityEngine;
 
 namespace MechAffinity.Patches
@@ -365,6 +368,33 @@ namespace MechAffinity.Patches
             }
             __instance.RoomManager.RefreshDisplay();
             return false;
+        }
+    }
+    
+    [HarmonyPatch(typeof(SimGameState), "GetPilotRoninIcon")]
+    class SimGameState_GetPilotRoninIcon
+    {
+        public static void Postfix(SimGameState __instance, Pilot p, ref SVGAsset __result)
+        {
+            PilotIcon pilotIcon = PilotUiManager.Instance.GetPilotIcon(p);
+            if (pilotIcon != null && pilotIcon.HasIcon())
+            {
+                __result = PilotUiManager.Instance.GetSvgAsset(pilotIcon.svgAssetId);
+            }
+        }
+    }
+    
+    [HarmonyPatch(typeof(SimGameState), "SetupRoninTooltip")]
+    class SimGameState_SetupRoninTooltip
+    {
+        public static void Postfix(SimGameState __instance, HBSTooltip RoninTooltip, Pilot pilot)
+        {
+            PilotIcon pilotIcon = PilotUiManager.Instance.GetPilotIcon(pilot);
+            if (pilotIcon != null && pilotIcon.HasDescription())
+            {
+                BaseDescriptionDef def = PilotUiManager.Instance.GetDescriptionDef(pilotIcon.descriptionDefId);
+                if (def != null) RoninTooltip.SetDefaultStateData(TooltipUtilities.GetStateDataFromObject((object)def));
+            }
         }
     }
 

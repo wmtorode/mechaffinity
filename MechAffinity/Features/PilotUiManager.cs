@@ -80,6 +80,11 @@ namespace MechAffinity
         {
             return dataManager.GetObjectOfType<SVGAsset>(iconId, BattleTechResourceType.SVGAsset);
         }
+        
+        public BaseDescriptionDef GetDescriptionDef(string defId)
+        {
+            return dataManager.BaseDescriptionDefs.Get(defId);
+        }
 
     }
 }
