@@ -5,7 +5,7 @@ using Newtonsoft.Json.Converters;
 
 namespace MechAffinity.Data
 {
-    class QuirkEffect
+    public class QuirkEffect
     {
         [JsonConverter(typeof(StringEnumConverter))]
         public EQuirkEffectType type = EQuirkEffectType.MedTech;

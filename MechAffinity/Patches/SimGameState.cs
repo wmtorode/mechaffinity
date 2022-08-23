@@ -6,8 +6,11 @@ using System.Threading.Tasks;
 using Harmony;
 using BattleTech;
 using BattleTech.Save;
+using BattleTech.UI.Tooltips;
 using Localize;
 using MechAffinity;
+using MechAffinity.Data;
+using SVGImporter;
 using UnityEngine;
 
 namespace MechAffinity.Patches
@@ -18,29 +21,39 @@ namespace MechAffinity.Patches
     {
         public static void Postfix(SimGameState __instance, GameInstanceSave gameInstanceSave)
         {
+            if (Main.settings.enablePilotAffinity)
+            {
                 PilotAffinityManager.Instance.setCompanyStats(__instance.CompanyStats);
                 PilotAffinityManager.Instance.setDataManager(__instance.DataManager);
-                
-                PilotQuirkManager.Instance.setCompanyStats(__instance.CompanyStats);
                 
                 List<MechDef> mechs = __instance.DataManager.MechDefs.Select(pair => pair.Value).ToList();
                 foreach (MechDef mech in mechs)
                 {
                     PilotAffinityManager.Instance.addToChassisPrefabLut(mech);
                 }
-
-                if (Main.settings.enablePilotQuirks)
+            }
+            if (Main.settings.enablePilotQuirks)
+            {
+                PilotQuirkManager.Instance.setCompanyStats(__instance.CompanyStats);
+                foreach (Pilot pilot in __instance.PilotRoster.ToList())
                 {
-                    foreach (Pilot pilot in __instance.PilotRoster.ToList())
-                    {
-                        PilotQuirkManager.Instance.proccessPilot(pilot.pilotDef, true);
-                        pilot.FromPilotDef(pilot.pilotDef);
-                    }
-                    // the commander is not part of the roster, so need to specifically call it.
-                    PilotQuirkManager.Instance.proccessPilot(__instance.Commander.pilotDef, true);
-                    __instance.Commander.FromPilotDef(__instance.Commander.pilotDef);
-                    PilotQuirkManager.Instance.forceMoraleInstanced();
+                    PilotQuirkManager.Instance.proccessPilot(pilot.pilotDef, true);
+                    pilot.FromPilotDef(pilot.pilotDef);
                 }
+                // the commander is not part of the roster, so need to specifically call it.
+                PilotQuirkManager.Instance.proccessPilot(__instance.Commander.pilotDef, true);
+                __instance.Commander.FromPilotDef(__instance.Commander.pilotDef);
+                PilotQuirkManager.Instance.forceMoraleInstanced();
+            }
+        }
+    }
+    
+    [HarmonyPatch(typeof(SimGameState), "_OnAttachUXComplete")]
+    class SimGameState_OnAttachUXComplete
+    {
+        public static void Postfix(SimGameState __instance)
+        {
+            PilotUiManager.Instance.issueLoadRequests();
         }
     }
 
@@ -49,19 +62,27 @@ namespace MechAffinity.Patches
     {
         public static void Postfix(SimGameState __instance)
         {
-
-            PilotAffinityManager.Instance.setCompanyStats(__instance.CompanyStats);
-            PilotAffinityManager.Instance.setDataManager(__instance.DataManager);
-            
-            PilotQuirkManager.Instance.setCompanyStats(__instance.CompanyStats);
-            // new career so this will be instanced automatically
-            PilotQuirkManager.Instance.forceMoraleInstanced();
-            
-            List<MechDef> mechs = __instance.DataManager.MechDefs.Select(pair => pair.Value).ToList();
-            foreach (MechDef mech in mechs)
+            if (Main.settings.enablePilotAffinity)
             {
-                PilotAffinityManager.Instance.addToChassisPrefabLut(mech);
+                PilotAffinityManager.Instance.setCompanyStats(__instance.CompanyStats);
+                PilotAffinityManager.Instance.setDataManager(__instance.DataManager);
+                
+                List<MechDef> mechs = __instance.DataManager.MechDefs.Select(pair => pair.Value).ToList();
+                foreach (MechDef mech in mechs)
+                {
+                    PilotAffinityManager.Instance.addToChassisPrefabLut(mech);
+                }
+
             }
+
+            if (Main.settings.enablePilotQuirks)
+            {
+                PilotQuirkManager.Instance.setCompanyStats(__instance.CompanyStats);
+                // new career so this will be instanced automatically
+                PilotQuirkManager.Instance.forceMoraleInstanced();
+            }
+
+
         }
     }
     
@@ -96,6 +117,10 @@ namespace MechAffinity.Patches
     [HarmonyPatch(typeof(SimGameState), "ResolveCompleteContract")]
     class SimGameState_ResolveCompleteContract
     {
+        public static bool Prepare()
+        {
+            return Main.settings.enablePilotAffinity;
+        }
         public static void Prefix(SimGameState __instance)
         {
             if (__instance.CompletedContract != null)
@@ -126,10 +151,15 @@ namespace MechAffinity.Patches
             pilotList.Add(__instance.Commander);
             foreach (Pilot pilot in pilotList)
             {
-                bool decayed = PilotAffinityManager.Instance.onSimDayElapsed(pilot);
-                if (decayed)
-                {                 
-                    __instance.RoomManager.ShipRoom.AddEventToast(new Text(string.Format("{0} affinities decayed!", (object)pilot.Callsign), (object[])Array.Empty<object>()));
+                if (Main.settings.enablePilotAffinity)
+                {
+                    bool decayed = PilotAffinityManager.Instance.onSimDayElapsed(pilot);
+                    if (decayed)
+                    {
+                        __instance.RoomManager.ShipRoom.AddEventToast(new Text(
+                            string.Format("{0} affinities decayed!", (object)pilot.Callsign),
+                            (object[])Array.Empty<object>()));
+                    }
                 }
 
                 if (Main.settings.enablePilotQuirks)
@@ -211,6 +241,10 @@ namespace MechAffinity.Patches
     [HarmonyPatch(typeof(SimGameState), "DismissPilot", new Type[] {typeof(Pilot)})]
     public static class SimGameState_DismissPilot
     {
+        public static bool Prepare()
+        {
+            return Main.settings.enablePilotQuirks;
+        }
         public static void Prefix(SimGameState __instance, Pilot p)
         {
             if (p != null)
@@ -334,6 +368,33 @@ namespace MechAffinity.Patches
             }
             __instance.RoomManager.RefreshDisplay();
             return false;
+        }
+    }
+    
+    [HarmonyPatch(typeof(SimGameState), "GetPilotRoninIcon")]
+    class SimGameState_GetPilotRoninIcon
+    {
+        public static void Postfix(SimGameState __instance, Pilot p, ref SVGAsset __result)
+        {
+            PilotIcon pilotIcon = PilotUiManager.Instance.GetPilotIcon(p);
+            if (pilotIcon != null && pilotIcon.HasIcon())
+            {
+                __result = PilotUiManager.Instance.GetSvgAsset(pilotIcon.svgAssetId);
+            }
+        }
+    }
+    
+    [HarmonyPatch(typeof(SimGameState), "SetupRoninTooltip")]
+    class SimGameState_SetupRoninTooltip
+    {
+        public static void Postfix(SimGameState __instance, HBSTooltip RoninTooltip, Pilot pilot)
+        {
+            PilotIcon pilotIcon = PilotUiManager.Instance.GetPilotIcon(pilot);
+            if (pilotIcon != null && pilotIcon.HasDescription())
+            {
+                BaseDescriptionDef def = PilotUiManager.Instance.GetDescriptionDef(pilotIcon.descriptionDefId);
+                if (def != null) RoninTooltip.SetDefaultStateData(TooltipUtilities.GetStateDataFromObject((object)def));
+            }
         }
     }
 

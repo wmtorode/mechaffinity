@@ -16,6 +16,11 @@ namespace MechAffinity.Patches
     [HarmonyPatch(typeof(TooltipPrefab_Mech), "SetData", typeof(object))]
     class TooltipPrefab_Mech_SetData
     {
+        public static bool Prepare()
+        {
+            return Main.settings.enablePilotAffinity;
+        }
+        
         public static void Postfix(TooltipPrefab_Mech __instance, object data, LocalizableText ___DetailsField)
         {
             

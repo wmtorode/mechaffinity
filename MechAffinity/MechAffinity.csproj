@@ -53,6 +53,9 @@
     <Reference Include="Assembly-CSharp">
       <HintPath>D:\SteamLibrary\steamapps\common\BATTLETECH\BattleTech_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>D:\SteamLibrary\steamapps\common\BATTLETECH\BattleTech_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+    </Reference>
     <Reference Include="CustomComponents">
       <HintPath>S:\SteamLibrary\steamapps\common\BATTLETECH\Mods\CustomComponents\CustomComponents.dll</HintPath>
     </Reference>
@@ -91,33 +94,42 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Data\Affinity.cs" />
-    <Compile Include="Data\AffinityGroup.cs" />
-    <Compile Include="Data\AffinityLevel.cs" />
-    <Compile Include="Data\ChassisSpecificAffinity.cs" />
-    <Compile Include="Data\DescriptionHolder.cs" />
-    <Compile Include="Data\EAffinityType.cs" />
-    <Compile Include="Data\EIdType.cs" />
-    <Compile Include="Data\EQuirkEffectType.cs" />
-    <Compile Include="Data\EStabilityEffectType.cs" />
+    <Compile Include="Data\Affinity\Affinity.cs" />
+    <Compile Include="Data\Affinity\AffinityDef.cs" />
+    <Compile Include="Data\Affinity\AffinityGroup.cs" />
+    <Compile Include="Data\Affinity\AffinityLevel.cs" />
+    <Compile Include="Data\Affinity\ChassisSpecificAffinity.cs" />
+    <Compile Include="Data\Affinity\ChassisTypeMap.cs" />
+    <Compile Include="Data\Affinity\DescriptionHolder.cs" />
+    <Compile Include="Data\Affinity\EAffinityDefType.cs" />
+    <Compile Include="Data\Affinity\EAffinityType.cs" />
+    <Compile Include="Data\Affinity\EIdType.cs" />
+    <Compile Include="Data\Affinity\PilotAffinitySettings.cs" />
+    <Compile Include="Data\Affinity\PrefabOverride.cs" />
+    <Compile Include="Data\Affinity\QuirkAffinity.cs" />
+    <Compile Include="Data\Affinity\TaggedAffinity.cs" />
+    <Compile Include="Data\Internal\PilotDelayedEffects.cs" />
+    <Compile Include="Data\Legacy\LegacyData.cs" />
+    <Compile Include="Data\Legacy\LegacySettings.cs" />
     <Compile Include="Data\Logger.cs" />
-    <Compile Include="Data\PilotDelayedEffects.cs" />
-    <Compile Include="Data\PilotIconColour.cs" />
-    <Compile Include="Data\PilotQuirk.cs" />
-    <Compile Include="Data\PilotSelectSettings.cs" />
-    <Compile Include="Data\PilotTagStabilityEffect.cs" />
-    <Compile Include="Data\PilotTooltipTag.cs" />
-    <Compile Include="Data\PrefabOverride.cs" />
-    <Compile Include="Data\QuirkAffinity.cs" />
-    <Compile Include="Data\QuirkEffect.cs" />
-    <Compile Include="Data\QuirkPool.cs" />
+    <Compile Include="Data\PilotSelect\PilotSelectSettings.cs" />
+    <Compile Include="Data\PilotUi\PilotIcon.cs" />
+    <Compile Include="Data\PilotUi\PilotUiSettings.cs" />
+    <Compile Include="Data\Quirk\EQuirkEffectType.cs" />
+    <Compile Include="Data\Quirk\PilotQuirk.cs" />
+    <Compile Include="Data\Quirk\PilotQuirkSettings.cs" />
+    <Compile Include="Data\Quirk\PilotTooltipTag.cs" />
+    <Compile Include="Data\Quirk\QuirkEffect.cs" />
+    <Compile Include="Data\Quirk\QuirkPool.cs" />
     <Compile Include="Data\Settings.cs" />
-    <Compile Include="Data\StablePilotingSettings.cs" />
-    <Compile Include="Data\TaggedAffinity.cs" />
+    <Compile Include="Data\StablePiloting\EStabilityEffectType.cs" />
+    <Compile Include="Data\StablePiloting\PilotTagStabilityEffect.cs" />
+    <Compile Include="Data\StablePiloting\StablePilotingSettings.cs" />
     <Compile Include="Features\BaseEffectManager.cs" />
     <Compile Include="Features\PilotAffinityManager.cs" />
     <Compile Include="Features\PilotQuirkManager.cs" />
     <Compile Include="Features\PilotRandomizerManager.cs" />
+    <Compile Include="Features\PilotUiManager.cs" />
     <Compile Include="Features\StablePilotingManager.cs" />
     <Compile Include="Features\UidManager.cs" />
     <Compile Include="Main.cs" />

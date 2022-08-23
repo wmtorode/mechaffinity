@@ -17,6 +17,11 @@ namespace MechAffinity.Patches
     {
         private static FieldInfo descriptor = AccessTools.Field(typeof(MechDetails), "mechDescription");
         private static FieldInfo mechdef = AccessTools.Field(typeof(MechDetails), "activeMech");
+        
+        public static bool Prepare()
+        {
+            return Main.settings.enablePilotAffinity;
+        }
         public static void Postfix(MechDetails __instance)
         {
             MechDef mech = (MechDef)mechdef.GetValue(__instance);

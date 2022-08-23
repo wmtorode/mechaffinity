@@ -18,7 +18,7 @@ namespace MechAffinity.Patches
     {
         public static bool Prepare()
         {
-            return Main.settings.showDescriptionsOnChassis;
+            return Main.settings.affinitySettings.showDescriptionsOnChassis && Main.settings.enablePilotAffinity;
         }
 
         public static void Postfix(TooltipPrefab_Chassis __instance, object data, LocalizableText ___descriptionText)

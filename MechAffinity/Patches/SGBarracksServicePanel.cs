@@ -17,6 +17,11 @@ namespace MechAffinity.Patches
     {
         private static FieldInfo finfo = AccessTools.Field(typeof(SGBarracksServicePanel), "biographyLabel");
         private static MethodInfo methodRefreshPanel = AccessTools.Method(typeof(SGBarracksServicePanel), "RefreshPanel");
+        
+        public static bool Prepare()
+        {
+            return Main.settings.enablePilotAffinity;
+        }
         public static void Postfix(SGBarracksServicePanel __instance, Pilot p)
         {
             string affinityDescriptors = PilotAffinityManager.Instance.getMechAffinityDescription(p);

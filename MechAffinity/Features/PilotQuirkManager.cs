@@ -5,6 +5,7 @@ using BattleTech;
 using MechAffinity.Data;
 using Newtonsoft.Json.Linq;
 using Harmony;
+using UnityEngine.UI;
 
 namespace MechAffinity
 {
@@ -24,6 +25,7 @@ namespace MechAffinity
         private StatCollection companyStats;
         private Dictionary<string, PilotQuirk> quirks;
         private Dictionary<string, QuirkPool> quirkPools;
+        private PilotQuirkSettings settings;
         private bool moraleModInstanced;
 
         public static PilotQuirkManager Instance
@@ -31,18 +33,19 @@ namespace MechAffinity
             get
             {
                 if (_instance == null) _instance = new PilotQuirkManager();
-                if (!_instance.hasInitialized) _instance.initialize();
+                if (!_instance.hasInitialized) _instance.initialize(Main.settings.quirkSettings, Main.pilotQuirks);
                 return _instance;
             }
         }
 
-        public void initialize()
+        public void initialize(PilotQuirkSettings pilotQuirkSettings, List<PilotQuirk> pilotQuirks)
         {
             if(hasInitialized) return;
+            settings = pilotQuirkSettings;
             UidManager.reset();
             moraleModInstanced = true;
             quirks = new Dictionary<string, PilotQuirk>();
-            foreach (PilotQuirk pilotQuirk in Main.settings.pilotQuirks)
+            foreach (PilotQuirk pilotQuirk in pilotQuirks)
             {
                 foreach (JObject jObject in pilotQuirk.effectData)
                 {
@@ -54,7 +57,7 @@ namespace MechAffinity
                 quirks.Add(pilotQuirk.tag, pilotQuirk);
             }
             quirkPools = new Dictionary<string, QuirkPool>();
-            foreach (QuirkPool quirkPool in Main.settings.quirkPools)
+            foreach (QuirkPool quirkPool in settings.quirkPools)
             {
                 quirkPools.Add(quirkPool.tag, quirkPool);
             }
@@ -268,7 +271,7 @@ namespace MechAffinity
                 }
                 else
                 {
-                    if (Main.settings.playerQuirkPools)
+                    if (settings.playerQuirkPools)
                     {
                         canUsePools = true;
                         Main.modLog.LogMessage("pq player pools enabled, allowing pooled quirk use");
@@ -371,7 +374,7 @@ namespace MechAffinity
         {
             if (!isNew) return;
             List<string> tags = def.PilotTags.ToList();
-            foreach (string tag in Main.settings.addTags)
+            foreach (string tag in settings.addTags)
             {
                 if (!tags.Contains(tag))
                 {
@@ -580,13 +583,13 @@ namespace MechAffinity
                             if (effect.affectedIds.Contains(upgradeId) || effect.affectedIds.Contains(PqAllArgoUpgrades))
                             {
                                 if (Main.settings.debug) Main.modLog.DebugMessage($"Found Argo factor: {quirk.quirkName}, value: {effect.modifier}");
-                                if (Main.settings.pqArgoAdditive)
+                                if (settings.argoAdditive)
                                 {
                                     ret += effect.modifier;
                                 }
                                 else
                                 {
-                                    if (Main.settings.pqArgoMultiAutoAdjust)
+                                    if (settings.argoMultiAutoAdjust)
                                     {
                                         ret *= (1.0f + effect.modifier);
                                     }
@@ -603,9 +606,9 @@ namespace MechAffinity
                 }
             }
 
-            if (ret < Main.settings.pqArgoMin)
+            if (ret < settings.argoMin)
             {
-                ret = Main.settings.pqArgoMin;
+                ret = settings.argoMin;
             }
             if (Main.settings.debug) Main.modLog.DebugMessage($"Found cost factor multiplier: {ret}");
             return ret;

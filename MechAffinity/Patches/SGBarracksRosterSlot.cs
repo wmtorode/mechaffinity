@@ -10,13 +10,14 @@ using BattleTech.UI.Tooltips;
 using Harmony;
 using MechAffinity;
 using MechAffinity.Data;
+using SVGImporter;
 
 namespace MechAffinity.Patches
 {
     [HarmonyPatch(typeof(SGBarracksRosterSlot), "Refresh")]
     public static class SGBarracksRosterSlot_Refresh_Patch
     {
-        public static void Postfix(SGBarracksRosterSlot __instance, UIColorRefTracker ___pilotTypeBackground)
+        public static void Postfix(SGBarracksRosterSlot __instance, UIColorRefTracker ___pilotTypeBackground, SVGImage ___roninIcon, HBSTooltip ___RoninTooltip)
         {
             if (__instance.Pilot == null)
                 return;
@@ -30,7 +31,7 @@ namespace MechAffinity.Patches
                 Desc = "";
             }
             
-            foreach (PilotTooltipTag pqTag in Main.settings.pqTooltipTags)
+            foreach (PilotTooltipTag pqTag in Main.settings.quirkSettings.tooltipTags)
             {
                 if (pilot.pilotDef.PilotTags.Contains(pqTag.tag))
                 {
@@ -38,21 +39,29 @@ namespace MechAffinity.Patches
                 }
             }
 
-            foreach (string tag in pilot.pilotDef.PilotTags)
+            PilotIcon pilotIcon = PilotUiManager.Instance.GetPilotIcon(pilot);
+
+            if (pilotIcon != null)
             {
-                Main.modLog.LogMessage($"checking tag: {tag}: {Main.settings.iconColoursMap.ContainsKey(tag)}");
-                if (Main.settings.iconColoursMap.ContainsKey(tag))
+                if (pilotIcon.HasColour())
                 {
                     Main.modLog.LogMessage("Setting Pilot Icon Colour!");
                     ___pilotTypeBackground.SetUIColor(UIColor.Custom);
-                    ___pilotTypeBackground.OverrideWithColor(Main.settings.iconColoursMap[tag]);
-                    break;
+                    ___pilotTypeBackground.OverrideWithColor(pilotIcon.GetColor());
                 }
+                
             }
 
-            Desc += PilotQuirkManager.Instance.getPilotToolTip(pilot);
-            Desc += "<b>Pilot Affinities:</b>\n\n";
-            Desc += PilotAffinityManager.Instance.getPilotToolTip(pilot);
+            if (Main.settings.enablePilotQuirks)
+            {
+                Desc += PilotQuirkManager.Instance.getPilotToolTip(pilot);
+            }
+
+            if (Main.settings.enablePilotAffinity)
+            {
+                Desc += "<b>Pilot Affinities:</b>\n\n";
+                Desc += PilotAffinityManager.Instance.getPilotToolTip(pilot);
+            }
 
             var descriptionDef = new BaseDescriptionDef("Tags", pilot.Callsign, Desc, null);
             tooltip.SetDefaultStateData(TooltipUtilities.GetStateDataFromObject(descriptionDef));

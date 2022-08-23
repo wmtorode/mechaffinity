@@ -1,188 +1,229 @@
-﻿using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
+using Newtonsoft.Json;
 
 namespace MechAffinity.Data
 {
-    class Settings
+    public class Settings
     {
+        public int version = 2;
+        //Logging Features
         public bool debug = false;
-        public int missionsBeforeDecay = -1;
-        public int lowestPossibleDecay = 0;
-        public int removeAffinityAfter = 100;
-        public int maxAffinityPoints = 1000;
-        public bool decayByModulo = false;
-        public string debugForceTag = "";
-        public int defaultDaysBeforeSimDecay = -1;
-        public bool showQuirks = false;
-        public bool showDescriptionsOnChassis = false;
-        public bool trackSimDecayByStat = true;
-        public bool trackLowestDecayByStat = false;
-        public bool showAllPilotAffinities = true;
-        public int topAffinitiesInTooltipCount = 3;
-
-        public bool enablePilotQuirks = false;
-        public bool playerQuirkPools = false;
-        public bool pqArgoAdditive = true;
-        public bool pqArgoMultiAutoAdjust = true;
-        public float pqArgoMin = 0.0f;
-
+        
+        // Feature Enables
+        public bool enablePilotAffinity = true;
         public bool enablePilotSelect = false;
+        public bool enablePilotQuirks = false;
         public bool enableMonthlyMoraleReset = false;
         public bool enableStablePiloting = false;
+        
+        
+        // Feature Settings
+        // Note: Monthly Morale has no settings, its handled by the Quirk Manager
+        // but has no settings other than if its enabled or disabled
+        public PilotAffinitySettings affinitySettings = new PilotAffinitySettings();
+        public PilotQuirkSettings quirkSettings = new PilotQuirkSettings();
         public StablePilotingSettings stablePilotingSettings = new StablePilotingSettings();
-
-        [JsonIgnore]
-        private Dictionary<string, AffinityLevel> globalAffinities_dict = new Dictionary<string, AffinityLevel>();
-        [JsonIgnore]
-        private Dictionary<string, ChassisSpecificAffinity> chassisAffinities_dict = new Dictionary<string, ChassisSpecificAffinity>();
-        [JsonIgnore]
-        private Dictionary<string, QuirkAffinity> quirkAffinities_dict = new Dictionary<string, QuirkAffinity>();
-        [JsonIgnore]
-        private Dictionary<string, TaggedAffinity> taggedAffinities_dict = new Dictionary<string, TaggedAffinity>();
-        [JsonIgnore]
-        private Dictionary<string, PilotQuirk> pilotQuirks_dict = new Dictionary<string, PilotQuirk>();
-        [JsonIgnore]
-        public Dictionary<string, Color> iconColoursMap = new Dictionary<string, Color>();
+        public PilotUiSettings pilotUiSettings = new PilotUiSettings();
+        
+        // Legacy Settings Debug data
+        public LegacyData legacyData = new LegacyData();
 
 
-        public List<QuirkPool> quirkPools = new List<QuirkPool>();
-        public List<PilotTooltipTag> pqTooltipTags = new List<PilotTooltipTag>();
+        //Helpers
+        internal LegacySettings ToLegacy(List<AffinityDef> affinityDefs, List<PilotQuirk> pilotQuirks)
+        {
+            LegacySettings legacySettings = new LegacySettings();
 
-        public List<PilotQuirk> pilotQuirks = new List<PilotQuirk>();
-        public List<AffinityLevel> globalAffinities = new List<AffinityLevel>();
-        public List<ChassisSpecificAffinity> chassisAffinities = new List<ChassisSpecificAffinity>();
-        public List<QuirkAffinity> quirkAffinities = new List<QuirkAffinity>();
-        public List<TaggedAffinity> taggedAffinities = new List<TaggedAffinity>();
+            legacySettings.debug = debug;
+            legacySettings.enablePilotQuirks = enablePilotQuirks;
+            legacySettings.enablePilotSelect = enablePilotSelect;
+            legacySettings.enableStablePiloting = enableStablePiloting;
+            legacySettings.enableMonthlyMoraleReset = enableMonthlyMoraleReset;
 
-        public List<PrefabOverride> prefabOverrides = new List<PrefabOverride>();
-        public List<AffinityGroup> affinityGroups = new List<AffinityGroup>();
-        public List<PilotIconColour> iconColours = new List<PilotIconColour>();
-        public List<String> addTags = new List<string>();
+            legacySettings.affinityGroups = affinitySettings.affinityGroups;
+            legacySettings.showQuirks = affinitySettings.showQuirks;
+            legacySettings.missionsBeforeDecay = affinitySettings.missionsBeforeDecay;
+            legacySettings.lowestPossibleDecay = affinitySettings.lowestPossibleDecay;
+            legacySettings.removeAffinityAfter = affinitySettings.removeAffinityAfter;
+            legacySettings.decayByModulo = affinitySettings.decayByModulo;
+            legacySettings.debugForceTag = affinitySettings.debugForceTag;
+            legacySettings.defaultDaysBeforeSimDecay = affinitySettings.defaultDaysBeforeSimDecay;
+            legacySettings.showDescriptionsOnChassis = affinitySettings.showDescriptionsOnChassis;
+            legacySettings.trackSimDecayByStat = affinitySettings.trackSimDecayByStat;
+            legacySettings.trackLowestDecayByStat = affinitySettings.trackLowestDecayByStat;
+            legacySettings.showAllPilotAffinities = affinitySettings.showAllPilotAffinities;
+            legacySettings.topAffinitiesInTooltipCount = affinitySettings.topAffinitiesInTooltipCount;
+            legacySettings.maxAffinityPoints = affinitySettings.maxAffinityPoints;
+            legacySettings.prefabOverrides = affinitySettings.prefabOverrides;
 
-    private static int unique_id_counter = 0;
-    private static HashSet<string> used_unique_Ids = new HashSet<string>();
-    public static string createId(string pattern) { return pattern.Replace(" ","_").Replace(".","_").Replace("!","_").Replace("!", "_").Replace("@", "_"); }
-    public static string createUniqueId(string pattern = null) {
-      if (string.IsNullOrEmpty(pattern)) { pattern = "please_fill_it_with_some_unique_id"; }
-      else{ pattern = Settings.createId(pattern); }
-      string result = pattern;
-      while (used_unique_Ids.Contains(result)) { 
-        result = string.Format("{0}_{1}", pattern, unique_id_counter);
-        ++unique_id_counter;
-      };
-      used_unique_Ids.Add(result);
-      return result;
-    }
+            legacySettings.playerQuirkPools = quirkSettings.playerQuirkPools;
+            legacySettings.pqArgoAdditive = quirkSettings.argoAdditive;
+            legacySettings.pqArgoMultiAutoAdjust = quirkSettings.argoMultiAutoAdjust;
+            legacySettings.pqArgoMin = quirkSettings.argoMin;
+            legacySettings.pqTooltipTags = quirkSettings.tooltipTags;
+            legacySettings.addTags = quirkSettings.addTags;
 
-    public void InitLookups()
-    {
-      foreach (PilotIconColour pilotIcon in iconColours)
-      {
-        iconColoursMap.Clear();
-        if (iconColoursMap.ContainsKey(pilotIcon.tag)) continue;
-        iconColoursMap.Add(pilotIcon.tag, pilotIcon.GetColor());
-      }
-    }
-    public void Merge_globalAffinities(List<AffinityLevel> add_globalAffinities) {
-      foreach (AffinityLevel new_lvl in add_globalAffinities) {
-        if(this.globalAffinities_dict.TryGetValue(new_lvl.id, out AffinityLevel old_lvl)) {
-          old_lvl.affinities.AddRange(new_lvl.affinities);
-          old_lvl.levelName = new_lvl.levelName;
-          old_lvl.decription = new_lvl.decription;
-          old_lvl.effectData.AddRange(new_lvl.effectData);
-        } else {
-          this.globalAffinities.Add(new_lvl);
-          this.globalAffinities_dict.Add(new_lvl.id, new_lvl);
+            legacySettings.stablePilotingSettings = stablePilotingSettings;
+            legacySettings.iconColours = pilotUiSettings.pilotIcons;
+
+            legacySettings.pilotQuirks = pilotQuirks;
+
+            foreach (var affinityDef in affinityDefs)
+            {
+                switch (affinityDef.affinityType)
+                {
+                    case EAffinityDefType.Global:
+                        legacySettings.globalAffinities.Add(affinityDef.getGlobalAffinity());
+                        break;
+                    case EAffinityDefType.Chassis:
+                        legacySettings.chassisAffinities.Add(affinityDef.getChassisAffinity());
+                        break;
+                    case EAffinityDefType.Quirk:
+                        legacySettings.quirkAffinities.Add(affinityDef.getQuirkAffinity());
+                        break;
+                    case EAffinityDefType.Tag:
+                        legacySettings.taggedAffinities.Add(affinityDef.getTaggedAffinity());
+                        break;
+                    
+                }
+            }
+
+            return legacySettings;
         }
-      }
-    }
-    public void Merge_chassisAffinities(List<ChassisSpecificAffinity> add_chassisAffinities) {
-      foreach (ChassisSpecificAffinity new_affinity in add_chassisAffinities) {
-        if (this.chassisAffinities_dict.TryGetValue(new_affinity.id, out ChassisSpecificAffinity old_affinity)) {
-          old_affinity.Merge(new_affinity.affinityLevels);
-          old_affinity.chassisNames.AddRange(new_affinity.chassisNames);
-        } else {
-          this.chassisAffinities.Add(new_affinity);
-          this.chassisAffinities_dict.Add(new_affinity.id, new_affinity);
+        
+        private static string createId(string pattern) { return pattern.Replace(" ","_").Replace(".","_").Replace("\\","_").Replace("/","_").Replace("!","").Replace("@", "_").Replace("\"", "").Replace("(", "").Replace(")", ""); }
+        
+        internal static Settings FromLegacy(LegacySettings legacySettings, string modDirectory)
+        {
+            Settings settings = new Settings();
+
+            settings.debug = legacySettings.debug;
+            settings.enablePilotSelect = legacySettings.enablePilotSelect;
+            settings.enablePilotQuirks = legacySettings.enablePilotQuirks;
+            settings.enableStablePiloting = legacySettings.enableStablePiloting;
+            settings.enableMonthlyMoraleReset = legacySettings.enableMonthlyMoraleReset;
+
+            settings.affinitySettings.affinityGroups = legacySettings.affinityGroups;
+            settings.affinitySettings.showQuirks = legacySettings.showQuirks;
+            settings.affinitySettings.missionsBeforeDecay = legacySettings.missionsBeforeDecay;
+            settings.affinitySettings.lowestPossibleDecay = legacySettings.lowestPossibleDecay;
+            settings.affinitySettings.removeAffinityAfter = legacySettings.removeAffinityAfter;
+            settings.affinitySettings.decayByModulo = legacySettings.decayByModulo;
+            settings.affinitySettings.debugForceTag = legacySettings.debugForceTag;
+            settings.affinitySettings.defaultDaysBeforeSimDecay = legacySettings.defaultDaysBeforeSimDecay;
+            settings.affinitySettings.showDescriptionsOnChassis = legacySettings.showDescriptionsOnChassis;
+            settings.affinitySettings.trackSimDecayByStat = legacySettings.trackSimDecayByStat;
+            settings.affinitySettings.trackLowestDecayByStat = legacySettings.trackLowestDecayByStat;
+            settings.affinitySettings.showAllPilotAffinities = legacySettings.showAllPilotAffinities;
+            settings.affinitySettings.topAffinitiesInTooltipCount = legacySettings.topAffinitiesInTooltipCount;
+            settings.affinitySettings.maxAffinityPoints = legacySettings.maxAffinityPoints;
+            settings.affinitySettings.prefabOverrides = legacySettings.prefabOverrides;
+
+            settings.quirkSettings.playerQuirkPools = legacySettings.playerQuirkPools;
+            settings.quirkSettings.argoAdditive = legacySettings.pqArgoAdditive;
+            settings.quirkSettings.argoMultiAutoAdjust = legacySettings.pqArgoMultiAutoAdjust;
+            settings.quirkSettings.argoMin = legacySettings.pqArgoMin;
+            settings.quirkSettings.quirkPools = legacySettings.quirkPools;
+            settings.quirkSettings.tooltipTags = legacySettings.pqTooltipTags;
+            settings.quirkSettings.addTags = legacySettings.addTags;
+
+            settings.stablePilotingSettings = legacySettings.stablePilotingSettings;
+            
+            settings.pilotUiSettings.pilotIcons = legacySettings.iconColours;
+
+            if (!Directory.Exists($"{modDirectory}/AffinityDefs"))
+            {
+                int counter = 0;
+                System.IO.Directory.CreateDirectory($"{modDirectory}/AffinityDefs");
+                
+                foreach (var globalAffinity in legacySettings.globalAffinities)
+                {
+                    AffinityDef affinityDef = new AffinityDef()
+                    {
+                        id = createId("AffinityDef_global_" + $"{globalAffinity.levelName}"),
+                        affinityType = EAffinityDefType.Global
+                    };
+                    if (File.Exists($"{modDirectory}/AffinityDefs/{affinityDef.id}.json"))
+                        affinityDef.id += $"_{counter}";
+                    counter++;
+                    affinityDef.setAffinityData(globalAffinity);
+                    File.WriteAllText($"{modDirectory}/AffinityDefs/{affinityDef.id}.json",
+                        JsonConvert.SerializeObject(affinityDef, Formatting.Indented));
+
+                }
+                
+                foreach (var chassisAffinity in legacySettings.chassisAffinities)
+                {
+                    AffinityDef affinityDef = new AffinityDef()
+                    {
+                        id = createId("AffinityDef_chassis_" + $"{chassisAffinity.affinityLevels.First().levelName}"),
+                        affinityType = EAffinityDefType.Chassis
+                    };
+                    Main.modLog.LogMessage($"{affinityDef.id}");
+                    if (File.Exists($"{modDirectory}/AffinityDefs/{affinityDef.id}.json"))
+                        affinityDef.id += $"_{counter}";
+                    counter++;
+                    affinityDef.setAffinityData(chassisAffinity);
+                    File.WriteAllText($"{modDirectory}/AffinityDefs/{affinityDef.id}.json",
+                        JsonConvert.SerializeObject(affinityDef, Formatting.Indented));
+
+                }
+
+                foreach (var quirkAffinity in legacySettings.quirkAffinities)
+                {
+                    AffinityDef affinityDef = new AffinityDef()
+                    {
+                        id = createId("AffinityDef_quirk_" + $"{quirkAffinity.affinityLevels.First().levelName}"),
+                        affinityType = EAffinityDefType.Quirk
+                    };
+                    if (File.Exists($"{modDirectory}/AffinityDefs/{affinityDef.id}.json"))
+                        affinityDef.id += $"_{counter}";
+                    counter++;
+                    affinityDef.setAffinityData(quirkAffinity);
+                    File.WriteAllText($"{modDirectory}/AffinityDefs/{affinityDef.id}.json",
+                        JsonConvert.SerializeObject(affinityDef, Formatting.Indented));
+
+                }
+
+                foreach (var taggedAffinity in legacySettings.taggedAffinities)
+                {
+                    AffinityDef affinityDef = new AffinityDef()
+                    {
+                        id = createId("AffinityDef_tagged_" + $"{taggedAffinity.affinityLevels.First().levelName}"),
+                        affinityType = EAffinityDefType.Tag
+                    };
+                    if (File.Exists($"{modDirectory}/AffinityDefs/{affinityDef.id}.json"))
+                        affinityDef.id += $"_{counter}";
+                    counter++;
+                    affinityDef.setAffinityData(taggedAffinity);
+                    File.WriteAllText($"{modDirectory}/AffinityDefs/{affinityDef.id}.json",
+                        JsonConvert.SerializeObject(affinityDef, Formatting.Indented));
+
+                }
+            }
+
+            if (!Directory.Exists($"{modDirectory}/QuirkDefs"))
+            {
+                int counter = 0;
+                System.IO.Directory.CreateDirectory($"{modDirectory}/QuirkDefs");
+                foreach (var pilotQuirk in legacySettings.pilotQuirks)
+                {
+                    if (string.IsNullOrEmpty(pilotQuirk.id))
+                    {
+                        pilotQuirk.id = $"pilotQuirkDef_{pilotQuirk.tag}";
+                    }
+                    if (File.Exists($"{modDirectory}/QuirkDefs/{pilotQuirk.id}.json"))
+                        pilotQuirk.id += $"_{counter}";
+                    counter++;
+                    File.WriteAllText($"{modDirectory}/QuirkDefs/{pilotQuirk.id}.json",
+                        JsonConvert.SerializeObject(pilotQuirk, Formatting.Indented));
+                    
+                }
+            }
+
+            return settings;
         }
-      }
-    }
-    public void Merge_quirkAffinities(List<QuirkAffinity> add_quirkAffinities) {
-      foreach (QuirkAffinity new_affinity in add_quirkAffinities) {
-        if (this.quirkAffinities_dict.TryGetValue(new_affinity.id, out QuirkAffinity old_affinity)) {
-          old_affinity.Merge(new_affinity.affinityLevels);
-          old_affinity.quirkNames.AddRange(new_affinity.quirkNames);
-        } else {
-          this.quirkAffinities.Add(new_affinity);
-          this.quirkAffinities_dict.Add(new_affinity.id, new_affinity);
-        }
-      }
-    }
-    public void Merge_taggedAffinities(List<TaggedAffinity> add_taggedAffinities) {
-      foreach (TaggedAffinity new_affinity in add_taggedAffinities) {
-        if (this.taggedAffinities_dict.TryGetValue(new_affinity.id, out TaggedAffinity old_affinity)) {
-          old_affinity.Merge(new_affinity.affinityLevels);
-          old_affinity.tag = new_affinity.tag;
-        } else {
-          this.taggedAffinities.Add(new_affinity);
-          this.taggedAffinities_dict.Add(new_affinity.id, new_affinity);
-        }
-      }
-    }
-    public void Merge_pilotQuirks(List<PilotQuirk> add_pilotQuirks) {
-      foreach (PilotQuirk new_affinity in add_pilotQuirks) {
-        if (this.pilotQuirks_dict.TryGetValue(new_affinity.tag, out PilotQuirk old_affinity)) {
-          old_affinity.quirkEffects.AddRange(new_affinity.quirkEffects);
-          old_affinity.effectData.AddRange(new_affinity.effectData);
-        } else {
-          this.pilotQuirks.Add(new_affinity);
-          this.pilotQuirks_dict.Add(new_affinity.tag, new_affinity);
-        }
-      }
-    }
-    public void Merge(Settings add_settings) {
-      this.Merge_pilotQuirks(add_settings.pilotQuirks);
-      this.Merge_globalAffinities(add_settings.globalAffinities);
-      this.Merge_chassisAffinities(add_settings.chassisAffinities);
-      this.Merge_quirkAffinities(add_settings.quirkAffinities);
-      this.Merge_taggedAffinities(add_settings.taggedAffinities);
-    }
-    public bool Check(string filename) {
-      bool result = false;
-      foreach (PilotQuirk item in this.pilotQuirks) {
-        if (string.IsNullOrEmpty(item.tag)) { result = true; item.tag = createUniqueId(item.tag); }
-        if (globalAffinities_dict.ContainsKey(item.tag)) { throw new Exception("pilotQuirk id duplication detected " + item.tag + " in file " + filename); }
-        pilotQuirks_dict.Add(item.tag, item);
-      }
-      foreach (AffinityLevel item in this.globalAffinities) {
-        if (string.IsNullOrEmpty(item.id)) { result = true; item.id = createUniqueId(item.levelName); }
-        if (globalAffinities_dict.ContainsKey(item.id)) { throw new Exception("globalAffinity id duplication detected "+ item.id + " in file " + filename); }
-        globalAffinities_dict.Add(item.id, item);
-      }
-      foreach (ChassisSpecificAffinity item in this.chassisAffinities) {
-        if (string.IsNullOrEmpty(item.id)) { result = true; item.id = createUniqueId(); }
-        if (chassisAffinities_dict.ContainsKey(item.id)) { throw new Exception("chassisAffinity id duplication detected " + item.id + " in file " + filename); }
-        chassisAffinities_dict.Add(item.id, item);
-        if (item.Check(filename)) { result = true; }
-      }
-      foreach (QuirkAffinity item in this.quirkAffinities) {
-        if (string.IsNullOrEmpty(item.id)) { result = true; item.id = createUniqueId(); }
-        if (quirkAffinities_dict.ContainsKey(item.id)) { throw new Exception("quirkAffinities id duplication detected " + item.id + " in file " + filename); }
-        quirkAffinities_dict.Add(item.id, item);
-        if (item.Check(filename)) { result = true; }
-      }
-      foreach (TaggedAffinity item in this.taggedAffinities) {
-        if (string.IsNullOrEmpty(item.id)) { result = true; item.id = createUniqueId(); }
-        if (taggedAffinities_dict.ContainsKey(item.id)) { throw new Exception("taggedAffinities id duplication detected " + item.id + " in file " + filename); }
-        taggedAffinities_dict.Add(item.id, item);
-        if (item.Check(filename)) { result = true; }
-      }
-      return result;
-    }
     }
 }
