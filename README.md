@@ -1,6 +1,34 @@
-# mechaffinity
+# MechAffinity
 
-A Mod for HBS's BattleTech that bonds makes pilots bond with their mechs
+Mech Affinity is a feature rich framework-style mod that enables a number of new mechanics to HBS' 2018 BATTLETECH pc game.
+
+High Level Feature Set (all can be enabled or disabled as needed):
+- Pilots can gain experience with certain mechs the more they pilot them, resulting in various bonuses
+- Pilots can have quirks, bonuses and/or malus' that results from their varied natured.
+- Certain pilots can be made more distinguished from other pilots in the same manner that Ronin or KS Backers are
+- Adjustments to Stability damage taken based on a pilot's piloting skill and quirks
+- Reset Morale on a monthly basis
+- Allow for new careers to pick guaranteed Ronin and/or random Ronin pilots
+- New Combat Effects
+
+As a framework-style mod, MechAffinity is highly configurable and is primarily designed to be integrated into modpacks like BattleTech Advanced 3062 (BTA), RogueTech (RT) or BattleTech Extended Commander's Edition (BEX/BEX:CE) and is a core piece of all of them.
+This documentation is therefore aimed at modpack creator's who already have a decent understanding of various concepts like status effects, creating JSON files and tinkering with settings. However, MechAffinity is fully capable of being used stand-alone
+
+### Available Editions
+
+MechAffinity currently ships with 3 different versions of its DLL
+
+#### Standard
+This version of the DLL has no dependencies and can be used stand-alone. AssemblyVariant mode for Chassis/Tag affinities fallback to using the prefab mode. Vehicles cannot be given affinities
+
+#### CustomSalvage/CustomComponents support
+
+This version of the DLL requires the CustomSalvage & CustomComponents mods, but enables the AssemblyVariant mode for Chassis/Tag affinities
+
+#### LewdableTanks support
+
+This version the DLL requires the CustomSalvage, CustomComponents & LewdableTanks mods, but enables the AssemblyVariant mode for Chassis/Tag affinities and support for vehicles to be given affinities
+
 
 ## Settings Json
 
@@ -43,7 +71,7 @@ class of chassis, so for example a pilot who has spent years piloting a ShadowHa
 Each deployment with a mech increases a pilot's affinity for that chassis by a single point, upon reaching enough deployments they will start to be granted 'affinities' until they have obtained all that can be obtained with that unit.
 Affinities can come in the form of Buffs or Malus depending on the setup.
 
-Depending on the setup of the below settings, affinities may decay overtime as a way to represent a pilot losing familiarity with that unit until it reaches a defined minimum threshold or is forgotten entirely. These thresholds can be setup to always come from
+Depending on the setup of the below settings, affinities may decay over time as a way to represent a pilot losing familiarity with that unit until it reaches a defined minimum threshold or is forgotten entirely. These thresholds can be setup to always come from
 the settings file or can be tracked by stats that in-game events or argo upgrades may modify as required.
 
 **Note: Pilots will receive ALL affinities that they qualify for, not just the highest available to them**
@@ -518,6 +546,8 @@ Consumable tags follow this scheme `MaConsumableAffinity_X=prefabId` where X is 
 Example: Pilot Raza has been given the tag `MaConsumableAffinity_5=chrPrfMech_urbanmechBase-001_30` this means Raza has a 5 point boost added when using the chassis `chrPrfMech_urbanmechBase-001_30` (the UrbanMech),
 overtime this may decay if Raza decides to pilot another mech.
 
+
+
 ## Pilot Quirks
 
 Pilot quirks represent innate quirks of a pilot based on their physical, mental, socioeconomic backgrounds & behaviours. These quirks can manifest themselves in numerous active or passive ways.
@@ -782,6 +812,11 @@ available types:
 
 non player pilots can be setup to get randomized quirks. To do this add quirk pools and make sure all AI pilots that should get quirks have at least one of the tags used by a quirk pool.
 
+### Getting Custom Quirks To Show
+
+any non-vanilla tag will not show up on the pilot's dossier in game by default. to get a custom quirk to show up like the above `Always Blamed` quirk, you will need to add custom tags
+via modtek. See ModTek's [Custom Tag](https://github.com/BattletechModders/ModTek/blob/master/doc/CUSTOM_TYPE_CUSTOMTAGS.md) documentation for details on how to load them
+
 ## Pilot Select
 
 Pilot Select allows a user to change how pilots are selected for the initial pilot roster on a new career.
@@ -909,5 +944,97 @@ PilotIconColour objects allow you to change the pilot type's background colour t
 - `colour`: when not blank, pilots with the matching tag will have their pilot type icon background set to this colour, use HTML RGB Colour encoding
 - `tag`: the tag the pilot must have for this icon updates to be applied
 - `descriptionDefId`: when not blank, the pilot type tool tip text will be updated to use the `BaseDescriptionDef` with the matching ID, Mech Affinity or another mod must load this description via the mod.json manifest
-- `svgAssetId`: when not blank, the pilot type icon will have the foreground icon replaced by the SVG Asset matching this ID, Mech Affinity or another mod must load this SVGAsset via the mod.json manifest
+- `svgAssetId`: when not blank, the pilot type icon will have the foreground icon replaced by the SVG Asset matching this ID, Mech Affinity or another mod must load this `SVGAsset` via the mod.json manifest
+
+
+## New Combat Effects
+
+Mech Affinity enables the following new combat effects
+
+
+### Super-Breaching Shot
+
+Super-Breaching Shot is an enhanced version of the vanilla breaching shot ability. It differs from the standard breaching shot in the following ways:
+- may be granted via gear, affinity or pilot quirk
+- all non-melee weapons always use breaching shot, even with multiple weapons being fired
+
+Given the power of this effect, it is recommended to keep access to it quite limited.
+
+#### How to enable
+
+Super-Breaching Shot is enabled via the `SuperPrecisionShot` status effect, allowing it to be granted by gear, affinities or pilot quirks.
+
+example:
+```json
+{
+  "durationData": {
+    "duration": -1
+  },
+  "targetingData": {
+    "effectTriggerType": "Passive",
+    "effectTargetType": "Creator"
+  },
+  "effectType": "StatisticEffect",
+  "Description": {
+    "Id": "TC-Breaching",
+    "Name": "BREACHING SHOT",
+    "Details": "PASSIVE: Attacking with a single weapon ignores COVER and GUARDED on the target.",
+    "Icon": "uixSvgIcon_ability_precisionstrike"
+  },
+  "statisticData": {
+    "statName": "SuperPrecisionShot",
+    "operation": "Set",
+    "modValue": "true",
+    "modType": "System.Boolean"
+  },
+  "nature": "Buff"
+}
+```
+
+## Upgrading from 1.3.0 or earlier
+
+MechAffinity versions prior to 1.4.0 had a significantly different format that is no longer compatible with newer versions.
+
+However, there is a relatively straightforward migration path:
+
+1. Grab the latest MechAffinity build suitable for your environment
+2. Drop the new DLL into your existing install
+3. Start the game
+4. ModTek will report that MechAffinity failed to load, *This is expected*
+5. close the game and check your mechaffinity folder in mods, verify the following:
+   1. settings.json is now significantly smaller and contains the new settings format
+   2. settings.legacy.json has been created and contains your old settings
+   3. A directory called `AffinityDefs` now exists and contains all your defined affinities as individual files
+   4. A directory called `QuirkDefs` now exists and contains any pilot quirks you had defined as individual files
+6. update your mod.json file to look something like this:
+
+```json
+{
+	"Name": "MechAffinity",
+	"Version": "1.4.0",
+	"Enabled": true,
+	"Hidden": false,
+	"Author": "Jamie Wolf",
+	"DLL": "MechAffinity.dll",
+	"DLLEntryPoint": "MechAffinity.Main.Init",
+	"CustomResourceTypes": ["AffinitiesDef", "QuirkDef"],
+	"DependsOn": [
+		"CustomComponents",
+		"CustomSalvage"
+	],
+	"ConflictsWith": [],
+	"Manifest": [
+		{
+			"Type": "AffinitiesDef",
+			"Path": "AffinityDefs"
+		},
+		{
+			"Type": "QuirkDef",
+			"Path": "QuirkDefs"
+		}
+	]
+}
+```
+
+*Note if you are using the version of MA that doesn't depend on custom components then the `DependsOn` entries should be omitted
 
