@@ -38,6 +38,8 @@ namespace MechAffinity
                                 actor.Combat.EffectManager.CreateEffect(statusEffect, effectId, -1, actor,actor, new WeaponHitInfo(), 0, false);
                                 break;
                             case EffectTargetType.AllLanceMates:
+                                Main.modLog.LogMessage($"Found lancemate effect {effectId}, effect ID: {statusEffect.Description.Id}");
+                                actor.Combat.EffectManager.CreateEffect(statusEffect, effectId, -1, actor,actor, new WeaponHitInfo(), 0, false);
                                 List<AbstractActor> lancemates =
                                     spawnedActors.FindAll((x => x.team == actor.team));
                                 foreach (var lancemate in lancemates)
