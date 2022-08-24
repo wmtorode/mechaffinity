@@ -55,6 +55,7 @@ namespace MechAffinity
                                 });
                                 break;
                             case EffectTargetType.AllEnemies:
+                                Main.modLog.LogMessage($"Found enemy effect {effectId}, effect ID: {statusEffect.Description.Id}");
                                 List<AbstractActor> allEnemies = spawnedActors.FindAll((x => x.IsEnemy(actor)));
                                 foreach (var enemy in allEnemies)
                                 {
@@ -101,7 +102,7 @@ namespace MechAffinity
                     case EffectTargetType.AllLanceMates:
                         if (delayedEffect.actor.team == actor.team)
                         {
-                            Main.modLog.LogMessage($"Applying Lancemate effect {delayedEffect.effectId}, effect ID: {delayedEffect.effect.Description.Id}, name: {delayedEffect.effect.Description.Name} to {actor.DisplayName} ");
+                            Main.modLog.LogMessage($"Applying delayed Lancemate effect {delayedEffect.effectId}, effect ID: {delayedEffect.effect.Description.Id}, name: {delayedEffect.effect.Description.Name} to {actor.DisplayName} ");
                             actor.Combat.EffectManager.CreateEffect(delayedEffect.effect, delayedEffect.effectId, -1, delayedEffect.actor, actor,
                                 new WeaponHitInfo(), 0);
                         }
@@ -109,7 +110,7 @@ namespace MechAffinity
                     case EffectTargetType.AllEnemies:
                         if (delayedEffect.actor.IsEnemy(actor))
                         {
-                            Main.modLog.LogMessage($"Applying enemy effect {delayedEffect.effectId}, effect ID: {delayedEffect.effect.Description.Id}, name: {delayedEffect.effect.Description.Name} to {actor.DisplayName} ");
+                            Main.modLog.LogMessage($"Applying delayed enemy effect {delayedEffect.effectId}, effect ID: {delayedEffect.effect.Description.Id}, name: {delayedEffect.effect.Description.Name} to {actor.DisplayName} ");
                             actor.Combat.EffectManager.CreateEffect(delayedEffect.effect, delayedEffect.effectId, -1, delayedEffect.actor, actor,
                                 new WeaponHitInfo(), 0);
                         }
