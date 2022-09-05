@@ -501,7 +501,7 @@ global Affinity Objects are simply [AffinityLevel](#affinitylevel-objects) objec
 
 - `missionsRequired` : the number of deployments required to receive this affinity
 - `levelName` : the name of this affinity level
-- `decription` : a description of this level
+- `decription` : a description of this level *Note: Yes this is spelt wrong, but has been left as is for compatibility reasons*
 - `affinities` : a list of [affinity](#affinity-objects) objects this level applies
 - `effectData` : a list of status effects that this level applies
 
@@ -509,7 +509,7 @@ global Affinity Objects are simply [AffinityLevel](#affinitylevel-objects) objec
 
 Affinity objects provide a direct boost to a pilot's stats.
 
-**Note: This provides a raw stat boost only, it does not confer additional abilities or traits that come with naturely leveling the pilot's skill up**
+**Note: This provides a raw stat boost only, it does not confer additional abilities or traits that come with naturally leveling the pilot's skill up**
 
 ```json
 {
@@ -659,15 +659,15 @@ available types:
 
 - `PilotCostFactor`
   This type modifies the amount it costs to hire and monthly pay of a pilot. this works as a multiplier to the standard costs of the pilot by the amount
-  specified by `modifier` field. A modifier that is postive increases a pilots cost, while a negative decreases costs.
+  specified by `modifier` field. A modifier that is positive increases a pilots cost, while a negative decreases costs.
   examples: a modifier of `0.3` with increase the cost of a pilot by 30%, while a value of `-0.25` will decrease the pilots cost by 25%
 
 - `CriminalEffect` and `CriminalEffect2`
   This type introduces a pilot's ability to steal either for you or from you. When a day passes all pilots with this effect make a roll. on a successful
   roll they will steal a specified amount. the chance to steal is governed by `modifier` which specifies the percentage (as an int) to successfully roll
-  a steal. `secondaryModifier` specifies the amount of cbills to steal when a successful roll is made, a postive amount steals from you, a negative amount
+  a steal. `secondaryModifier` specifies the amount of cbills to steal when a successful roll is made, a positive amount steals from you, a negative amount
   steals from you. for example a modifier of `9` and a secondaryModifier with a value of 500 gives the pilot a 9% chance to steal 500 cbills from you
-  when a day passes. `CriminalEffect2` is functionally identical, just used to make a second independant roll.
+  when a day passes. `CriminalEffect2` is functionally identical, just used to make a second independent roll.
 
 - `ArgoUpgradeFactor` and `ArgoUpkeepFactor`
   These types affect the pilots ability to reduce or increase the upfront cost or the monthly upkeep of an argo upgrade. the `modifier` field is a float that acts as a multiplier
@@ -680,6 +680,10 @@ available types:
 
 - `Immortality`
   This type is used to grant a pilot the same plot-armour that your company-commander has been granted. Pilots granted immortality cannot be killed on the battlefield (although they may still be subject to death from events or from other mods)
+
+- `AdditionalSalvage`
+  This is used to grant additional salvage rights. `modifier` adds additional overall salvage allocation, while `secondaryModifier` adds to the number of priority picks you will receive. 
+  *Note: pilots with this effect must be deployed to the battle for you to receive the benefits. You cannot increase the number of priority picks past 7 regardless of the value used, this is a game UI limitation*
 
 #### Example QuirkDef:
 ```json

@@ -1,11 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using BattleTech;
 using MechAffinity.Data;
 using Newtonsoft.Json.Linq;
 using Harmony;
+using UnityEngine;
 using UnityEngine.UI;
+using Random = System.Random;
 
 namespace MechAffinity
 {
@@ -554,6 +555,24 @@ namespace MechAffinity
             }
 
             return false;
+            
+        }
+
+        public void additionalSalvage(PilotDef pilotDef, ref int additionalSalvage, ref int additionalSalvagePicks)
+        {
+            List<PilotQuirk> pilotQuirks = getQuirks(pilotDef);
+            foreach (PilotQuirk quirk in pilotQuirks)
+            {
+                foreach (QuirkEffect effect in quirk.quirkEffects)
+                {
+                    if (effect.type == EQuirkEffectType.AdditionalSalvage)
+                    {
+                        additionalSalvage += Mathf.FloorToInt(effect.modifier);
+                        additionalSalvagePicks += Mathf.FloorToInt(effect.secondaryModifier);
+                        Main.modLog.LogMessage($"Pilot: {pilotDef.Description.Callsign}, adds: {effect.modifier} salvage, {effect.secondaryModifier} picks");
+                    }
+                }
+            }
             
         }
 

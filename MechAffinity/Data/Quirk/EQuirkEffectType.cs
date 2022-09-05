@@ -17,6 +17,7 @@ namespace MechAffinity.Data
         ArgoUpkeepFactor = 6,
         CriminalEffect2 = 7,
         PilotHealth = 8,
-        Immortality = 9
+        Immortality = 9,
+        AdditionalSalvage = 10
     }
 }
