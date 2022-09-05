@@ -179,9 +179,10 @@ namespace MechAffinity.Patches
         }
         public static void Postfix(SimGameState __instance, PilotDef def, ref int __result)
         {
-            float multiplier = PilotQuirkManager.Instance.getPilotCostMulitplier(def);
+            int flatCost;
+            float multiplier = PilotQuirkManager.Instance.getPilotCostModifier(def, out flatCost);
 
-            __result = (int)(__result * multiplier);
+            __result = (int)((__result + flatCost) * multiplier);
         }
     }
 
@@ -195,9 +196,10 @@ namespace MechAffinity.Patches
         }
         public static void Postfix(SimGameState __instance, PilotDef def, ref int __result)
         {
-            float multiplier = PilotQuirkManager.Instance.getPilotCostMulitplier(def);
+            int flatCost;
+            float multiplier = PilotQuirkManager.Instance.getPilotCostModifier(def, out flatCost);
 
-            __result = (int)(__result * multiplier);
+            __result = (int)((__result + flatCost) * multiplier);
         }
     }
 

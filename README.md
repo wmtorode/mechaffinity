@@ -657,10 +657,13 @@ available types:
   and can increment or decrement these levels for example one quirk could add `0.6` mechtech points while another could add `1.4` and a third could add `-0.1`
   this would net an overall boost of 1, with 0.9 leftover and stored for when the pilot roster changes
 
+
 - `PilotCostFactor`
   This type modifies the amount it costs to hire and monthly pay of a pilot. this works as a multiplier to the standard costs of the pilot by the amount
   specified by `modifier` field. A modifier that is positive increases a pilots cost, while a negative decreases costs.
+  `secondaryModifier` can be used to add or subtract a flat cost to the pilot's cost, this is applied before the `modifier` percentage costs are applied
   examples: a modifier of `0.3` with increase the cost of a pilot by 30%, while a value of `-0.25` will decrease the pilots cost by 25%
+
 
 - `CriminalEffect` and `CriminalEffect2`
   This type introduces a pilot's ability to steal either for you or from you. When a day passes all pilots with this effect make a roll. on a successful
@@ -669,17 +672,21 @@ available types:
   steals from you. for example a modifier of `9` and a secondaryModifier with a value of 500 gives the pilot a 9% chance to steal 500 cbills from you
   when a day passes. `CriminalEffect2` is functionally identical, just used to make a second independent roll.
 
+
 - `ArgoUpgradeFactor` and `ArgoUpkeepFactor`
   These types affect the pilots ability to reduce or increase the upfront cost or the monthly upkeep of an argo upgrade. the `modifier` field is a float that acts as a multiplier
   to the base/upkeep cost of the upgrade. `affectedIds` is a list of argo upgrade IDs that this quirk affects. to affect all upgrades a value of `PqAllArgoUpgrades` can be
   added to this list. example: `ArgoUpgradeFactor` with a modifier of `-0.3` and affectedIds list equal to `[PqAllArgoUpgrades]` will give a 30% cost reduction to
   the purchase cost of all upgrades. while a `ArgoUpkeepFactor` with a modifier of `0.15` will increase the monthly upkeep of all affected upgrades.
 
+
 - `PilotHealth`
   This type is used to add or remove health from a pilot
 
+
 - `Immortality`
   This type is used to grant a pilot the same plot-armour that your company-commander has been granted. Pilots granted immortality cannot be killed on the battlefield (although they may still be subject to death from events or from other mods)
+
 
 - `AdditionalSalvage`
   This is used to grant additional salvage rights. `modifier` adds additional overall salvage allocation, while `secondaryModifier` adds to the number of priority picks you will receive. 

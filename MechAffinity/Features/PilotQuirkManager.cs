@@ -284,9 +284,10 @@ namespace MechAffinity
 
         }
 
-        public float getPilotCostMulitplier(PilotDef pilotDef)
+        public float getPilotCostModifier(PilotDef pilotDef, out int flatCost)
         {
             float ret = 1.0f;
+            flatCost = 0;
 
             List<PilotQuirk> pilotQuirks = getQuirks(pilotDef);
             foreach (PilotQuirk quirk in pilotQuirks)
@@ -296,6 +297,7 @@ namespace MechAffinity
                     if(effect.type == EQuirkEffectType.PilotCostFactor)
                     {
                         ret += effect.modifier;
+                        flatCost += Mathf.FloorToInt(effect.secondaryModifier);
                     }
                 }
             }
