@@ -225,16 +225,25 @@ namespace MechAffinity.Patches
         {
             return Main.settings.enablePilotQuirks;
         }
-        public static void Prefix(SimGameState __instance, Pilot p)
+        public static bool Prefix(SimGameState __instance, Pilot p, ref bool __result)
         {
             if (p != null && (__instance.PilotRoster.Contains(p)))
             {
                 PilotDef def = p.pilotDef;
                 if (def != null)
                 {
+                    // if the pilot is supposed to be killed, but is immortal, dont kill them
+                    if (PilotQuirkManager.Instance.hasImmortality(def))
+                    {
+                        Main.modLog.LogMessage($"Preventing death of pilot: {def.Description.Callsign}");
+                        __result = true;
+                        return false;
+                    }
                     PilotQuirkManager.Instance.proccessPilot(def, false);
                 }
             }
+
+            return true;
         }
     }
     
