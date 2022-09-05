@@ -64,7 +64,6 @@ namespace MechAffinity
         {
             foreach (string tag in pilot.pilotDef.PilotTags)
             {
-                Main.modLog.LogMessage($"checking tag: {tag}: {iconMap.ContainsKey(tag)}");
                 if (iconMap.ContainsKey(tag))
                 {
                     Main.modLog.LogMessage($"Found IconData for: {tag}!");

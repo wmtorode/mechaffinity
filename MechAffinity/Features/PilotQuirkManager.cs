@@ -539,10 +539,8 @@ namespace MechAffinity
             }
         }
 
-        public bool isPilotImmortal(PilotDef pilotDef)
+        public bool hasImmortality(PilotDef pilotDef)
         {
-            if (pilotDef.IsImmortal) return true;
-            
             List<PilotQuirk> pilotQuirks = getQuirks(pilotDef);
             foreach (PilotQuirk quirk in pilotQuirks)
             {
@@ -556,6 +554,14 @@ namespace MechAffinity
             }
 
             return false;
+            
+        }
+
+        public bool isPilotImmortal(PilotDef pilotDef)
+        {
+            if (pilotDef.IsImmortal) return true;
+            return hasImmortality(pilotDef);
+
         }
 
         public bool isPilotImmortal(Pilot pilot)
