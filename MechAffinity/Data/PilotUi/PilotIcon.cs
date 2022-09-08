@@ -9,6 +9,7 @@ namespace MechAffinity.Data
         public string tag = "";
         public string descriptionDefId = "";
         public string svgAssetId = "";
+        public int priority = 1;
         
         private Color refColor;
         private bool cSet = false;

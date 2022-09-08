@@ -121,6 +121,7 @@
     <Compile Include="Data\Quirk\PilotTooltipTag.cs" />
     <Compile Include="Data\Quirk\QuirkEffect.cs" />
     <Compile Include="Data\Quirk\QuirkPool.cs" />
+    <Compile Include="Data\Quirk\TagUpdate.cs" />
     <Compile Include="Data\Settings.cs" />
     <Compile Include="Data\StablePiloting\EStabilityEffectType.cs" />
     <Compile Include="Data\StablePiloting\PilotTagStabilityEffect.cs" />

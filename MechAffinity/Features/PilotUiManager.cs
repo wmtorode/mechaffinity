@@ -62,16 +62,25 @@ namespace MechAffinity
 
         public PilotIcon GetPilotIcon(Pilot pilot)
         {
+            PilotIcon icon = null;
             foreach (string tag in pilot.pilotDef.PilotTags)
             {
                 if (iconMap.ContainsKey(tag))
                 {
                     Main.modLog.LogMessage($"Found IconData for: {tag}!");
-                    return iconMap[tag];
+                    if (icon == null)
+                    {
+                        icon = iconMap[tag];
+                    }
+                    else if (icon.priority > iconMap[tag].priority)
+                    {
+                        Main.modLog.LogMessage($"icon IconData for: {tag} has higher priority, bumping");
+                        icon = iconMap[tag];
+                    }
                 }
             }
 
-            return null;
+            return icon;
 
         }
 

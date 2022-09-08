@@ -385,6 +385,29 @@ namespace MechAffinity
                     Main.modLog.LogMessage($"Adding Tag: {tag} to {def.Description.Callsign}");
                 }
             }
+
+            foreach (var update in settings.tagUpdates)
+            {
+                if (tags.Contains(update.selector))
+                {
+                    foreach (var newTag in update.addTags)
+                    {
+                        if (!tags.Contains(newTag))
+                        {
+                            def.PilotTags.Add(newTag);
+                            Main.modLog.LogMessage($"Adding Tag: {newTag} to {def.Description.Callsign}");
+                        }
+                    }
+                    foreach (var depTag in update.removeTags)
+                    {
+                        if (tags.Contains(depTag))
+                        {
+                            def.PilotTags.Remove(depTag);
+                            Main.modLog.LogMessage($"Removing Tag: {depTag} to {def.Description.Callsign}");
+                        }
+                    }
+                }
+            }
             
         }
 

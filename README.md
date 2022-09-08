@@ -570,7 +570,8 @@ Quirks may have their various features adjusted using the below settings.
   "argoMin": 0.0,
   "quirkPools":[],
   "tooltipTags":[],
-  "addTags":[]
+  "addTags":[],
+  "tagUpdates": []
 }
 ```
 
@@ -581,6 +582,7 @@ Quirks may have their various features adjusted using the below settings.
 - `argoMultiAutoAdjust` : when `true` auto normalize modifiers for the multiplicative model (by adding 1.0 to the modifier before its factored in) instead of directly applying the modifier
 - `tooltipTags` : a list of [PilotTooltipTag](#pilottooltiptag-objects) objects. These will be used for tooltips, this can be used for TBAS or for legacy functions of PilotQuirks for PilotFatigue support
 - `addTags` : a list of pilot tags. When Quirks are enabled, these tags will be automatically added to any pilot in your roster
+- `tagUpdates`: a list of [TagUpdate](#tageupdate-objects) objects. These can be used to roll out updates to existing pilots in the players roster without a save break.
 
 #### QuirkPool objects
 
@@ -609,6 +611,21 @@ A quirk pool provides a way to randomly assign quirks to a pilot based on the pr
 
 - `tag` : the tag that activates this tooltip text
 - `tooltipText` : the text for the tooltip, Note: a double new line will be automatically added to the end
+
+#### TageUpdate objects
+```json
+{
+  "selector": "",
+  "addTags": [],
+  "removeTags": []
+}
+```
+TagUpdate objects allow you to selectively roll out updates to pilots during a routine update to your modpack. this can be used to add and/or remove tags from select pilots to correct bugs or add features to them.
+
+- `selector`: the existing tag that signals this update should be run
+- `addTags`: tags to be added to the pilots with the selector, if the tag already is on the pilot it will not be added a second time
+- `removeTags`: tags to be removed from the pilots with the selector if the pilot has them.
+
 
 ### QuirkDef Objects
 
@@ -944,18 +961,20 @@ example:
   "colour" : "#f21c1c",
   "tag" : "pilot_rtolegend",
   "descriptionDefId": "",
-  "svgAssetId": ""
+  "svgAssetId": "",
+  "priority": 1
 }
 ```
 
 PilotIconColour objects allow you to change the pilot type's background colour to the specified colour, based on tags the pilot has.
 
-*Note: if a pilot qualifies for multiple icons only the first one will be applied*
+*Note: if a pilot qualifies for multiple icons, the one with the lowest priority value will be used*
 
 - `colour`: when not blank, pilots with the matching tag will have their pilot type icon background set to this colour, use HTML RGB Colour encoding
 - `tag`: the tag the pilot must have for this icon updates to be applied
 - `descriptionDefId`: when not blank, the pilot type tool tip text will be updated to use the `BaseDescriptionDef` with the matching ID, Mech Affinity or another mod must load this description via the mod.json manifest
 - `svgAssetId`: when not blank, the pilot type icon will have the foreground icon replaced by the SVG Asset matching this ID, Mech Affinity or another mod must load this `SVGAsset` via the mod.json manifest
+- `priority`: the priority for this icon data, the lower the number the higher the priority (ie. if a pilot matches 2 sets of icon data, then the one with the lowest value for priority will be used)
 
 
 ## New Combat Effects
