@@ -309,6 +309,17 @@ namespace MechAffinity
 
         private string getPrefabId(ChassisDef chassis, EIdType idType)
         {
+            #if USE_CS_CC && USE_LT
+                if (chassis.IsVehicle())
+                {
+                    if (dataManager == null)
+                    {
+                        return null;
+                    }
+                    VehicleChassisDef vehicle = dataManager.VehicleChassisDefs.Get(chassis.Description.Id);
+                    return getPrefabId(vehicle, idType);
+                }
+            #endif
             string prefab = getPrefabIdInternal(chassis, idType);
             if (remappedIds.ContainsKey(prefab))
             {
