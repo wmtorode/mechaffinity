@@ -121,6 +121,7 @@
     <Compile Include="Data\Quirk\PilotTooltipTag.cs" />
     <Compile Include="Data\Quirk\QuirkEffect.cs" />
     <Compile Include="Data\Quirk\QuirkPool.cs" />
+    <Compile Include="Data\Quirk\QuirkRestriction.cs" />
     <Compile Include="Data\Quirk\TagUpdate.cs" />
     <Compile Include="Data\Settings.cs" />
     <Compile Include="Data\StablePiloting\EStabilityEffectType.cs" />
@@ -137,6 +138,7 @@
     <Compile Include="Patches\AbstractActor.cs" />
     <Compile Include="Patches\AttackSequence.cs" />
     <Compile Include="Patches\Contract.cs" />
+    <Compile Include="Patches\LanceLoadoutSlot.cs" />
     <Compile Include="Patches\Mech.cs" />
     <Compile Include="Patches\MechDetails.cs" />
     <Compile Include="Patches\MechLabStockInfoPopup.cs" />

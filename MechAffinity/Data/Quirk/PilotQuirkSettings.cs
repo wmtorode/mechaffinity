@@ -14,6 +14,7 @@ namespace MechAffinity.Data
         public List<PilotTooltipTag> tooltipTags = new List<PilotTooltipTag>();
         public List<String> addTags = new List<string>();
         public List<TagUpdate> tagUpdates = new List<TagUpdate>();
+        public List<QuirkRestriction> restrictions = new List<QuirkRestriction>();
 
     }
 }

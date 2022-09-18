@@ -12,6 +12,7 @@ namespace MechAffinity.Data
         public string tag = "";
         public string quirkName = "";
         public string description = "";
+        public string restrictionCategory = "";
  
         [JsonIgnore]
         public List<EffectData> effects = new List<EffectData>();
