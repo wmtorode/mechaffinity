@@ -571,7 +571,8 @@ Quirks may have their various features adjusted using the below settings.
   "quirkPools":[],
   "tooltipTags":[],
   "addTags":[],
-  "tagUpdates": []
+  "tagUpdates": [],
+  "restrictions": []
 }
 ```
 
@@ -583,6 +584,7 @@ Quirks may have their various features adjusted using the below settings.
 - `tooltipTags` : a list of [PilotTooltipTag](#pilottooltiptag-objects) objects. These will be used for tooltips, this can be used for TBAS or for legacy functions of PilotQuirks for PilotFatigue support
 - `addTags` : a list of pilot tags. When Quirks are enabled, these tags will be automatically added to any pilot in your roster
 - `tagUpdates`: a list of [TagUpdate](#tageupdate-objects) objects. These can be used to roll out updates to existing pilots in the players roster without a save break.
+- `restrictions`: a list of [QuirkRestriction](#quirkrestriction-objects) objects. These can be used to keep powerful quirks from being overused
 
 #### QuirkPool objects
 
@@ -625,6 +627,22 @@ TagUpdate objects allow you to selectively roll out updates to pilots during a r
 - `selector`: the existing tag that signals this update should be run
 - `addTags`: tags to be added to the pilots with the selector, if the tag already is on the pilot it will not be added a second time
 - `removeTags`: tags to be removed from the pilots with the selector if the pilot has them.
+
+#### QuirkRestriction objects
+```json
+{
+  "restrictionCategory" : "",
+  "deploymentCap": 0,
+  "errorMsg": "",
+  "errorTitle": ""
+}
+```
+QuirkRestriction objects allow you to restrict powerful quirks from overuse by limiting the number of pilots with a particular quirk category
+
+- `restrictionCategory`: the quirk category this restriction is placed on, any [QuirkDef](#quirkdef-objects) with a `restrictionCategory` that matches this will be subject to this restriction
+- `deploymentCap`: the maximum number of quirks with this category that may be deployed in a single drop
+- `errorMsg`: message text for the user when this restriction occurs
+- `errorTitle`: title text for the user error message
 
 
 ### QuirkDef Objects
