@@ -112,6 +112,8 @@
     <Compile Include="Data\Legacy\LegacyData.cs" />
     <Compile Include="Data\Legacy\LegacySettings.cs" />
     <Compile Include="Data\Logger.cs" />
+    <Compile Include="Data\MonthlyTech\LegacyMtmaSave.cs" />
+    <Compile Include="Data\MonthlyTech\MonthlyTechSettings.cs" />
     <Compile Include="Data\PilotSelect\PilotSelectSettings.cs" />
     <Compile Include="Data\PilotUi\PilotIcon.cs" />
     <Compile Include="Data\PilotUi\PilotUiSettings.cs" />
