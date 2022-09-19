@@ -130,6 +130,7 @@
     <Compile Include="Data\StablePiloting\PilotTagStabilityEffect.cs" />
     <Compile Include="Data\StablePiloting\StablePilotingSettings.cs" />
     <Compile Include="Features\BaseEffectManager.cs" />
+    <Compile Include="Features\MonthlyTechAdjustmentManager.cs" />
     <Compile Include="Features\PilotAffinityManager.cs" />
     <Compile Include="Features\PilotQuirkManager.cs" />
     <Compile Include="Features\PilotRandomizerManager.cs" />

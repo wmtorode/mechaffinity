@@ -17,7 +17,7 @@ namespace MechAffinity.Patches
       private static MethodInfo methodAddLineItem = AccessTools.Method(typeof(SGCaptainsQuartersStatusScreen), "AddListLineItem");
         public static bool Prepare()
         {
-            return Main.settings.enablePilotQuirks;
+            return Main.settings.enablePilotQuirks || Main.settings.enableMonthlyTechAdjustments;
         }
         
         public static bool Prefix(SGCaptainsQuartersStatusScreen __instance, EconomyScale expenditureLevel, bool showMoraleChange, SimGameState ___simState,
@@ -27,7 +27,7 @@ namespace MechAffinity.Patches
           Transform ___SectionTwoExpensesList, LocalizableText ___EndOfQuarterFunds, LocalizableText ___QuarterOperatingExpenses, 
           LocalizableText ___CurrentFunds, List<LocalizableText> ___ExpenditureLvlBtnMoraleFields, List<LocalizableText> ___ExpenditureLvlBtnCostFields)
         {
-          if (__instance == null || ___simState == null)
+          if (__instance == null || ___simState == null || !Main.settings.enablePilotQuirks)
           {
             return true;
           }
@@ -100,15 +100,27 @@ namespace MechAffinity.Patches
             methodSetField.GetValue(new object[] {___EndOfQuarterFunds, SimGameState.GetCBillString(___simState.Funds + ___simState.GetExpenditures(false))});
             methodSetField.GetValue(new object[] {___QuarterOperatingExpenses, SimGameState.GetCBillString(___simState.GetExpenditures(false))});
             methodSetField.GetValue(new object[] {___CurrentFunds, SimGameState.GetCBillString(___simState.Funds)});
-            int index = 0;
+            int medAdjust, mechAdjust, index = 0;
+            string newText;
             foreach (KeyValuePair<EconomyScale, int> keyValuePair in ___simState.ExpenditureMoraleValue)
             {
-              ___ExpenditureLvlBtnMoraleFields[index].SetText(string.Format("{0}", (object) keyValuePair.Value), (object[]) Array.Empty<object>());
+              if (Main.settings.enableMonthlyTechAdjustments)
+              {
+                MonthlyTechAdjustmentManager.Instance.getTechAdjustments(keyValuePair.Key, out mechAdjust, out medAdjust);
+                newText = $"{keyValuePair.Value}, {mechAdjust}/{medAdjust} Techs";
+                ___ExpenditureLvlBtnMoraleFields[index].SetText(newText, (object[]) Array.Empty<object>());
+              }
+              else
+              {
+                ___ExpenditureLvlBtnMoraleFields[index].SetText(string.Format("{0}", (object) keyValuePair.Value), (object[]) Array.Empty<object>());
+              }
+              
               ___ExpenditureLvlBtnCostFields[index].SetText(SimGameState.GetCBillString(___simState.GetExpenditures(keyValuePair.Key, false)), (object[]) Array.Empty<object>());
               ++index;
             }
 
             return false;
         }
+      
     }
 }

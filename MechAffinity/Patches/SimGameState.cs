@@ -45,6 +45,11 @@ namespace MechAffinity.Patches
                 __instance.Commander.FromPilotDef(__instance.Commander.pilotDef);
                 PilotQuirkManager.Instance.forceMoraleInstanced();
             }
+
+            if (Main.settings.enableMonthlyTechAdjustments)
+            {
+                MonthlyTechAdjustmentManager.Instance.setCompanyStats(__instance.CompanyStats, __instance);
+            }
         }
     }
     
@@ -80,6 +85,11 @@ namespace MechAffinity.Patches
                 PilotQuirkManager.Instance.setCompanyStats(__instance.CompanyStats);
                 // new career so this will be instanced automatically
                 PilotQuirkManager.Instance.forceMoraleInstanced();
+            }
+            
+            if (Main.settings.enableMonthlyTechAdjustments)
+            {
+                MonthlyTechAdjustmentManager.Instance.setCompanyStats(__instance.CompanyStats, __instance);
             }
 
 
@@ -345,20 +355,21 @@ namespace MechAffinity.Patches
     }
     
     [HarmonyPatch(typeof(SimGameState), "OnNewQuarterBegin")]
-    public static class OnNewQuarterBeginSimGameStateBattleTechPatch
+    public static class SimGameState_OnNewQuarterBegin
     {
         public static bool Prepare()
         {
-            return Main.settings.enableMonthlyMoraleReset;
+            return Main.settings.enableMonthlyMoraleReset || Main.settings.enableMonthlyTechAdjustments;
         }
         public static void Postfix(SimGameState __instance)
         {
-            PilotQuirkManager.Instance.resetMorale(__instance);
+            if (Main.settings.enableMonthlyMoraleReset) PilotQuirkManager.Instance.resetMorale(__instance);
+            if (Main.settings.enableMonthlyTechAdjustments) MonthlyTechAdjustmentManager.Instance.resetTechLevels();
         }
     }
     
     [HarmonyPatch(typeof(SimGameState), "AddMorale")]
-    public static class AddMoralePatch
+    public static class SimGameState_AddMorale
     {
         public static bool Prepare()
         {
@@ -379,6 +390,19 @@ namespace MechAffinity.Patches
             }
             __instance.RoomManager.RefreshDisplay();
             return false;
+        }
+    }
+    
+    [HarmonyPatch(typeof(SimGameState), "SetExpenditureLevel")]
+    public static class SimGameState_SetExpenditureLevel
+    {
+        public static bool Prepare()
+        {
+            return Main.settings.enableMonthlyTechAdjustments;
+        }
+        public static void Postfix(SimGameState __instance, EconomyScale value, bool updateMorale)
+        {
+            if (updateMorale) MonthlyTechAdjustmentManager.Instance.adjustTechLevels(value);
         }
     }
     
