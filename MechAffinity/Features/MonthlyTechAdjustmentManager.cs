@@ -20,7 +20,6 @@ namespace MechAffinity
         private static MonthlyTechAdjustmentManager _instance;
         private StatCollection companyStats;
         private MonthlyTechSettings settings;
-        private bool moraleModInstanced;
 
         public static MonthlyTechAdjustmentManager Instance
         {
@@ -37,7 +36,6 @@ namespace MechAffinity
             if (hasInitialized) return;
             settings = monthlyTechSettings;
             UidManager.reset();
-            moraleModInstanced = true;
             hasInitialized = true;
         }
 

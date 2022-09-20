@@ -43,10 +43,12 @@ example:
   "enablePilotQuirks": false,
   "enableMonthlyMoraleReset": false,
   "enableStablePiloting": false,
+  "enableMonthlyTechAdjustments": false,
   "affinitySettings": {},
   "quirkSettings": {},
   "stablePilotingSettings": {},
   "pilotUiSettings": {},
+  "monthlyTechSettings": {},
   "legacyData": {}
 }
 ```
@@ -56,11 +58,13 @@ example:
 - `enablePilotQuirks` : when true, pilot quirk feaures will be enabled **Warning: This will conflict with Pilot Quirks mod**
 - `enablePilotSelect` : when `true` allow set or random ronin to be part of the initial career start pilot roster. you must setup [Pilot Select Settings](#pilot-select-settings) in `pilotselectsettings.json` for this to work
 - `enableMonthlyMoraleReset`: when `true` morale will be reset on the start of each month and then recalculated based on argo upgrades and pilot quirks
+- `enableMonthlyTechAdjustments`: when `true` the argo funding levels will also incorporate mech/medtech buffs/maluses as part of their funding level features
 - `enableStablePiloting`: when `true` enables 'Stable Piloting' features
 - `affinitySettings` : an [Affinity Settings](#affinity-settings) Object, this controls all settings for Affinity features
 - `quirkSettings` : a [Pilot Quirk Settings](#pilot-quirk-settings) Object, this controls all settings for Pilot Quirks features
 - `stablePilotingSettings` : a [Stable Piloting Settings](#stable-piloting-settings) object for controlling Stable Piloting features
 - `pilotUiSettings`: a [Pilot UI Settings](#pilot-ui-settings) Object, this controls all settings and configuration for Pilot UI features
+- `monthlyTechSettings`: a [Monthly Tech Adjust Settings](#monthly-tech-settings) Object, this controls all settings for the Monthly Tech Adjust features
 - `legacyData` : a `Legacy Data Settings` object, controls various options for outputting legacy versions of the settings file for compatibility with some third party tools
 
 ## Mech-Pilot Affinity
@@ -953,6 +957,40 @@ These objects define stability reductions or penalties for pilots possessing mat
   - `Piloting` : the magnitude of this effect is the `effect` value multiplied by the Piloting skill of the pilot.
   - `PilotingInverse` : the magnitude of this effect is the `effect` value multiplied by the `InverseMax` minus the Piloting skill of the pilot. When piloting reaches the Inverse Max or greater, this effect will become 0. This mode is best used to reduce a penalty as Piloting Skill grows.
 
+## Monthly Tech Adjustment
+
+Monthly Tech Adjustment adds some additional meaning to the various monthly funding levels of the Argo by adding a boost/malus to the mech and med tech values in addition to the morale modifier
+
+**Note: This is a re-imagining and expansion of the [Monthly Tech Adjustment](https://github.com/donZappo/MonthlyTechandMoraleAdjustment) feature set to resolve conflicts with this mod and will conflict with it when enabled**
+
+### Monthly Tech Settings
+
+**These settings only apply when `enableMonthlyTechAdjustments` is true**
+
+These settings control the 'Monthly Tech Adjustment' feature set.
+
+
+```json
+
+{
+  "SpartanMedModifier": -4,
+  "RestrictedMedModifier": -2,
+  "NormalMedModifier": 0,
+  "GenerousMedModifier": 1,
+  "ExtravagantMedModifier": 2,
+  "SpartanMechModifier": -4,
+  "RestrictedMechModifier": -2,
+  "NormalMechModifier": 0,
+  "GenerousMechModifier": 8,
+  "ExtravagantMechModifier": 2,
+  "UiFontSize": 28
+}
+
+```
+
+- `xxxMedModifier`: the buff/malus to the MedTech at the corresponding funding level, positive is a buff, negative is a malus. Note that this an adjustment from the baseline value, not an stacking modifier. This means if Spartan provides a -4 malus, taking Spartan for 2 straight months will still only be a -4 penalty, like wise with buffs
+- `xxxMedModifier`: the buff/malus to the MechTech at the corresponding funding level, positive is a buff, negative is a malus. Note that this an adjustment from the baseline value, not an stacking modifier. This means if Spartan provides a -4 malus, taking Spartan for 2 straight months will still only be a -4 penalty, like wise with buffs
+- `UiFontSize`: the fontsize of various parts of the financial report will not scale with additional text being added to the fields, to fix this we can scale the fontsize down to allow it to fit better. the default of 28 seems pretty good but is adjustable if needed. Note: vanilla's default size for these fields is 30 for comparision.
 
 ## Pilot UI Modifications
 

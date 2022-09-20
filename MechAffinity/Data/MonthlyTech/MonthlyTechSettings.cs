@@ -13,5 +13,7 @@
         public int NormalMechModifier = 0;
         public int GenerousMechModifier = 1;
         public int ExtravagantMechModifier = 2;
+
+        public float UiFontSize = 28;
     }
 }

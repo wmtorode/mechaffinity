@@ -42,7 +42,21 @@ namespace MechAffinity.Patches
             methodSetField.GetValue(new object[] {___SectionTwoExpenseLevel, string.Format("{0}", (object) expenditureLevel)});
             ___FinanceWidget.RefreshData(expenditureLevel);
             int num1 = ___simState.ExpenditureMoraleValue[expenditureLevel];
-            methodSetField.GetValue(new object[] {___MoraleValueField, string.Format("{0}{1}", num1 > 0 ? (object) "+" : (object) "", (object) num1)});
+            if (Main.settings.enableMonthlyTechAdjustments)
+            {
+              int medExpAdjust, mechExpAdjust;
+              MonthlyTechAdjustmentManager.Instance.getTechAdjustments(expenditureLevel, out mechExpAdjust, out medExpAdjust);
+              string moraleText = $"{num1}, {mechExpAdjust}/{medExpAdjust} Techs";
+              ___MoraleValueField.fontSize = Main.settings.monthlyTechSettings.UiFontSize;
+              methodSetField.GetValue(new object[] {___MoraleValueField, moraleText});
+              Main.modLog.LogMessage($"Font: {___MoraleValueField.fontSize}");
+              
+            }
+            else
+            {
+              methodSetField.GetValue(new object[] {___MoraleValueField, string.Format("{0}{1}", num1 > 0 ? (object) "+" : (object) "", (object) num1)});
+            }
+            
             if (showMoraleChange)
             {
               int morale = ___simState.Morale;
@@ -108,7 +122,9 @@ namespace MechAffinity.Patches
               {
                 MonthlyTechAdjustmentManager.Instance.getTechAdjustments(keyValuePair.Key, out mechAdjust, out medAdjust);
                 newText = $"{keyValuePair.Value}, {mechAdjust}/{medAdjust} Techs";
+                ___ExpenditureLvlBtnMoraleFields[index].fontSize = Main.settings.monthlyTechSettings.UiFontSize;
                 ___ExpenditureLvlBtnMoraleFields[index].SetText(newText, (object[]) Array.Empty<object>());
+                
               }
               else
               {

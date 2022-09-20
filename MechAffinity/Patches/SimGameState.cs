@@ -402,7 +402,11 @@ namespace MechAffinity.Patches
         }
         public static void Postfix(SimGameState __instance, EconomyScale value, bool updateMorale)
         {
-            if (updateMorale) MonthlyTechAdjustmentManager.Instance.adjustTechLevels(value);
+            if (updateMorale)
+            {
+                MonthlyTechAdjustmentManager.Instance.adjustTechLevels(value);
+                __instance.RoomManager.RefreshDisplay();
+            }
         }
     }
     
