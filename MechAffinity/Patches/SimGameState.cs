@@ -7,6 +7,8 @@ using Harmony;
 using BattleTech;
 using BattleTech.Save;
 using BattleTech.UI.Tooltips;
+using HBS;
+using HBS.Collections;
 using Localize;
 using MechAffinity;
 using MechAffinity.Data;
@@ -433,6 +435,63 @@ namespace MechAffinity.Patches
             {
                 BaseDescriptionDef def = PilotUiManager.Instance.GetDescriptionDef(pilotIcon.descriptionDefId);
                 if (def != null) RoninTooltip.SetDefaultStateData(TooltipUtilities.GetStateDataFromObject((object)def));
+            }
+        }
+    }
+    
+    [HarmonyPatch(typeof(SimGameState), "ApplySimGameEventResult", new Type[] {typeof(SimGameEventResult), typeof(List<object>), typeof(SimGameEventTracker)})]
+    public static class SimGameState_ApplySimGameEventResult
+    {
+        public static bool Prepare()
+        {
+            return Main.settings.enablePilotQuirks;
+        }
+        public static void Prefix(SimGameState __instance, SimGameEventResult result, List<object> objects)
+        {
+            SimGameState simulation = SceneSingletonBehavior<UnityGameInstance>.Instance.Game.Simulation;
+            SimGameReport.ReportEntry log = (SimGameReport.ReportEntry) null;
+            for (var i = 0; i < objects.Count; i++)
+            {
+                Pilot target = null;
+                TagSet tagSet;
+                switch (result.Scope)
+                {
+                    case EventScope.MechWarrior:
+                    case EventScope.AllMechWarriors:
+                    case EventScope.SecondaryMechWarrior:
+                    case EventScope.TertiaryMechWarrior:
+                        target = (Pilot) objects[i];
+                        tagSet = target.pilotDef.PilotTags;
+                        break;
+                    case EventScope.Commander:
+                        target = simulation.Commander;
+                        tagSet = simulation.CommanderTags;
+                        break;
+                    default:
+                        continue;
+                }
+
+                if (result.Requirements == null || simulation.MeetsRequirements(result.Requirements, log))
+                {
+                    if (result.AddedTags != null)
+                    {
+                        foreach (string addedTag in result.AddedTags)
+                        {
+                            if (!tagSet.Contains(addedTag)) ;
+                            //process tags here
+                        }
+                    }
+
+                    if (result.RemovedTags != null)
+                    {
+                        foreach (string removedTag in result.RemovedTags)
+                        {
+                            if (tagSet.Contains(removedTag)) ;
+                            //process tags here
+                        }
+                    }
+                }
+
             }
         }
     }
