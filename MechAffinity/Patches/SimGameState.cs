@@ -477,8 +477,8 @@ namespace MechAffinity.Patches
                     {
                         foreach (string addedTag in result.AddedTags)
                         {
-                            if (!tagSet.Contains(addedTag)) ;
-                            //process tags here
+                            if (!tagSet.Contains(addedTag)) 
+                                PilotQuirkManager.Instance.processTagChange(target, addedTag, true);
                         }
                     }
 
@@ -486,8 +486,9 @@ namespace MechAffinity.Patches
                     {
                         foreach (string removedTag in result.RemovedTags)
                         {
-                            if (tagSet.Contains(removedTag)) ;
-                            //process tags here
+                            if (tagSet.Contains(removedTag)) 
+                                PilotQuirkManager.Instance.processTagChange(target, removedTag, false);
+                            
                         }
                     }
                 }
