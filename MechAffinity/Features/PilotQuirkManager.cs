@@ -567,7 +567,6 @@ namespace MechAffinity
             bool updateMech = false;
             bool updateMed = false;
             bool updateMorale = false;
-            int healthChange = 0;
             Main.modLog.LogMessage($"Processing Quirk Tag change on {pilot.Callsign} - {tag}: {isNew}");
             
             Main.modLog.LogMessage($"Tracker Stat: {PqMechSkillTracker}, value: {currentMechTek}");

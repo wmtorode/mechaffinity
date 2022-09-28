@@ -71,6 +71,7 @@ namespace MechAffinity
 
         public void resetTechLevels()
         {
+            if (companyStats is null) return;
             int mechTech = companyStats.GetValue<int>(MechTechSkill) + companyStats.GetValue<int>(MechTechModifier);
             int medTech = companyStats.GetValue<int>(MedTechSkill) + companyStats.GetValue<int>(MedTechModifier);
 
@@ -112,6 +113,7 @@ namespace MechAffinity
 
         public void adjustTechLevels(EconomyScale economyScale)
         {
+            if (companyStats is null) return;
             int medTechAdjust = 0;
             int mechTechAdjust = 0;
 
