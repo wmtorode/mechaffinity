@@ -62,8 +62,8 @@
     <Reference Include="CustomSalvage">
       <HintPath>S:\SteamLibrary\steamapps\common\BATTLETECH\Mods\CustomSalvage\CustomSalvage.dll</HintPath>
     </Reference>
-    <Reference Include="LewdableTanks, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>D:\RtMasterCache\RtCache\LewdableTanks\LewdableTanks.dll</HintPath>
+    <Reference Include="LewdableTanks">
+      <HintPath>..\..\..\BT_Publicized\CC2\LewdableTanks.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>D:\SteamLibrary\steamapps\common\BATTLETECH\BattleTech_Data\Managed\Newtonsoft.Json.dll</HintPath>
@@ -115,6 +115,7 @@
     <Compile Include="Data\MonthlyTech\LegacyMtmaSave.cs" />
     <Compile Include="Data\MonthlyTech\MonthlyTechSettings.cs" />
     <Compile Include="Data\PilotSelect\PilotSelectSettings.cs" />
+    <Compile Include="Data\PilotUi\PilotAffinityColour.cs" />
     <Compile Include="Data\PilotUi\PilotIcon.cs" />
     <Compile Include="Data\PilotUi\PilotUiSettings.cs" />
     <Compile Include="Data\Quirk\EQuirkEffectType.cs" />
@@ -141,6 +142,7 @@
     <Compile Include="Patches\AbstractActor.cs" />
     <Compile Include="Patches\AttackSequence.cs" />
     <Compile Include="Patches\Contract.cs" />
+    <Compile Include="Patches\LanceConfiguratorPanel.cs" />
     <Compile Include="Patches\LanceLoadoutSlot.cs" />
     <Compile Include="Patches\Mech.cs" />
     <Compile Include="Patches\MechDetails.cs" />

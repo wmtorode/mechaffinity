@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using BattleTech;
 using BattleTech.Data;
 using BattleTech.UI;
+using BattleTech.UI.TMProWrapper;
 using MechAffinity.Data;
 using UnityEngine;
 using SVGImporter;
@@ -82,6 +83,32 @@ namespace MechAffinity
 
             return icon;
 
+        }
+
+        public void AdjustExpertiseTextForAffinity(LocalizableText expertise, int deployCount, string defaultText)
+        {
+            
+            
+            if (settings.enableAffinityColour)
+            {
+                expertise.SetText(defaultText);
+                int currentLvl = -1;
+                string newColour = "";
+                foreach (var affinityColour in settings.pilotAffinityColours)
+                {
+                    if (deployCount >= affinityColour.deploysRequired && affinityColour.deploysRequired > currentLvl)
+                    {
+                        currentLvl = affinityColour.deploysRequired;
+                        newColour = affinityColour.colour;
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(newColour))
+                {
+                    expertise.SetText($"<color={newColour}>{defaultText}</color>");
+                }
+                
+            }
         }
 
         public SVGAsset GetSvgAsset(string iconId)

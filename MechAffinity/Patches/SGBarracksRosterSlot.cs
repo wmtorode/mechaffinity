@@ -17,7 +17,7 @@ namespace MechAffinity.Patches
     [HarmonyPatch(typeof(SGBarracksRosterSlot), "Refresh")]
     public static class SGBarracksRosterSlot_Refresh_Patch
     {
-        public static void Postfix(SGBarracksRosterSlot __instance, UIColorRefTracker ___pilotTypeBackground, SVGImage ___roninIcon, HBSTooltip ___RoninTooltip)
+        public static void Postfix(SGBarracksRosterSlot __instance, UIColorRefTracker ___pilotTypeBackground, SVGImage ___roninIcon, HBSTooltip ___RoninTooltip, LocalizableText ___expertise)
         {
             if (__instance.Pilot == null)
                 return;

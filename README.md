@@ -99,6 +99,7 @@ the settings file or can be tracked by stats that in-game events or argo upgrade
   "showAllPilotAffinities": true,
   "topAffinitiesInTooltipCount": 3,
   "showQuirks": false,
+  "treatDefaultsAsFixed" : false,
   "affinityGroups": [],
   "prefabOverrides": []
 }
@@ -121,6 +122,7 @@ setting value will always be used
 - `showAllPilotAffinities` : when true, the pilot dossier will show every affinity the pilot has with every chassis, when false only the highest level affininty will be show for a given chassis
 - `affinityGroups` : a list of [AffinityGroup](#affinitygroup-objects) objects. These allow you to treat a group of prefabs/assembly IDs as a single ID
 - `prefabOverrides`: a list of [PrefabOveride](#prefaboveride-objects) objects. These allow you to correct UI display issues caused by some of the game's "Dummy Units"
+- `treatDefaultsAsFixed` : when true, mech defaults (like FCS, sensors, etc...) will be treated as fixed equipment for the purposes of quirk affinities. This setting can only be used with CustomComponents support enabled
 
 #### AffinityGroup objects
 
@@ -1004,11 +1006,17 @@ example:
 
 ```json
 {
-  "pilotIcons" : []
+  "enableAffinityColour": false,
+  "orderByAffinity": false,
+  "pilotIcons" : [],
+  "pilotAffinityColours" : []
 }
 ```
 
-`iconColours`: a list of `PilotIcon` objects
+- `iconColours`: a list of `PilotIcon` objects
+- `pilotAffinityColours`: a list of `PilotAffinityColours` objects
+- `enableAffinityColour`: when true the pilot expertise text (the text that says Recruit, Vanguard, etc) on a pilot roster slot will be colourized to show the approximate affinity level with the currently selected unit in the lance configuration screen
+- `orderByAffinity`: when true unselected pilots in the lance configuration screen will be sorted based on their affinity level with the currently selected unit 
 
 #### Pilot Icon Objects
 
@@ -1031,6 +1039,24 @@ PilotIconColour objects allow you to change the pilot type's background colour t
 - `descriptionDefId`: when not blank, the pilot type tool tip text will be updated to use the `BaseDescriptionDef` with the matching ID, Mech Affinity or another mod must load this description via the mod.json manifest
 - `svgAssetId`: when not blank, the pilot type icon will have the foreground icon replaced by the SVG Asset matching this ID, Mech Affinity or another mod must load this `SVGAsset` via the mod.json manifest
 - `priority`: the priority for this icon data, the lower the number the higher the priority (ie. if a pilot matches 2 sets of icon data, then the one with the lowest value for priority will be used)
+
+#### Pilot Affinity Colours Objects
+
+```json
+{
+  "colour": "#f21c1c",
+  "deploysRequired": 1
+}
+```
+
+PilotAffinityColours objects allow you to change the pilot's expertise text colour in the lance configuration screen depending on the level of affinity they have with the selected unit. This
+allows the player to get a rough idea of the pilot's affinity at a glance.
+
+*Note: if a pilot qualifies for multiple colours, the one with the highest deployment requirement value will be used*
+
+- `colour`: the text colour, use HTML RGB Colour encoding
+- `deploysRequired`: the deployments required to earn this colour
+
 
 
 ## New Combat Effects
