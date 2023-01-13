@@ -534,6 +534,7 @@ Affinity objects provide a direct boost to a pilot's stats.
 ### Giving AI Pilots Affinities
 
 non player pilots can also be setup to receive affinities. to do this add a pilot tag of `affinityLevel_X` where X is the number of deployments that should be granted to the pilot. pilots with this tag will be able to receive all affinities (Global, Chassis, Quirk & Tagged) that a player pilot of equal deployments is applicable for
+you may also give affinities based on the weight class of a mech using `affinityLevelLight_X`, `affinityLevelMedium_X`, `affinityLevelHeavy_X`, `affinityLevelAssault_X` for the appropriate weight class
 
 ### Affinities By Tags
 

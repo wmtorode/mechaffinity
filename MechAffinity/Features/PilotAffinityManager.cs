@@ -30,6 +30,10 @@ namespace MechAffinity
         private const string MaNoAffinity = "No Affinity";
         private const string MaConsumableTag = "MaConsumableAffinity_";
         private const string MaPermaTag = "MaPermAffinity_";
+        private const string MaPilotDeployCountTagLight = "affinityLevelLight_";
+        private const string MaPilotDeployCountTagMedium = "affinityLevelMedium_";
+        private const string MaPilotDeployCountTagHeavy = "affinityLevelHeavy_";
+        private const string MaPilotDeployCountTagAssault = "affinityLevelAssault_";
         private static PilotAffinityManager _instance;
         private StatCollection companyStats;
         private Dictionary<string, List<AffinityLevel>> chassisAffinities;
@@ -1232,7 +1236,15 @@ namespace MechAffinity
         public int getPilotDeployBonusByTag(AbstractActor actor)
         {
             int deployCount = 0;
+            int deployBonus = 0;
             Pilot pilot = actor.GetPilot();
+            Mech mech = actor as Mech;
+            WeightClass weightClass = WeightClass.ASSAULT;
+            if (mech != null)
+            {
+                weightClass = mech.weightClass;
+            }
+
             if (pilot != null)
             {
                 List<string> tags = pilot.pilotDef.PilotTags.ToArray().ToList();
@@ -1245,11 +1257,43 @@ namespace MechAffinity
                     if (tag.StartsWith(MaPilotDeployCountTag))
                     {
                         string count = tag.Replace(MaPilotDeployCountTag, "");
-                        if (!int.TryParse(count, out deployCount))
+                        if (int.TryParse(count, out deployBonus))
                         {
-                            deployCount = 0;
+                            deployCount += deployBonus;
                         }
-                        break;
+                    }
+                    // for weight class bonuses
+                    else if (tag.StartsWith(MaPilotDeployCountTagLight) && weightClass == WeightClass.LIGHT)
+                    {
+                        string count = tag.Replace(MaPilotDeployCountTagLight, "");
+                        if (int.TryParse(count, out deployBonus))
+                        {
+                            deployCount += deployBonus;
+                        }
+                    }
+                    else if (tag.StartsWith(MaPilotDeployCountTagMedium) && weightClass == WeightClass.MEDIUM)
+                    {
+                        string count = tag.Replace(MaPilotDeployCountTagMedium, "");
+                        if (int.TryParse(count, out deployBonus))
+                        {
+                            deployCount += deployBonus;
+                        }
+                    }
+                    else if (tag.StartsWith(MaPilotDeployCountTagHeavy) && weightClass == WeightClass.HEAVY)
+                    {
+                        string count = tag.Replace(MaPilotDeployCountTagHeavy, "");
+                        if (int.TryParse(count, out deployBonus))
+                        {
+                            deployCount += deployBonus;
+                        }
+                    }
+                    else if (tag.StartsWith(MaPilotDeployCountTagAssault) && weightClass == WeightClass.ASSAULT)
+                    {
+                        string count = tag.Replace(MaPilotDeployCountTagAssault, "");
+                        if (int.TryParse(count, out deployBonus))
+                        {
+                            deployCount += deployBonus;
+                        }
                     }
                 }
             }
