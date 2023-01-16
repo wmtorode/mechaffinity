@@ -659,13 +659,15 @@ namespace MechAffinity
                 }
             }
             string statName = getAffinityStatName(pilot, prefab);
-            return getStatDeploymentCountWithMech(statName) + getTaggedDeploymentCountWithMech(pilot, prefab);
+            return getStatDeploymentCountWithMech(statName) + getTaggedDeploymentCountWithMech(pilot, prefab) + 
+                   getPilotDeployBonusByTag(pilot, mechDef.Chassis.weightClass);
         }
 
         public int getDeploymentCountWithMech(Pilot pilot, string prefabId)
         {
             string statName = getAffinityStatName(pilot, prefabId);
-            return getStatDeploymentCountWithMech(statName) + getTaggedDeploymentCountWithMech(pilot, prefabId);
+            return getStatDeploymentCountWithMech(statName) + getTaggedDeploymentCountWithMech(pilot, prefabId) +
+                   getPilotDeployBonusByTag(pilot, WeightClass.ASSAULT);
 
         }
 
@@ -1233,18 +1235,11 @@ namespace MechAffinity
             getDeploymentBonus(deployCount, chassisPrefab, statName, possibleQuirks, possibleTags, out bonuses, out effects);
         }
 
-        public int getPilotDeployBonusByTag(AbstractActor actor)
+        public int getPilotDeployBonusByTag(Pilot pilot, WeightClass weightClass)
         {
             int deployCount = 0;
             int deployBonus = 0;
-            Pilot pilot = actor.GetPilot();
-            Mech mech = actor as Mech;
-            WeightClass weightClass = WeightClass.ASSAULT;
-            if (mech != null)
-            {
-                weightClass = mech.weightClass;
-            }
-
+            
             if (pilot != null)
             {
                 List<string> tags = pilot.pilotDef.PilotTags.ToArray().ToList();
@@ -1298,6 +1293,20 @@ namespace MechAffinity
                 }
             }
             return deployCount;
+        }
+
+        public int getPilotDeployBonusByTag(AbstractActor actor)
+        {
+            
+            Pilot pilot = actor.GetPilot();
+            Mech mech = actor as Mech;
+            WeightClass weightClass = WeightClass.ASSAULT;
+            if (mech != null)
+            {
+                weightClass = mech.weightClass;
+            }
+
+            return getPilotDeployBonusByTag(pilot, weightClass);
         }
 
         private void getAIBonuses(AbstractActor actor, out Dictionary<EAffinityType, int> bonuses, out List<EffectData> effects)
