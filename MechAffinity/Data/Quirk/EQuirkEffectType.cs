@@ -18,6 +18,7 @@ namespace MechAffinity.Data
         CriminalEffect2 = 7,
         PilotHealth = 8,
         Immortality = 9,
-        AdditionalSalvage = 10
+        AdditionalSalvage = 10,
+        AdditionalCbills = 11
     }
 }

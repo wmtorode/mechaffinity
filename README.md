@@ -734,6 +734,10 @@ available types:
   This is used to grant additional salvage rights. `modifier` adds additional overall salvage allocation, while `secondaryModifier` adds to the number of priority picks you will receive. 
   *Note: pilots with this effect must be deployed to the battle for you to receive the benefits. You cannot increase the number of priority picks past 7 regardless of the value used, this is a game UI limitation*
 
+- `AdditionalCbills`
+  This is used to grant additional CBills on contracts deployments. `modifier` adds an additional flat payout, while `secondaryModifier` adds a percentage of the payout on top.
+  *Note: pilots with this effect must be deployed to the battle for you to receive the benefits. Changes may not show on the results screen. Secondary modifier assumes a base value of 1.0, so to add a 5% pay bonus set this to 0.05, for a 5% decrease use -0.05*
+
 #### Example QuirkDef:
 ```json
 {

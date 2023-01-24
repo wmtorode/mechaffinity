@@ -722,6 +722,24 @@ namespace MechAffinity
             }
             
         }
+        
+        public void additionalCbills(PilotDef pilotDef, ref int flatPayout, ref float percentagePayout)
+        {
+            List<PilotQuirk> pilotQuirks = getQuirks(pilotDef);
+            foreach (PilotQuirk quirk in pilotQuirks)
+            {
+                foreach (QuirkEffect effect in quirk.quirkEffects)
+                {
+                    if (effect.type == EQuirkEffectType.AdditionalCbills)
+                    {
+                        flatPayout += Mathf.FloorToInt(effect.modifier);
+                        percentagePayout += effect.secondaryModifier;
+                        Main.modLog.LogMessage($"Pilot: {pilotDef.Description.Callsign}, adds: {effect.modifier} flat payout, {effect.secondaryModifier} payout percentage");
+                    }
+                }
+            }
+            
+        }
 
         public bool isPilotImmortal(PilotDef pilotDef)
         {
