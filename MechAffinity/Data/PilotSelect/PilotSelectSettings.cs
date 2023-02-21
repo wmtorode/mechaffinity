@@ -8,5 +8,6 @@ namespace MechAffinity.Data
         public int RoninFromList = 0;
         public int ProceduralPilots = 4;
         public int RandomRonin = 4;
+        public List<PilotSelectRestrictions> RandomRestrictions = new List<PilotSelectRestrictions>();
     }
 }

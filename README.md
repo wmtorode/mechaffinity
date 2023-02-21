@@ -913,6 +913,22 @@ example list for vanilla pilots:
 - `RandomRonin` : the number of ronin to randomly select from the entire pool of ronin in the game
 - `ProceduralPilots`: the number of procedural pilots to generate to fill out the rest of the roster
 
+### Pilot Select Restriction
+```json
+{
+  "tags" : [],
+  "limit" : 0,
+  "restrictionId" : ""
+}
+```
+
+Some pilots may offer special abilities or be extremely powerful, in some cases you may wish to have a limit on how many of these pilots a player can roll during a career start. Pilot Select Restrictions allow you to restrict pilots
+from random ronin selection by putting limits on the number of pilots that can roll with a group of tags
+
+- `tags` : a list of the tags in this restriction group
+- `limit`: the limit of the number pilots that may have any tags from this group. Note that all tags count against this limit.
+- `restrictionId`: an ID for this restriction group, should be unique
+
 ## Stable Piloting
 
 Stable Piloting allows you to modify the incoming stability damage to a mech and adjust it depending on a pilot's piloting skill.

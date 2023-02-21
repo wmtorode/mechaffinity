@@ -114,6 +114,8 @@
     <Compile Include="Data\Logger.cs" />
     <Compile Include="Data\MonthlyTech\LegacyMtmaSave.cs" />
     <Compile Include="Data\MonthlyTech\MonthlyTechSettings.cs" />
+    <Compile Include="Data\PilotSelect\PilotRestrictionCounter.cs" />
+    <Compile Include="Data\PilotSelect\PilotSelectRestrictions.cs" />
     <Compile Include="Data\PilotSelect\PilotSelectSettings.cs" />
     <Compile Include="Data\PilotUi\PilotAffinityColour.cs" />
     <Compile Include="Data\PilotUi\PilotIcon.cs" />

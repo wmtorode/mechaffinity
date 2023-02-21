@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using BattleTech;
+using MechAffinity.Data;
 
 namespace MechAffinity
 {
@@ -123,8 +124,68 @@ namespace MechAffinity
                     var rnd = new Random();
                     var randomized = randomRonin.OrderBy(item => rnd.Next());
                     int count = 0;
+                    Dictionary<string, PilotRestrictionCounter> restrictions = new Dictionary<string, PilotRestrictionCounter>();
                     foreach (var value in randomized)
                     {
+                        List<string> tagsToIncrement = new List<string>();
+                        List<string> usedRestrictions = new List<string>();
+                        bool isAllowed = true;
+                        foreach (var tag in value.PilotTags.ToList())
+                        {
+                            foreach (var restriction in Main.pilotSelectSettings.RandomRestrictions)
+                            {
+                                if (usedRestrictions.Contains(restriction.restrictionId)) continue;
+                                if (restriction.tags.Contains(tag))
+                                {
+                                    Main.modLog.DebugMessage($"Pilot: {value.Description.Callsign} has restricted tag: {tag}");
+                                    if (restriction.limit == 0)
+                                    {
+                                        Main.modLog.DebugMessage($"Rejecting pilot as a starting pilot, tag not allowed");
+                                        isAllowed = false;
+                                        break;
+                                    }
+                                    
+                                    usedRestrictions.Add(restriction.restrictionId);
+
+                                    if (!restrictions.ContainsKey(restriction.tags[0]))
+                                    {
+                                        PilotRestrictionCounter counter = new PilotRestrictionCounter()
+                                        {
+                                            restriction = restriction
+                                        };
+                                        foreach (var restrictionTag in restriction.tags)
+                                        {
+                                            restrictions.Add(restrictionTag, counter);
+                                        }
+                                    }
+                                    
+                                    if (restrictions[tag].currentCount < restrictions[tag].restriction.limit)
+                                    {
+                                        tagsToIncrement.Add(tag);
+                                    }
+                                    else
+                                    {
+                                        Main.modLog.DebugMessage($"Rejecting pilot as a starting pilot, tag has reached its limits already");
+                                        isAllowed = false;
+                                        break;
+                                    }
+                                    
+                                }
+                            }
+
+                            if (!isAllowed) break;
+
+                        }
+
+                        // pilot isn't allowed, move on to the next
+                        if (!isAllowed) continue;
+                        
+                        // now increment all the tag restrictions this pilot has
+                        foreach (var tag in tagsToIncrement)
+                        {
+                            restrictions[tag].currentCount += 1;
+                        }
+                        
                         Main.modLog.LogMessage($"Adding Random Ronin {value.Description.Id}, to roster");
                         newPilots.Add(value);
                         count++;
