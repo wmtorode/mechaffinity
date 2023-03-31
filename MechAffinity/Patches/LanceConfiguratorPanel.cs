@@ -22,7 +22,7 @@ namespace MechAffinity.Patches
         public static void Postfix(LanceConfiguratorPanel __instance, IMechLabDraggableItem item,
             LanceLoadoutSlot[] ___loadoutSlots)
         {
-            
+
             if (UnityGameInstance.BattleTechGame.Simulation == null) return;
 
             SimGameState simGameState = UnityGameInstance.BattleTechGame.Simulation;
@@ -49,7 +49,8 @@ namespace MechAffinity.Patches
                             PilotAffinityManager.Instance.getDeploymentCountWithMech(pilotSlot.Pilot, selectedMech);
                         LocalizableText expertise = (LocalizableText)Traverse.Create(pilotSlot)
                             .Field("expertise").GetValue();
-                        PilotUiManager.Instance.AdjustExpertiseTextForAffinity(expertise, deployCount, simGameState.GetPilotFullExpertise(pilotSlot.Pilot));
+                        PilotUiManager.Instance.AdjustExpertiseTextForAffinity(expertise, deployCount,
+                            simGameState.GetPilotFullExpertise(pilotSlot.Pilot));
                     }
 
                     // now do pilots already assigned to a unit
@@ -60,7 +61,8 @@ namespace MechAffinity.Patches
                             PilotAffinityManager.Instance.getDeploymentCountWithMech(pilotSlot.Pilot, selectedMech);
                         LocalizableText expertise = (LocalizableText)Traverse.Create(pilotSlot)
                             .Field("expertise").GetValue();
-                        PilotUiManager.Instance.AdjustExpertiseTextForAffinity(expertise, deployCount, simGameState.GetPilotFullExpertise(pilotSlot.Pilot));
+                        PilotUiManager.Instance.AdjustExpertiseTextForAffinity(expertise, deployCount,
+                            simGameState.GetPilotFullExpertise(pilotSlot.Pilot));
                     }
                 }
 
@@ -81,6 +83,28 @@ namespace MechAffinity.Patches
                 Main.modLog.LogException(ex);
             }
 
+        }
+    }
+
+    [HarmonyPatch(typeof(LanceConfiguratorPanel), "ContinueConfirmClicked")]
+    public class LanceConfiguratorPanel_ContinueConfirmClicked
+    {
+        public static bool Prepare()
+        {
+            return Main.settings.enablePilotAffinity || Main.settings.enablePilotQuirks;
+        }
+
+        public static void Postfix(LanceConfiguratorPanel __instance)
+        {
+            if (Main.settings.enablePilotAffinity)
+            {
+                PilotAffinityManager.Instance.ResetEffectCache();
+            }
+
+            if (Main.settings.enablePilotQuirks)
+            {
+                PilotQuirkManager.Instance.ResetEffectCache();
+            }
         }
     }
 }
