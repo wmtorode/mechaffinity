@@ -673,13 +673,13 @@ namespace MechAffinity
                 }
             }
             Random random = new Random();
-            int roll = random.Next(0, 99);
+            int roll = random.Next(0, 100);
             if (roll < stealChance)
             {
                 Main.modLog.LogMessage($"Pilot {pilot.Callsign}, steals: {stealAmount}");
                  sim.AddFunds(stealAmount * -1, null, true);
             }
-            roll = random.Next(0, 99);
+            roll = random.Next(0, 100);
             if (roll < stealChance2)
             {
                 Main.modLog.LogMessage($"Pilot {pilot.Callsign}, steals: {stealAmount2}");
