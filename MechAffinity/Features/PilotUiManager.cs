@@ -68,14 +68,14 @@ namespace MechAffinity
             {
                 if (iconMap.ContainsKey(tag))
                 {
-                    Main.modLog.Info?.Write($"Found IconData for: {tag}!");
+                    Main.modLog.Debug?.Write($"Found IconData for: {tag}!");
                     if (icon == null)
                     {
                         icon = iconMap[tag];
                     }
                     else if (icon.priority > iconMap[tag].priority)
                     {
-                        Main.modLog.Info?.Write($"icon IconData for: {tag} has higher priority, bumping");
+                        Main.modLog.Debug?.Write($"icon IconData for: {tag} has higher priority, bumping");
                         icon = iconMap[tag];
                     }
                 }

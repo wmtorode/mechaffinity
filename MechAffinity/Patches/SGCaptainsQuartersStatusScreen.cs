@@ -49,7 +49,7 @@ namespace MechAffinity.Patches
               string moraleText = $"{num1}, {mechExpAdjust}/{medExpAdjust} Techs";
               ___MoraleValueField.fontSize = Main.settings.monthlyTechSettings.UiFontSize;
               methodSetField.GetValue(new object[] {___MoraleValueField, moraleText});
-              Main.modLog.Info?.Write($"Font: {___MoraleValueField.fontSize}");
+              Main.modLog.Debug?.Write($"Font: {___MoraleValueField.fontSize}");
               
             }
             else

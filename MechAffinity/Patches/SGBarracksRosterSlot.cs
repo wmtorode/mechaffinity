@@ -45,7 +45,7 @@ namespace MechAffinity.Patches
             {
                 if (pilotIcon.HasColour())
                 {
-                    Main.modLog.Info?.Write("Setting Pilot Icon Colour!");
+                    Main.modLog.Debug?.Write("Setting Pilot Icon Colour!");
                     ___pilotTypeBackground.SetUIColor(UIColor.Custom);
                     ___pilotTypeBackground.OverrideWithColor(pilotIcon.GetColor());
                 }

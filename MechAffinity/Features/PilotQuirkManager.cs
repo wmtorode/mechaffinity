@@ -27,6 +27,7 @@ namespace MechAffinity
         private Dictionary<string, PilotQuirk> quirks;
         private Dictionary<string, QuirkPool> quirkPools;
         private Dictionary<string, QuirkRestriction> quirkRestrictions;
+        private Dictionary<string, bool> immortalityCache;
         private PilotQuirkSettings settings;
         private bool moraleModInstanced;
 
@@ -69,6 +70,8 @@ namespace MechAffinity
                 quirkRestrictions.Add(restriction.restrictionCategory, restriction);
             }
 
+            immortalityCache = new Dictionary<string, bool>();
+
             hasInitialized = true;
         }
         
@@ -96,6 +99,7 @@ namespace MechAffinity
             Main.modLog.Info?.Write($"Tracker Stat: {PqMechSkillTracker}, value: {companyStats.GetValue<float>(PqMechSkillTracker)}");
             Main.modLog.Info?.Write($"Tracker Stat: {PqMedSkillTracker}, value: {companyStats.GetValue<float>(PqMedSkillTracker)}");
             Main.modLog.Info?.Write($"Tracker Stat: {PqMoraleTracker}, value: {companyStats.GetValue<float>(PqMoraleTracker)}");
+            immortalityCache.Clear();
         }
 
         public void forceMoraleInstanced()
@@ -689,6 +693,11 @@ namespace MechAffinity
 
         public bool hasImmortality(PilotDef pilotDef)
         {
+            if (immortalityCache.ContainsKey(pilotDef.Description.Id))
+            {
+                return immortalityCache[pilotDef.Description.Id];
+            }
+            
             List<PilotQuirk> pilotQuirks = getQuirks(pilotDef);
             foreach (PilotQuirk quirk in pilotQuirks)
             {
@@ -696,11 +705,13 @@ namespace MechAffinity
                 {
                     if (effect.type == EQuirkEffectType.Immortality)
                     {
+                        immortalityCache.Add(pilotDef.Description.Id, true);
                         return true;
                     }
                 }
             }
 
+            immortalityCache.Add(pilotDef.Description.Id, false);
             return false;
             
         }
@@ -772,7 +783,7 @@ namespace MechAffinity
                         {
                             if (effect.affectedIds.Contains(upgradeId) || effect.affectedIds.Contains(PqAllArgoUpgrades))
                             {
-                                if (Main.settings.debug) Main.modLog.Debug?.Write($"Found Argo factor: {quirk.quirkName}, value: {effect.modifier}");
+                                Main.modLog.Debug?.Write($"Found Argo factor: {quirk.quirkName}, value: {effect.modifier}");
                                 if (settings.argoAdditive)
                                 {
                                     ret += effect.modifier;
