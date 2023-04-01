@@ -12,6 +12,8 @@
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <LangVersion>8</LangVersion>
+    <Nullable>disable</Nullable>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -108,6 +110,7 @@
     <Compile Include="Data\Affinity\PrefabOverride.cs" />
     <Compile Include="Data\Affinity\QuirkAffinity.cs" />
     <Compile Include="Data\Affinity\TaggedAffinity.cs" />
+    <Compile Include="Data\DeferringLogger.cs" />
     <Compile Include="Data\Internal\PilotDelayedEffects.cs" />
     <Compile Include="Data\Legacy\LegacyData.cs" />
     <Compile Include="Data\Legacy\LegacySettings.cs" />

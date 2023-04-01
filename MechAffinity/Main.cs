@@ -19,7 +19,7 @@ namespace MechAffinity
         private const string LegacyFilePath = "settings.legacy.json";
         private const string PilotSelectSettingsFilePath = "pilotselectsettings.json";
         
-        internal static Logger modLog;
+        internal static DeferringLogger modLog;
         internal static Settings settings;
         internal static PilotSelectSettings pilotSelectSettings = new PilotSelectSettings();
         internal static string modDir;
@@ -33,20 +33,20 @@ namespace MechAffinity
             {
                 foreach (var customResource in customResources)
                 {
-                    modLog.LogMessage("customResource:" + customResource.Key);
+                    modLog.Info?.LogMessage("customResource:" + customResource.Key);
                     if (customResource.Key == AffinitiesDefinitionTypeName)
                     {
                         foreach (var affinityDefPath in customResource.Value)
                         {
                             try
                             {
-                                modLog.LogMessage("Path:" + affinityDefPath.Value.FilePath);
+                                modLog.Info?.LogMessage("Path:" + affinityDefPath.Value.FilePath);
                                 AffinityDef affinityDef = JsonConvert.DeserializeObject<AffinityDef>(File.ReadAllText(affinityDefPath.Value.FilePath));
                                 affinityDefs.Add(affinityDef);
                             }
                             catch (Exception ex)
                             {
-                                modLog.LogException(ex);
+                                modLog.Error?.LogException(ex);
                             }
                         }
                     }
@@ -56,13 +56,13 @@ namespace MechAffinity
                         {
                             try
                             {
-                                modLog.LogMessage("Path:" + quirkDefPath.Value.FilePath);
+                                modLog.Info?.LogMessage("Path:" + quirkDefPath.Value.FilePath);
                                 PilotQuirk quirkDef = JsonConvert.DeserializeObject<PilotQuirk>(File.ReadAllText(quirkDefPath.Value.FilePath));
                                 pilotQuirks.Add(quirkDef);
                             }
                             catch (Exception ex)
                             {
-                                modLog.LogException(ex);
+                                modLog.Error?.LogException(ex);
                             }
                         }
                     }
@@ -79,7 +79,7 @@ namespace MechAffinity
             }
             catch (Exception ex)
             {
-                modLog.LogException(ex);
+                modLog.Error?.LogException(ex);
             }
         }
 
@@ -96,7 +96,7 @@ namespace MechAffinity
         {
 
             modDir = modDirectory;
-            modLog = new Logger(modDir, "MechAffinity", true);
+            modLog = new DeferringLogger(modDir, "MechAffinity", true);
 
             var settingsData = JObject.Parse(File.ReadAllText($"{modDir}/{SettingsFilePath}"));
             JToken version;
@@ -120,7 +120,7 @@ namespace MechAffinity
                 }
                 catch (Exception ex)
                 {
-                    modLog.LogException(ex);
+                    modLog.Error?.LogException(ex);
                 }
             }
 

@@ -164,7 +164,7 @@ namespace MechAffinity.Data
                         id = createId("AffinityDef_chassis_" + $"{chassisAffinity.affinityLevels.First().levelName}"),
                         affinityType = EAffinityDefType.Chassis
                     };
-                    Main.modLog.LogMessage($"{affinityDef.id}");
+                    Main.modLog.Info?.LogMessage($"{affinityDef.id}");
                     if (File.Exists($"{modDirectory}/AffinityDefs/{affinityDef.id}.json"))
                         affinityDef.id += $"_{counter}";
                     counter++;
