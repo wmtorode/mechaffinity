@@ -24,16 +24,16 @@ namespace MechAffinity.Patches
         {
             if (def != null)
             {
-                Main.modLog.LogMessage($"finding mechdef affinity descriptor for {def.Description.UIName}");
+                Main.modLog.Info?.Write($"finding mechdef affinity descriptor for {def.Description.UIName}");
                 string affinityDescriptors = PilotAffinityManager.Instance.getMechChassisAffinityDescription(def);
-                //Main.modLog.LogMessage(affinityDescriptors);
+                //Main.modLog.Info?.Write(affinityDescriptors);
                 ___descriptionText.AppendTextAndRefresh(affinityDescriptors, (object[])Array.Empty<object>());
                 //descriptor.SetValue(__instance, bioText);
                 __instance.ForceRefreshImmediate();
             }
             else
             {
-                Main.modLog.LogMessage("mechdef is null!");
+                Main.modLog.Info?.Write("mechdef is null!");
             }
         }
     }

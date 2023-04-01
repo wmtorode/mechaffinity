@@ -93,9 +93,9 @@ namespace MechAffinity
                 companyStats.AddStatistic<int>(PqMoraleModifierTracker, 0);
                 moraleModInstanced = false;
             }
-            Main.modLog.LogMessage($"Tracker Stat: {PqMechSkillTracker}, value: {companyStats.GetValue<float>(PqMechSkillTracker)}");
-            Main.modLog.LogMessage($"Tracker Stat: {PqMedSkillTracker}, value: {companyStats.GetValue<float>(PqMedSkillTracker)}");
-            Main.modLog.LogMessage($"Tracker Stat: {PqMoraleTracker}, value: {companyStats.GetValue<float>(PqMoraleTracker)}");
+            Main.modLog.Info?.Write($"Tracker Stat: {PqMechSkillTracker}, value: {companyStats.GetValue<float>(PqMechSkillTracker)}");
+            Main.modLog.Info?.Write($"Tracker Stat: {PqMedSkillTracker}, value: {companyStats.GetValue<float>(PqMedSkillTracker)}");
+            Main.modLog.Info?.Write($"Tracker Stat: {PqMoraleTracker}, value: {companyStats.GetValue<float>(PqMoraleTracker)}");
         }
 
         public void forceMoraleInstanced()
@@ -128,7 +128,7 @@ namespace MechAffinity
                 List<string> usedQuirks = new List<string>();
                 foreach (string tag in tags)
                 {
-                    //Main.modLog.LogMessage($"Processing tag: {tag}");
+                    //Main.modLog.Info?.Write($"Processing tag: {tag}");
                     PilotQuirk quirk;
                     if (quirks.TryGetValue(tag, out quirk))
                     {
@@ -166,11 +166,11 @@ namespace MechAffinity
                                     {
                                         pilotQuirks.Add(quirk);
                                         usedQuirks.Add(possibleQuirk);
-                                        Main.modLog.LogMessage($"Adding Randomized Quirk: {possibleQuirk}");
+                                        Main.modLog.Info?.Write($"Adding Randomized Quirk: {possibleQuirk}");
                                     }
                                     else
                                     {
-                                        Main.modLog.LogMessage($"Skipped adding randomized quirk {possibleQuirk}, because it was already used");
+                                        Main.modLog.Info?.Write($"Skipped adding randomized quirk {possibleQuirk}, because it was already used");
                                     }
                                 }
                             }
@@ -297,14 +297,14 @@ namespace MechAffinity
                 if (actor.team == null || !actor.team.IsLocalPlayer)
                 {
                     canUsePools = true;
-                    Main.modLog.LogMessage("Processing AI actor, allowing pooled quirk use");
+                    Main.modLog.Info?.Write("Processing AI actor, allowing pooled quirk use");
                 }
                 else
                 {
                     if (settings.playerQuirkPools)
                     {
                         canUsePools = true;
-                        Main.modLog.LogMessage("pq player pools enabled, allowing pooled quirk use");
+                        Main.modLog.Info?.Write("pq player pools enabled, allowing pooled quirk use");
                     }
                 }
                 getEffectBonuses(actor, canUsePools, out effects);
@@ -339,7 +339,7 @@ namespace MechAffinity
             int cValue = companyStats.GetValue<int>(cStat);
             int MoraleMod = companyStats.GetValue<int>(PqMoraleModifierTracker);
             bool updateMoraleMod = cStat == Morale;
-            Main.modLog.LogMessage($"possible update to {cStat}, current {cValue}, tracker: {trackerValue}");
+            Main.modLog.Info?.Write($"possible update to {cStat}, current {cValue}, tracker: {trackerValue}");
             int trackerInt = (int) trackerValue;
             trackerValue -= trackerInt;
             if (trackerInt != 0)
@@ -353,12 +353,12 @@ namespace MechAffinity
                 MoraleMod -= 1;
                 trackerValue = 1.0f + trackerValue;
             }
-            Main.modLog.LogMessage($"Updating: {cStat} => {cValue}, tracker => {trackerValue}");
+            Main.modLog.Info?.Write($"Updating: {cStat} => {cValue}, tracker => {trackerValue}");
             companyStats.Set<int>(cStat, cValue);
             companyStats.Set<float>(trackerStat, trackerValue);
             if (updateMoraleMod)
             {
-                Main.modLog.LogMessage($"Updating: {PqMoraleModifierTracker} => {MoraleMod}");
+                Main.modLog.Info?.Write($"Updating: {PqMoraleModifierTracker} => {MoraleMod}");
                 companyStats.Set<int>(PqMoraleModifierTracker, MoraleMod);
             }
         }
@@ -379,7 +379,7 @@ namespace MechAffinity
                             {
                                 Traverse.Create(def).Property("Health")
                                     .SetValue((int) (def.Health + (int) effect.modifier));
-                                Main.modLog.LogMessage($"adding health to pilot: {def.Description.Callsign}");
+                                Main.modLog.Info?.Write($"adding health to pilot: {def.Description.Callsign}");
                                 if (!proccessTags.Contains(PqMarkedPrefix + EQuirkEffectType.PilotHealth.ToString()))
                                 {
                                     proccessTags.Add(PqMarkedPrefix + EQuirkEffectType.PilotHealth.ToString());
@@ -388,7 +388,7 @@ namespace MechAffinity
                         }
                         else
                         {
-                            Main.modLog.LogMessage($"removing health to pilot: {def.Description.Callsign}");
+                            Main.modLog.Info?.Write($"removing health to pilot: {def.Description.Callsign}");
                             Traverse.Create(def).Property("Health").SetValue((int) (def.Health - (int) effect.modifier));
                         }
                         
@@ -411,7 +411,7 @@ namespace MechAffinity
                 if (!tags.Contains(tag))
                 {
                     def.PilotTags.Add(tag);
-                    Main.modLog.LogMessage($"Adding Tag: {tag} to {def.Description.Callsign}");
+                    Main.modLog.Info?.Write($"Adding Tag: {tag} to {def.Description.Callsign}");
                 }
             }
 
@@ -424,7 +424,7 @@ namespace MechAffinity
                         if (!tags.Contains(newTag))
                         {
                             def.PilotTags.Add(newTag);
-                            Main.modLog.LogMessage($"Adding Tag: {newTag} to {def.Description.Callsign}");
+                            Main.modLog.Info?.Write($"Adding Tag: {newTag} to {def.Description.Callsign}");
                         }
                     }
                     foreach (var depTag in update.removeTags)
@@ -432,7 +432,7 @@ namespace MechAffinity
                         if (tags.Contains(depTag))
                         {
                             def.PilotTags.Remove(depTag);
-                            Main.modLog.LogMessage($"Removing Tag: {depTag} to {def.Description.Callsign}");
+                            Main.modLog.Info?.Write($"Removing Tag: {depTag} to {def.Description.Callsign}");
                         }
                     }
                 }
@@ -442,7 +442,7 @@ namespace MechAffinity
 
         public void proccessPilot(PilotDef def, bool isNew)
         {
-            Main.modLog.LogMessage($"processing pilot: {def.Description.Callsign}");
+            Main.modLog.Info?.Write($"processing pilot: {def.Description.Callsign}");
             proccessPilotStats(def, isNew);
             processAdditionalTags(def, isNew);
             if (def.PilotTags.Contains(PqMarkedTag) && isNew)
@@ -470,11 +470,11 @@ namespace MechAffinity
                     if (updateMoraleMod)
                     {
                         currentMorale += (int)modChange;
-                        Main.modLog.LogMessage($"Updating: {PqMoraleModifierTracker} => {currentMorale}");
+                        Main.modLog.Info?.Write($"Updating: {PqMoraleModifierTracker} => {currentMorale}");
                         companyStats.Set<int>(PqMoraleModifierTracker, currentMorale);
                     }
                 }
-                Main.modLog.LogMessage($"pilot {def.Description.Callsign} already marked, skipping");
+                Main.modLog.Info?.Write($"pilot {def.Description.Callsign} already marked, skipping");
                 return;
             }
             float currentMechTek = companyStats.GetValue<float>(PqMechSkillTracker);
@@ -485,9 +485,9 @@ namespace MechAffinity
             bool updateMorale = false;
             
             
-            Main.modLog.LogMessage($"Tracker Stat: {PqMechSkillTracker}, value: {currentMechTek}");
-            Main.modLog.LogMessage($"Tracker Stat: {PqMedSkillTracker}, value: {currentMedTek}");
-            Main.modLog.LogMessage($"Tracker Stat: {PqMoraleTracker}, value: {currentMoraleTek}");
+            Main.modLog.Info?.Write($"Tracker Stat: {PqMechSkillTracker}, value: {currentMechTek}");
+            Main.modLog.Info?.Write($"Tracker Stat: {PqMedSkillTracker}, value: {currentMedTek}");
+            Main.modLog.Info?.Write($"Tracker Stat: {PqMoraleTracker}, value: {currentMoraleTek}");
 
             List<PilotQuirk> pilotQuirks = getQuirks(def);
             foreach (PilotQuirk quirk in pilotQuirks)
@@ -558,7 +558,7 @@ namespace MechAffinity
 
         public void processTagChange(Pilot pilot, string tag, bool isNew)
         {
-            Main.modLog.DebugMessage($"Tag change: {tag}");
+            Main.modLog.Debug?.Write($"Tag change: {tag}");
             PilotQuirk quirk;
             if (!GetQuirk(tag, out quirk)) return;
             float currentMechTek = companyStats.GetValue<float>(PqMechSkillTracker);
@@ -567,11 +567,11 @@ namespace MechAffinity
             bool updateMech = false;
             bool updateMed = false;
             bool updateMorale = false;
-            Main.modLog.LogMessage($"Processing Quirk Tag change on {pilot.Callsign} - {tag}: {isNew}");
+            Main.modLog.Info?.Write($"Processing Quirk Tag change on {pilot.Callsign} - {tag}: {isNew}");
             
-            Main.modLog.LogMessage($"Tracker Stat: {PqMechSkillTracker}, value: {currentMechTek}");
-            Main.modLog.LogMessage($"Tracker Stat: {PqMedSkillTracker}, value: {currentMedTek}");
-            Main.modLog.LogMessage($"Tracker Stat: {PqMoraleTracker}, value: {currentMoraleTek}");
+            Main.modLog.Info?.Write($"Tracker Stat: {PqMechSkillTracker}, value: {currentMechTek}");
+            Main.modLog.Info?.Write($"Tracker Stat: {PqMedSkillTracker}, value: {currentMedTek}");
+            Main.modLog.Info?.Write($"Tracker Stat: {PqMoraleTracker}, value: {currentMoraleTek}");
 
             foreach (QuirkEffect effect in quirk.quirkEffects)
             {
@@ -620,7 +620,7 @@ namespace MechAffinity
                     {
                         Traverse.Create(pilot.pilotDef).Property("Health")
                                 .SetValue((int) (pilot.pilotDef.Health + (int) effect.modifier));
-                            Main.modLog.LogMessage($"adding health to pilot: {pilot.pilotDef.Description.Callsign}");
+                            Main.modLog.Info?.Write($"adding health to pilot: {pilot.pilotDef.Description.Callsign}");
                             if (!pilot.pilotDef.PilotTags.Contains(PqMarkedPrefix + EQuirkEffectType.PilotHealth.ToString()))
                             {
                                 pilot.pilotDef.PilotTags.Add(PqMarkedPrefix + EQuirkEffectType.PilotHealth.ToString());
@@ -628,7 +628,7 @@ namespace MechAffinity
                     }
                     else
                     {
-                        Main.modLog.LogMessage($"removing health to pilot: {pilot.pilotDef.Description.Callsign}");
+                        Main.modLog.Info?.Write($"removing health to pilot: {pilot.pilotDef.Description.Callsign}");
                         Traverse.Create(pilot.pilotDef).Property("Health").SetValue((int) (pilot.pilotDef.Health - (int) effect.modifier));
                     }
                         
@@ -676,13 +676,13 @@ namespace MechAffinity
             int roll = random.Next(0, 100);
             if (roll < stealChance)
             {
-                Main.modLog.LogMessage($"Pilot {pilot.Callsign}, steals: {stealAmount}");
+                Main.modLog.Info?.Write($"Pilot {pilot.Callsign}, steals: {stealAmount}");
                  sim.AddFunds(stealAmount * -1, null, true);
             }
             roll = random.Next(0, 100);
             if (roll < stealChance2)
             {
-                Main.modLog.LogMessage($"Pilot {pilot.Callsign}, steals: {stealAmount2}");
+                Main.modLog.Info?.Write($"Pilot {pilot.Callsign}, steals: {stealAmount2}");
                 sim.AddFunds(stealAmount2 * -1, null, true);
             }
         }
@@ -716,7 +716,7 @@ namespace MechAffinity
                     {
                         additionalSalvage += Mathf.FloorToInt(effect.modifier);
                         additionalSalvagePicks += Mathf.FloorToInt(effect.secondaryModifier);
-                        Main.modLog.LogMessage($"Pilot: {pilotDef.Description.Callsign}, adds: {effect.modifier} salvage, {effect.secondaryModifier} picks");
+                        Main.modLog.Info?.Write($"Pilot: {pilotDef.Description.Callsign}, adds: {effect.modifier} salvage, {effect.secondaryModifier} picks");
                     }
                 }
             }
@@ -734,7 +734,7 @@ namespace MechAffinity
                     {
                         flatPayout += Mathf.FloorToInt(effect.modifier);
                         percentagePayout += effect.secondaryModifier;
-                        Main.modLog.LogMessage($"Pilot: {pilotDef.Description.Callsign}, adds: {effect.modifier} flat payout, {effect.secondaryModifier} payout percentage");
+                        Main.modLog.Info?.Write($"Pilot: {pilotDef.Description.Callsign}, adds: {effect.modifier} flat payout, {effect.secondaryModifier} payout percentage");
                     }
                 }
             }
@@ -772,7 +772,7 @@ namespace MechAffinity
                         {
                             if (effect.affectedIds.Contains(upgradeId) || effect.affectedIds.Contains(PqAllArgoUpgrades))
                             {
-                                if (Main.settings.debug) Main.modLog.DebugMessage($"Found Argo factor: {quirk.quirkName}, value: {effect.modifier}");
+                                if (Main.settings.debug) Main.modLog.Debug?.Write($"Found Argo factor: {quirk.quirkName}, value: {effect.modifier}");
                                 if (settings.argoAdditive)
                                 {
                                     ret += effect.modifier;
@@ -800,7 +800,7 @@ namespace MechAffinity
             {
                 ret = settings.argoMin;
             }
-            if (Main.settings.debug) Main.modLog.DebugMessage($"Found cost factor multiplier: {ret}");
+            if (Main.settings.debug) Main.modLog.Debug?.Write($"Found cost factor multiplier: {ret}");
             return ret;
         }
 
@@ -814,7 +814,7 @@ namespace MechAffinity
             }
             
             int MoraleModifier = companyStats.GetValue<int>(PqMoraleModifierTracker);
-            Main.modLog.LogMessage($"Reseting Morale, baseline {MoraleModifier}");
+            Main.modLog.Info?.Write($"Reseting Morale, baseline {MoraleModifier}");
             if (sim.CurDropship == DropshipType.Argo)
             {
                 foreach (ShipModuleUpgrade shipModuleUpgrade in sim.ShipUpgrades)
@@ -834,9 +834,9 @@ namespace MechAffinity
                     }
                 }
             }
-            Main.modLog.LogMessage($"Morale, baseline + Argo {MoraleModifier}");
+            Main.modLog.Info?.Write($"Morale, baseline + Argo {MoraleModifier}");
             MoraleModifier += sim.Constants.Story.StartingMorale;
-            Main.modLog.LogMessage($"New Morale: {MoraleModifier}");
+            Main.modLog.Info?.Write($"New Morale: {MoraleModifier}");
             companyStats.ModifyStat<int>("Mission", 0, "COMPANY_MonthlyStartingMorale", StatCollection.StatOperation.Set, MoraleModifier, -1, true);
             companyStats.ModifyStat<int>("Mission", 0, "Morale", StatCollection.StatOperation.Set, MoraleModifier, -1, true);
         }

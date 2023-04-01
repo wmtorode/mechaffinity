@@ -30,7 +30,7 @@ namespace MechAffinity.Patches
                 {
                     if (slot.SelectedPilot != null)
                     {
-                        Main.modLog.LogMessage($"Pilot In Slot: {slot.SelectedPilot.Pilot.Callsign}");
+                        Main.modLog.Info?.Write($"Pilot In Slot: {slot.SelectedPilot.Pilot.Callsign}");
                         pilotsInUse.Add(slot.SelectedPilot.Pilot);
                     }
                 }
@@ -43,7 +43,7 @@ namespace MechAffinity.Patches
                 QuirkRestriction restriction = PilotQuirkManager.Instance.pilotRestrictionInEffect(pilotsInUse);
                 if (restriction != null)
                 {
-                    Main.modLog.LogMessage($"preventing Pilot {barracksRosterSlot.Pilot.Callsign} from deploying: {restriction.restrictionCategory} in effect");
+                    Main.modLog.Info?.Write($"preventing Pilot {barracksRosterSlot.Pilot.Callsign} from deploying: {restriction.restrictionCategory} in effect");
                     ___LC.ReturnItem(item);
                     __result = false;
                     GenericPopupBuilder.Create(restriction.errorTitle, restriction.errorMsg).AddFader(new UIColorRef?(LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.PopupBackfill), 0.0f, true).Render();

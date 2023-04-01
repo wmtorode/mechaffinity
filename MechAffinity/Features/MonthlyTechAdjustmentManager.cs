@@ -56,16 +56,16 @@ namespace MechAffinity
             if (sim.CompanyTags.Any(x => x.StartsWith(MTMASaveTagPrefix)))
             {
                 LegacyMtmaSave legacyMtmaSave = JsonConvert.DeserializeObject<LegacyMtmaSave>(sim.CompanyTags.First(x => x.StartsWith(MTMASaveTagPrefix)).Substring(4));
-                Main.modLog.LogMessage($"loaded MTMA legacy data, importing....");
+                Main.modLog.Info?.Write($"loaded MTMA legacy data, importing....");
                 companyStats.Set<int>(MechTechModifier, legacyMtmaSave.DeltaMechTech);
                 companyStats.Set<int>(MedTechModifier, legacyMtmaSave.DeltaMedTech);
-                Main.modLog.LogMessage($"Imported: {legacyMtmaSave.ExpenseLevel} - {legacyMtmaSave.DeltaMechTech}/{legacyMtmaSave.DeltaMedTech}");
+                Main.modLog.Info?.Write($"Imported: {legacyMtmaSave.ExpenseLevel} - {legacyMtmaSave.DeltaMechTech}/{legacyMtmaSave.DeltaMedTech}");
                 sim.CompanyTags.Where(tag => tag.StartsWith(MTMASaveTagPrefix)).Do(x => sim.CompanyTags.Remove(x));
             }
 
-            Main.modLog.LogMessage(
+            Main.modLog.Info?.Write(
                 $"MT Stat: {MechTechModifier}, value: {companyStats.GetValue<int>(MechTechModifier)}");
-            Main.modLog.LogMessage(
+            Main.modLog.Info?.Write(
                 $"MT Stat: {MedTechModifier}, value: {companyStats.GetValue<int>(MedTechModifier)}");
         }
 
@@ -77,7 +77,7 @@ namespace MechAffinity
 
             companyStats.Set<int>(MechTechSkill, mechTech);
             companyStats.Set<int>(MedTechSkill, medTech);
-            Main.modLog.LogMessage($"Reset Mech/MedTech: {mechTech}/{medTech}");
+            Main.modLog.Info?.Write($"Reset Mech/MedTech: {mechTech}/{medTech}");
         }
 
         public void getTechAdjustments(EconomyScale economyScale, out int mechTechAdjust, out int medTechAdjust)
@@ -129,8 +129,8 @@ namespace MechAffinity
             companyStats.Set<int>(MechTechModifier, currentMechTech - newMechTech);
             companyStats.Set<int>(MedTechSkill, newMedTech);
             companyStats.Set<int>(MedTechModifier, currentMedTech - newMedTech);
-            Main.modLog.LogMessage($"Adjusting tech on expend: Mech: M:{mechTechAdjust}, C:{currentMechTech}, N: {newMechTech} S: {currentMechTech - newMechTech}");
-            Main.modLog.LogMessage($"Adjusting tech on expend: Med: M:{medTechAdjust}, C:{currentMedTech}, N: {newMedTech} S: {currentMedTech - newMedTech}");
+            Main.modLog.Info?.Write($"Adjusting tech on expend: Mech: M:{mechTechAdjust}, C:{currentMechTech}, N: {newMechTech} S: {currentMechTech - newMechTech}");
+            Main.modLog.Info?.Write($"Adjusting tech on expend: Med: M:{medTechAdjust}, C:{currentMedTech}, N: {newMedTech} S: {currentMedTech - newMedTech}");
         }
     }
 }

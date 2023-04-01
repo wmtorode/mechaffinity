@@ -33,20 +33,20 @@ namespace MechAffinity
             {
                 foreach (var customResource in customResources)
                 {
-                    modLog.Info?.LogMessage("customResource:" + customResource.Key);
+                    modLog.Info?.Write("customResource:" + customResource.Key);
                     if (customResource.Key == AffinitiesDefinitionTypeName)
                     {
                         foreach (var affinityDefPath in customResource.Value)
                         {
                             try
                             {
-                                modLog.Info?.LogMessage("Path:" + affinityDefPath.Value.FilePath);
+                                modLog.Info?.Write("Path:" + affinityDefPath.Value.FilePath);
                                 AffinityDef affinityDef = JsonConvert.DeserializeObject<AffinityDef>(File.ReadAllText(affinityDefPath.Value.FilePath));
                                 affinityDefs.Add(affinityDef);
                             }
                             catch (Exception ex)
                             {
-                                modLog.Error?.LogException(ex);
+                                modLog.Error?.Write(ex);
                             }
                         }
                     }
@@ -56,13 +56,13 @@ namespace MechAffinity
                         {
                             try
                             {
-                                modLog.Info?.LogMessage("Path:" + quirkDefPath.Value.FilePath);
+                                modLog.Info?.Write("Path:" + quirkDefPath.Value.FilePath);
                                 PilotQuirk quirkDef = JsonConvert.DeserializeObject<PilotQuirk>(File.ReadAllText(quirkDefPath.Value.FilePath));
                                 pilotQuirks.Add(quirkDef);
                             }
                             catch (Exception ex)
                             {
-                                modLog.Error?.LogException(ex);
+                                modLog.Error?.Write(ex);
                             }
                         }
                     }
@@ -79,7 +79,7 @@ namespace MechAffinity
             }
             catch (Exception ex)
             {
-                modLog.Error?.LogException(ex);
+                modLog.Error?.Write(ex);
             }
         }
 
@@ -105,6 +105,7 @@ namespace MechAffinity
             //if we fail to read settings it is useless to proceed. Better notify ModTek instead, by allowing the exception
             // to be raised
             settings = JsonConvert.DeserializeObject<Settings>(File.ReadAllText($"{modDir}/{SettingsFilePath}"));
+            modLog.setDebug(settings.debug);
 
             if (settings.enablePilotSelect)
             {
@@ -120,7 +121,7 @@ namespace MechAffinity
                 }
                 catch (Exception ex)
                 {
-                    modLog.Error?.LogException(ex);
+                    modLog.Error?.Write(ex);
                 }
             }
 

@@ -80,7 +80,7 @@ namespace MechAffinity.Patches
             }
             catch (Exception ex)
             {
-                Main.modLog.LogException(ex);
+                Main.modLog.Error?.Write(ex);
             }
 
         }

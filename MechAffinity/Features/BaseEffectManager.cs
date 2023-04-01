@@ -34,17 +34,17 @@ namespace MechAffinity
                         switch (statusEffect.targetingData.effectTargetType)
                         {
                             case EffectTargetType.Creator:
-                                Main.modLog.LogMessage($"Applying affect {effectId}, effect ID: {statusEffect.Description.Id}, name: {statusEffect.Description.Name} to creator");
+                                Main.modLog.Info?.Write($"Applying affect {effectId}, effect ID: {statusEffect.Description.Id}, name: {statusEffect.Description.Name} to creator");
                                 actor.Combat.EffectManager.CreateEffect(statusEffect, effectId, -1, actor,actor, new WeaponHitInfo(), 0, false);
                                 break;
                             case EffectTargetType.AllLanceMates:
-                                Main.modLog.LogMessage($"Found lancemate effect {effectId}, effect ID: {statusEffect.Description.Id}");
+                                Main.modLog.Info?.Write($"Found lancemate effect {effectId}, effect ID: {statusEffect.Description.Id}");
                                 actor.Combat.EffectManager.CreateEffect(statusEffect, effectId, -1, actor,actor, new WeaponHitInfo(), 0, false);
                                 List<AbstractActor> lancemates =
                                     spawnedActors.FindAll((x => x.team == actor.team));
                                 foreach (var lancemate in lancemates)
                                 {
-                                    Main.modLog.LogMessage($"Applying Lancemate effect {effectId}, effect ID: {statusEffect.Description.Id}, name: {statusEffect.Description.Name} to {lancemate.DisplayName} ");
+                                    Main.modLog.Info?.Write($"Applying Lancemate effect {effectId}, effect ID: {statusEffect.Description.Id}, name: {statusEffect.Description.Name} to {lancemate.DisplayName} ");
                                     actor.Combat.EffectManager.CreateEffect(statusEffect, effectId, -1, actor, lancemate,
                                         new WeaponHitInfo(), 0);
                                 }
@@ -57,11 +57,11 @@ namespace MechAffinity
                                 });
                                 break;
                             case EffectTargetType.AllEnemies:
-                                Main.modLog.LogMessage($"Found enemy effect {effectId}, effect ID: {statusEffect.Description.Id}");
+                                Main.modLog.Info?.Write($"Found enemy effect {effectId}, effect ID: {statusEffect.Description.Id}");
                                 List<AbstractActor> allEnemies = spawnedActors.FindAll((x => x.IsEnemy(actor)));
                                 foreach (var enemy in allEnemies)
                                 {
-                                    Main.modLog.LogMessage($"Applying enemy effect {effectId}, effect ID: {statusEffect.Description.Id}, name: {statusEffect.Description.Name} to {enemy.DisplayName} ");
+                                    Main.modLog.Info?.Write($"Applying enemy effect {effectId}, effect ID: {statusEffect.Description.Id}, name: {statusEffect.Description.Name} to {enemy.DisplayName} ");
                                     actor.Combat.EffectManager.CreateEffect(statusEffect, effectId, -1, actor, enemy,
                                         new WeaponHitInfo(), 0);
                                 }
@@ -74,24 +74,24 @@ namespace MechAffinity
                                 });
                                 break;
                             default:
-                                Main.modLog.LogError($"Unable to apply passive effect {effectId}, effect ID: {statusEffect.Description.Id}, name: {statusEffect.Description.Name}, unsupported target type: {statusEffect.targetingData.effectTargetType.ToString()} ");
+                                Main.modLog.Error?.Write($"Unable to apply passive effect {effectId}, effect ID: {statusEffect.Description.Id}, name: {statusEffect.Description.Name}, unsupported target type: {statusEffect.targetingData.effectTargetType.ToString()} ");
                                 break;
                         }
                         break;
                     case EffectTriggerType.OnHit:
                         foreach (var weapon in actor.Weapons)
                         {
-                            Main.modLog.LogMessage($"Add onHit effect: {statusEffect.Description.Name} to {weapon.UIName}");
-                            Main.modLog.DebugMessage($"Before Add: {weapon.weaponDef.statusEffects.Length}");
+                            Main.modLog.Info?.Write($"Add onHit effect: {statusEffect.Description.Name} to {weapon.UIName}");
+                            Main.modLog.Debug?.Write($"Before Add: {weapon.weaponDef.statusEffects.Length}");
                             List<EffectData> statEffects = weapon.weaponDef.statusEffects.ToList();
                             statEffects.Add(statusEffect);
                             weapon.weaponDef.SetEffectData(statEffects.ToArray());
-                            Main.modLog.DebugMessage($"After Add: {weapon.weaponDef.statusEffects.Length}");
+                            Main.modLog.Debug?.Write($"After Add: {weapon.weaponDef.statusEffects.Length}");
                             
                         }
                         break;
                     default:
-                        Main.modLog.LogError($"Unable to apply effect {effectId}, effect ID: {statusEffect.Description.Id}, name: {statusEffect.Description.Name}, unsupported Trigger Type: {statusEffect.targetingData.effectTriggerType.ToString()} ");
+                        Main.modLog.Error?.Write($"Unable to apply effect {effectId}, effect ID: {statusEffect.Description.Id}, name: {statusEffect.Description.Name}, unsupported Trigger Type: {statusEffect.targetingData.effectTriggerType.ToString()} ");
                         break;
 
                 }
@@ -104,7 +104,7 @@ namespace MechAffinity
                     case EffectTargetType.AllLanceMates:
                         if (delayedEffect.actor.team == actor.team)
                         {
-                            Main.modLog.LogMessage($"Applying delayed Lancemate effect {delayedEffect.effectId}, effect ID: {delayedEffect.effect.Description.Id}, name: {delayedEffect.effect.Description.Name} to {actor.DisplayName} ");
+                            Main.modLog.Info?.Write($"Applying delayed Lancemate effect {delayedEffect.effectId}, effect ID: {delayedEffect.effect.Description.Id}, name: {delayedEffect.effect.Description.Name} to {actor.DisplayName} ");
                             actor.Combat.EffectManager.CreateEffect(delayedEffect.effect, delayedEffect.effectId, -1, delayedEffect.actor, actor,
                                 new WeaponHitInfo(), 0);
                         }
@@ -112,7 +112,7 @@ namespace MechAffinity
                     case EffectTargetType.AllEnemies:
                         if (delayedEffect.actor.IsEnemy(actor))
                         {
-                            Main.modLog.LogMessage($"Applying delayed enemy effect {delayedEffect.effectId}, effect ID: {delayedEffect.effect.Description.Id}, name: {delayedEffect.effect.Description.Name} to {actor.DisplayName} ");
+                            Main.modLog.Info?.Write($"Applying delayed enemy effect {delayedEffect.effectId}, effect ID: {delayedEffect.effect.Description.Id}, name: {delayedEffect.effect.Description.Name} to {actor.DisplayName} ");
                             actor.Combat.EffectManager.CreateEffect(delayedEffect.effect, delayedEffect.effectId, -1, delayedEffect.actor, actor,
                                 new WeaponHitInfo(), 0);
                         }

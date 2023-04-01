@@ -62,7 +62,7 @@ namespace MechAffinity
 
         public void setStartingRonin(SimGameState simGameState)
         {
-            Main.modLog.LogMessage(
+            Main.modLog.Info?.Write(
                 $"PS settings, RL: {Main.pilotSelectSettings.RoninFromList}, RR: {Main.pilotSelectSettings.RandomRonin}, PP: {Main.pilotSelectSettings.ProceduralPilots} ");
             if (Main.pilotSelectSettings.RandomRonin + Main.pilotSelectSettings.ProceduralPilots +
                 Main.pilotSelectSettings.RoninFromList > 0)
@@ -86,7 +86,7 @@ namespace MechAffinity
 
                 if (Main.pilotSelectSettings.PossibleStartingRonin != null)
                 {
-                    Main.modLog.LogMessage($"Selecting {Main.pilotSelectSettings.RoninFromList} list ronin");
+                    Main.modLog.Info?.Write($"Selecting {Main.pilotSelectSettings.RoninFromList} list ronin");
                     var RoninRandomizer = GetRandomSubList(Main.pilotSelectSettings.PossibleStartingRonin,
                         Main.pilotSelectSettings.RoninFromList);
                     foreach (var roninID in RoninRandomizer)
@@ -96,7 +96,7 @@ namespace MechAffinity
                         // add directly to roster, don't want to get duplicate ronin from random ronin
                         if (pilotDef != null)
                         {
-                            Main.modLog.LogMessage($"Adding Starting Ronin {pilotDef.Description.Id}, to roster");
+                            Main.modLog.Info?.Write($"Adding Starting Ronin {pilotDef.Description.Id}, to roster");
                             simGameState.AddPilotToRoster(pilotDef, true);
                         }
                     }
@@ -104,7 +104,7 @@ namespace MechAffinity
 
                 if (Main.pilotSelectSettings.RandomRonin > 0)
                 {
-                    Main.modLog.LogMessage($"Selecting {Main.pilotSelectSettings.RandomRonin} random ronin");
+                    Main.modLog.Info?.Write($"Selecting {Main.pilotSelectSettings.RandomRonin} random ronin");
                     List<PilotDef> randomRonin = new List<PilotDef>(simGameState.RoninPilots);
                     for (int m = randomRonin.Count - 1; m >= 0; m--)
                     {
@@ -113,7 +113,7 @@ namespace MechAffinity
                             // remove any ronin from the selection pool if they are already hired
                             if (randomRonin[m].Description.Id == simGameState.PilotRoster[n].Description.Id)
                             {
-                                Main.modLog.LogMessage(
+                                Main.modLog.Info?.Write(
                                     $"Removing Ronin {randomRonin[m].Description.Id}, already in pool");
                                 randomRonin.RemoveAt(m);
                                 break;
@@ -137,10 +137,10 @@ namespace MechAffinity
                                 if (usedRestrictions.Contains(restriction.restrictionId)) continue;
                                 if (restriction.tags.Contains(tag))
                                 {
-                                    Main.modLog.DebugMessage($"Pilot: {value.Description.Callsign} has restricted tag: {tag}");
+                                    Main.modLog.Debug?.Write($"Pilot: {value.Description.Callsign} has restricted tag: {tag}");
                                     if (restriction.limit == 0)
                                     {
-                                        Main.modLog.DebugMessage($"Rejecting pilot as a starting pilot, tag not allowed");
+                                        Main.modLog.Debug?.Write($"Rejecting pilot as a starting pilot, tag not allowed");
                                         isAllowed = false;
                                         break;
                                     }
@@ -165,7 +165,7 @@ namespace MechAffinity
                                     }
                                     else
                                     {
-                                        Main.modLog.DebugMessage($"Rejecting pilot as a starting pilot, tag has reached its limits already");
+                                        Main.modLog.Debug?.Write($"Rejecting pilot as a starting pilot, tag has reached its limits already");
                                         isAllowed = false;
                                         break;
                                     }
@@ -186,7 +186,7 @@ namespace MechAffinity
                             restrictions[tag].currentCount += 1;
                         }
                         
-                        Main.modLog.LogMessage($"Adding Random Ronin {value.Description.Id}, to roster");
+                        Main.modLog.Info?.Write($"Adding Random Ronin {value.Description.Id}, to roster");
                         newPilots.Add(value);
                         count++;
                         if (count >= Main.pilotSelectSettings.RandomRonin)
@@ -198,7 +198,7 @@ namespace MechAffinity
 
                 if (Main.pilotSelectSettings.ProceduralPilots > 0)
                 {
-                    Main.modLog.LogMessage($"Generating {Main.pilotSelectSettings.ProceduralPilots} proc pilots");
+                    Main.modLog.Info?.Write($"Generating {Main.pilotSelectSettings.ProceduralPilots} proc pilots");
                     List<PilotDef> list3;
                     List<PilotDef> collection =
                         simGameState.PilotGenerator.GeneratePilots(Main.pilotSelectSettings.ProceduralPilots, 1, 0f,
@@ -206,10 +206,10 @@ namespace MechAffinity
                     newPilots.AddRange(collection);
                 }
 
-                Main.modLog.LogMessage($"Pilots to add to roster: {newPilots.Count}");
+                Main.modLog.Info?.Write($"Pilots to add to roster: {newPilots.Count}");
                 foreach (PilotDef def in newPilots)
                 {
-                    Main.modLog.LogMessage($"Adding {def.Description.Callsign} to pilot roster");
+                    Main.modLog.Info?.Write($"Adding {def.Description.Callsign} to pilot roster");
                     simGameState.AddPilotToRoster(def, true);
                 }
             }

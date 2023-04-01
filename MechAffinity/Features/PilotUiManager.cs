@@ -50,7 +50,7 @@ namespace MechAffinity
 
         public void issueLoadRequests()
         {
-            Main.modLog.LogMessage("Issuing Load requests!");
+            Main.modLog.Info?.Write("Issuing Load requests!");
             LoadRequest loadRequest = dataManager.CreateLoadRequest();
             foreach (PilotIcon pilotIcon in settings.pilotIcons)
             {
@@ -68,14 +68,14 @@ namespace MechAffinity
             {
                 if (iconMap.ContainsKey(tag))
                 {
-                    Main.modLog.LogMessage($"Found IconData for: {tag}!");
+                    Main.modLog.Info?.Write($"Found IconData for: {tag}!");
                     if (icon == null)
                     {
                         icon = iconMap[tag];
                     }
                     else if (icon.priority > iconMap[tag].priority)
                     {
-                        Main.modLog.LogMessage($"icon IconData for: {tag} has higher priority, bumping");
+                        Main.modLog.Info?.Write($"icon IconData for: {tag} has higher priority, bumping");
                         icon = iconMap[tag];
                     }
                 }

@@ -16,32 +16,21 @@ namespace MechAffinity.Data
             }
 
             logStream = File.AppendText(filePath);
-            logStream.AutoFlush = true;
-            
+
         }
 
-        public void DebugMessage(string message)
+        public void Write(string message)
         {
             string now = DateTime.UtcNow.ToString("s", System.Globalization.CultureInfo.InvariantCulture);
-            logStream.WriteLine($"DEBUG: {now} - {message}");
+            logStream.WriteLine($"{now} - {message}");
+            logStream.Flush();
         }
-
-        public void LogMessage(string message)
-        {
-            string now = DateTime.UtcNow.ToString("s", System.Globalization.CultureInfo.InvariantCulture);
-            logStream.WriteLine($"INFO: {now} - {message}");
-        }
-
-        public void LogError(string message)
-        {
-            string now = DateTime.UtcNow.ToString("s", System.Globalization.CultureInfo.InvariantCulture);
-            logStream.WriteLine($"ERROR: {now} - {message}");
-        }
-
-        public void LogException(Exception error)
+        
+        public void Write(Exception error)
         {
             string now = DateTime.UtcNow.ToString("s", System.Globalization.CultureInfo.InvariantCulture);
             logStream.WriteLine($"CRITICAL: {now} - {error}");
+            logStream.Flush();
         }
 
     }

@@ -249,7 +249,7 @@ namespace MechAffinity.Patches
                     // if the pilot is supposed to be killed, but is immortal, dont kill them
                     if (PilotQuirkManager.Instance.hasImmortality(def))
                     {
-                        Main.modLog.LogMessage($"Preventing death of pilot: {def.Description.Callsign}");
+                        Main.modLog.Info?.Write($"Preventing death of pilot: {def.Description.Callsign}");
                         __result = true;
                         return false;
                     }

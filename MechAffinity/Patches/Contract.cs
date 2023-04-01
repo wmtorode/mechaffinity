@@ -23,12 +23,12 @@ namespace MechAffinity.Patches
         
         public static void Prefix(Contract __instance, SimGameState sim)
         {
-            Main.modLog.LogMessage($"Contract Finalize Killed Pilots Starting");
+            Main.modLog.Info?.Write($"Contract Finalize Killed Pilots Starting");
         }
         
         public static void Postfix(Contract __instance, SimGameState sim)
         {
-            Main.modLog.LogMessage($"Contract Finalize Killed Pilots done");
+            Main.modLog.Info?.Write($"Contract Finalize Killed Pilots done");
         }
     }
     
@@ -69,7 +69,7 @@ namespace MechAffinity.Patches
 
                 if (payoutChanged)
                 {
-                    Main.modLog.LogMessage($"Payout Changed by Quirk Effects: f:{FlatBonus}, P: {PercentageBonus}, New Payout: {Payout}");
+                    Main.modLog.Info?.Write($"Payout Changed by Quirk Effects: f:{FlatBonus}, P: {PercentageBonus}, New Payout: {Payout}");
                     Traverse.Create(__instance).Property("MoneyResults").SetValue(Payout);
                 }
                 
@@ -91,7 +91,7 @@ namespace MechAffinity.Patches
             int additionalSalvage = 0;
             int additionalSalvagePicks = 0;
             
-            Main.modLog.LogMessage($"Generating Salvage picks Start: {__instance.FinalPrioritySalvageCount}/{__instance.FinalSalvageCount}");
+            Main.modLog.Info?.Write($"Generating Salvage picks Start: {__instance.FinalPrioritySalvageCount}/{__instance.FinalSalvageCount}");
 
             foreach (var unitResult in __instance.PlayerUnitResults)
             {
@@ -111,7 +111,7 @@ namespace MechAffinity.Patches
                     Math.Min(__instance.FinalPrioritySalvageCount + additionalSalvagePicks, 7), 0));
             }
             
-            Main.modLog.LogMessage($"Generating Salvage picks Finish: {__instance.FinalPrioritySalvageCount}/{__instance.FinalSalvageCount}");
+            Main.modLog.Info?.Write($"Generating Salvage picks Finish: {__instance.FinalPrioritySalvageCount}/{__instance.FinalSalvageCount}");
         }
     }
 }
