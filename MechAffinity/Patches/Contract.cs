@@ -4,7 +4,6 @@ using BattleTech.UI;
 using BattleTech.StringInterpolation;
 using BattleTech.UI.TMProWrapper;
 using Localize;
-using Harmony;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
@@ -21,8 +20,14 @@ namespace MechAffinity.Patches
             return Main.settings.enablePilotQuirks;
         }
         
-        public static void Prefix(Contract __instance, SimGameState sim)
+        public static void Prefix(ref bool __runOriginal, Contract __instance, SimGameState sim)
         {
+            
+            if (!__runOriginal)
+            {
+                return;
+            }
+            
             Main.modLog.Info?.Write($"Contract Finalize Killed Pilots Starting");
         }
         

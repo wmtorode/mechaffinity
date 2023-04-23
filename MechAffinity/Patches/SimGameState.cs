@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Harmony;
 using BattleTech;
 using BattleTech.Save;
 using BattleTech.UI.Tooltips;
@@ -133,8 +132,14 @@ namespace MechAffinity.Patches
         {
             return Main.settings.enablePilotAffinity;
         }
-        public static void Prefix(SimGameState __instance)
+        public static void Prefix(ref bool __runOriginal, SimGameState __instance)
         {
+            
+            if (!__runOriginal)
+            {
+                return;
+            }
+            
             if (__instance.CompletedContract != null)
             {
                 List<UnitResult> results = __instance.CompletedContract.PlayerUnitResults;
@@ -222,8 +227,14 @@ namespace MechAffinity.Patches
         {
             return Main.settings.enablePilotQuirks;
         }
-        public static void Prefix(SimGameState __instance, PilotDef def, bool updatePilotDiscardPile = false)
+        public static void Prefix(ref bool __runOriginal, SimGameState __instance, PilotDef def, bool updatePilotDiscardPile = false)
         {
+            
+            if (!__runOriginal)
+            {
+                return;
+            }
+            
             if (def != null)
             {
                 PilotQuirkManager.Instance.proccessPilot(def, true);
@@ -239,8 +250,14 @@ namespace MechAffinity.Patches
         {
             return Main.settings.enablePilotQuirks;
         }
-        public static bool Prefix(SimGameState __instance, Pilot p, ref bool __result)
+        public static void Prefix(ref bool __runOriginal, SimGameState __instance, Pilot p, ref bool __result)
         {
+            
+            if (!__runOriginal)
+            {
+                return;
+            }
+            
             if (p != null && (__instance.PilotRoster.Contains(p)))
             {
                 PilotDef def = p.pilotDef;
@@ -251,13 +268,13 @@ namespace MechAffinity.Patches
                     {
                         Main.modLog.Info?.Write($"Preventing death of pilot: {def.Description.Callsign}");
                         __result = true;
-                        return false;
+                        __runOriginal = false;
+                        return;
                     }
                     PilotQuirkManager.Instance.proccessPilot(def, false);
                 }
             }
-
-            return true;
+            
         }
     }
     
@@ -268,8 +285,14 @@ namespace MechAffinity.Patches
         {
             return Main.settings.enablePilotQuirks;
         }
-        public static void Prefix(SimGameState __instance, Pilot p)
+        public static void Prefix(ref bool __runOriginal, SimGameState __instance, Pilot p)
         {
+            
+            if (!__runOriginal)
+            {
+                return;
+            }
+            
             if (p != null)
             {
                 PilotDef def = p.pilotDef;
@@ -291,8 +314,14 @@ namespace MechAffinity.Patches
             return Main.settings.enablePilotQuirks;
         }
         
-        public static void Prefix(SimGameState __instance, bool refund)
+        public static void Prefix(ref bool __runOriginal, SimGameState __instance, bool refund)
         {
+            
+            if (!__runOriginal)
+            {
+                return;
+            }
+            
             ShipModuleUpgrade shipModuleUpgrade = __instance.DataManager.ShipUpgradeDefs.Get(__instance.CurrentUpgradeEntry.upgradeID);
 
             float multiplier = PilotQuirkManager.Instance.getArgoUpgradeCostModifier(__instance.PilotRoster.ToList(),
@@ -322,8 +351,14 @@ namespace MechAffinity.Patches
             return Main.settings.enablePilotQuirks;
         }
         
-        public static bool Prefix(SimGameState __instance, EconomyScale expenditureLevel, bool proRate, int  ___ProRateRefund, ref int __result)
+        public static void Prefix(ref bool __runOriginal, SimGameState __instance, EconomyScale expenditureLevel, bool proRate, int  ___ProRateRefund, ref int __result)
         {
+            
+            if (!__runOriginal)
+            {
+                return;
+            }
+            
             FinancesConstantsDef finances = __instance.Constants.Finances;
             int baseMaintenanceCost = __instance.GetShipBaseMaintenanceCost();
             for (int index = 0; index < __instance.ShipUpgrades.Count; ++index)
@@ -339,7 +374,7 @@ namespace MechAffinity.Patches
                 baseMaintenanceCost += __instance.GetMechWarriorValue(__instance.PilotRoster[index].pilotDef);
             float expenditureCostModifier = __instance.GetExpenditureCostModifier(expenditureLevel);
             __result = Mathf.CeilToInt((float) (baseMaintenanceCost - (proRate ? ___ProRateRefund : 0)) * expenditureCostModifier);
-            return false;
+            __runOriginal = false;
         }
     }
 
@@ -377,8 +412,14 @@ namespace MechAffinity.Patches
         {
             return Main.settings.enableMonthlyMoraleReset;
         }
-        public static bool Prefix(SimGameState __instance, int val, string sourceID)
+        public static void Prefix(ref bool __runOriginal, SimGameState __instance, int val, string sourceID)
         {
+            
+            if (!__runOriginal)
+            {
+                return;
+            }
+            
             if (sourceID == null)
                 sourceID = nameof (SimGameState);
             if (__instance.CompanyStats.ContainsStatistic("Morale"))
@@ -391,7 +432,7 @@ namespace MechAffinity.Patches
                 PilotQuirkManager.Instance.resetMorale(__instance);
             }
             __instance.RoomManager.RefreshDisplay();
-            return false;
+            __runOriginal = false;
         }
     }
     
@@ -446,8 +487,14 @@ namespace MechAffinity.Patches
         {
             return Main.settings.enablePilotQuirks;
         }
-        public static void Prefix(SimGameState __instance, SimGameEventResult result, List<object> objects)
+        public static void Prefix(ref bool __runOriginal, SimGameState __instance, SimGameEventResult result, List<object> objects)
         {
+            
+            if (!__runOriginal)
+            {
+                return;
+            }
+            
             SimGameState simulation = SceneSingletonBehavior<UnityGameInstance>.Instance.Game.Simulation;
             SimGameReport.ReportEntry log = (SimGameReport.ReportEntry) null;
             for (var i = 0; i < objects.Count; i++)

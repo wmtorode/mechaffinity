@@ -1,7 +1,6 @@
 using System;
 using BattleTech;
 using BattleTech.UI;
-using Harmony;
 using System.Collections.Generic;
 using System.Linq;
 using BattleTech.UI.TMProWrapper;

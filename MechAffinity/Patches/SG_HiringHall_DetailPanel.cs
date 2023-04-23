@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Reflection;
-using Harmony;
 using BattleTech;
 using BattleTech.UI;
 
@@ -15,8 +14,14 @@ namespace MechAffinity.Patches
             return Main.settings.enablePilotQuirks;
         }
 
-        public static void Prefix(Pilot p)
+        public static void Prefix(ref bool __runOriginal, Pilot p)
         {
+            
+            if (!__runOriginal)
+            {
+                return;
+            }
+            
             origDesc = p.pilotDef.Description.Details;
 
             //because, #HBSWhy

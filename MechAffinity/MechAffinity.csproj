@@ -1,172 +1,69 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{3CA926A5-79B7-44C0-B38A-2E49E31AEEC3}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MechAffinity</RootNamespace>
-    <AssemblyName>MechAffinity</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <Deterministic>true</Deterministic>
-    <LangVersion>8</LangVersion>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>11</LangVersion>
     <Nullable>disable</Nullable>
+    <AssemblyTitle>MechAffinity</AssemblyTitle>
+    <Product>MechAffinity</Product>
+    <Copyright>Copyright © 2022</Copyright>
+    <AssemblyVersion>2.0.0.0</AssemblyVersion>
+    <FileVersion>2.0.0.0</FileVersion>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <AssemblySearchPaths>
+      $(ReferencePath);
+      {HintPathFromItem};
+    </AssemblySearchPaths>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE;USE_CS_CC;USE_LT</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ReleaseNoCS|AnyCPU'">
-    <OutputPath>bin\ReleaseNoCS\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <LangVersion>7.3</LangVersion>
-    <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'ReleaseNoLT|AnyCPU' ">
-    <OutputPath>bin\ReleaseNoLT\</OutputPath>
     <DefineConstants>TRACE;USE_CS_CC</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="0Harmony">
-      <HintPath>D:\SteamLibrary\steamapps\common\BATTLETECH\Mods\ModTek\0Harmony.dll</HintPath>
-    </Reference>
+    <PackageReference Include="HarmonyX" Version="2.10.1">
+      <PrivateAssets>all</PrivateAssets>
+      <ExcludeAssets>runtime</ExcludeAssets>
+    </PackageReference>
     <Reference Include="Assembly-CSharp">
-      <HintPath>D:\SteamLibrary\steamapps\common\BATTLETECH\BattleTech_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp-firstpass">
-      <HintPath>D:\SteamLibrary\steamapps\common\BATTLETECH\BattleTech_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
     <Reference Include="CustomComponents">
-      <HintPath>S:\SteamLibrary\steamapps\common\BATTLETECH\Mods\CustomComponents\CustomComponents.dll</HintPath>
     </Reference>
     <Reference Include="CustomSalvage">
-      <HintPath>S:\SteamLibrary\steamapps\common\BATTLETECH\Mods\CustomSalvage\CustomSalvage.dll</HintPath>
     </Reference>
     <Reference Include="LewdableTanks">
-      <HintPath>..\..\..\BT_Publicized\CC2\LewdableTanks.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
-      <HintPath>D:\SteamLibrary\steamapps\common\BATTLETECH\BattleTech_Data\Managed\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
     <Reference Include="Unity.TextMeshPro, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>S:\SteamLibrary\steamapps\common\BATTLETECH\BattleTech_Data\Managed\Unity.TextMeshPro.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>S:\SteamLibrary\steamapps\common\BATTLETECH\BattleTech_Data\Managed\UnityEngine.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>S:\SteamLibrary\steamapps\common\BATTLETECH\BattleTech_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>S:\SteamLibrary\steamapps\common\BATTLETECH\BattleTech_Data\Managed\UnityEngine.UI.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Data\Affinity\Affinity.cs" />
-    <Compile Include="Data\Affinity\AffinityDef.cs" />
-    <Compile Include="Data\Affinity\AffinityGroup.cs" />
-    <Compile Include="Data\Affinity\AffinityLevel.cs" />
-    <Compile Include="Data\Affinity\ChassisSpecificAffinity.cs" />
-    <Compile Include="Data\Affinity\ChassisTypeMap.cs" />
-    <Compile Include="Data\Affinity\DescriptionHolder.cs" />
-    <Compile Include="Data\Affinity\EAffinityDefType.cs" />
-    <Compile Include="Data\Affinity\EAffinityType.cs" />
-    <Compile Include="Data\Affinity\EIdType.cs" />
-    <Compile Include="Data\Affinity\PilotAffinitySettings.cs" />
-    <Compile Include="Data\Affinity\PrefabOverride.cs" />
-    <Compile Include="Data\Affinity\QuirkAffinity.cs" />
-    <Compile Include="Data\Affinity\TaggedAffinity.cs" />
-    <Compile Include="Data\DeferringLogger.cs" />
-    <Compile Include="Data\Internal\PilotDelayedEffects.cs" />
-    <Compile Include="Data\Legacy\LegacyData.cs" />
-    <Compile Include="Data\Legacy\LegacySettings.cs" />
-    <Compile Include="Data\Logger.cs" />
-    <Compile Include="Data\MonthlyTech\LegacyMtmaSave.cs" />
-    <Compile Include="Data\MonthlyTech\MonthlyTechSettings.cs" />
-    <Compile Include="Data\PilotSelect\PilotRestrictionCounter.cs" />
-    <Compile Include="Data\PilotSelect\PilotSelectRestrictions.cs" />
-    <Compile Include="Data\PilotSelect\PilotSelectSettings.cs" />
-    <Compile Include="Data\PilotUi\PilotAffinityColour.cs" />
-    <Compile Include="Data\PilotUi\PilotIcon.cs" />
-    <Compile Include="Data\PilotUi\PilotUiSettings.cs" />
-    <Compile Include="Data\Quirk\EQuirkEffectType.cs" />
-    <Compile Include="Data\Quirk\PilotQuirk.cs" />
-    <Compile Include="Data\Quirk\PilotQuirkSettings.cs" />
-    <Compile Include="Data\Quirk\PilotTooltipTag.cs" />
-    <Compile Include="Data\Quirk\QuirkEffect.cs" />
-    <Compile Include="Data\Quirk\QuirkPool.cs" />
-    <Compile Include="Data\Quirk\QuirkRestriction.cs" />
-    <Compile Include="Data\Quirk\TagUpdate.cs" />
-    <Compile Include="Data\Settings.cs" />
-    <Compile Include="Data\StablePiloting\EStabilityEffectType.cs" />
-    <Compile Include="Data\StablePiloting\PilotTagStabilityEffect.cs" />
-    <Compile Include="Data\StablePiloting\StablePilotingSettings.cs" />
-    <Compile Include="Features\BaseEffectManager.cs" />
-    <Compile Include="Features\MonthlyTechAdjustmentManager.cs" />
-    <Compile Include="Features\PilotAffinityManager.cs" />
-    <Compile Include="Features\PilotQuirkManager.cs" />
-    <Compile Include="Features\PilotRandomizerManager.cs" />
-    <Compile Include="Features\PilotUiManager.cs" />
-    <Compile Include="Features\StablePilotingManager.cs" />
-    <Compile Include="Features\UidManager.cs" />
-    <Compile Include="Main.cs" />
-    <Compile Include="Patches\AbstractActor.cs" />
-    <Compile Include="Patches\AttackSequence.cs" />
-    <Compile Include="Patches\Contract.cs" />
-    <Compile Include="Patches\LanceConfiguratorPanel.cs" />
-    <Compile Include="Patches\LanceLoadoutSlot.cs" />
-    <Compile Include="Patches\Mech.cs" />
-    <Compile Include="Patches\MechDetails.cs" />
-    <Compile Include="Patches\MechLabStockInfoPopup.cs" />
-    <Compile Include="Patches\PilotDef.cs" />
-    <Compile Include="Patches\SGBarracksRosterSlot.cs" />
-    <Compile Include="Patches\SGBarracksServicePanel.cs" />
-    <Compile Include="Patches\SGCaptainsQuartersStatusScreen.cs" />
-    <Compile Include="Patches\SGEngineeringScreen.cs" />
-    <Compile Include="Patches\SGShipModuleUpgradeViewPopulator.cs" />
-    <Compile Include="Patches\SG_HiringHall_DetailPanel.cs" />
-    <Compile Include="Patches\SimGameState.cs" />
-    <Compile Include="Patches\TagDataStructFetcher.cs" />
-    <Compile Include="Patches\TooltipPrefab_Chassis.cs" />
-    <Compile Include="Patches\UnitSpawnPointGameLogic.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Remove="obj\ReleaseNoCS\.NETFramework,Version=v4.7.2.AssemblyAttributes.cs" />
+    <Compile Remove="obj\ReleaseNoLT\.NETFramework,Version=v4.7.2.AssemblyAttributes.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Patches\TooltipPrefab_Mech.cs" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

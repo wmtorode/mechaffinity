@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Reflection;
 using BattleTech;
 using BattleTech.UI;
-using Harmony;
 using UnityEngine;
 using UnityEngine.UI;
 using BattleTech.UI.TMProWrapper;
@@ -20,16 +19,22 @@ namespace MechAffinity.Patches
             return Main.settings.enablePilotQuirks || Main.settings.enableMonthlyTechAdjustments;
         }
         
-        public static bool Prefix(SGCaptainsQuartersStatusScreen __instance, EconomyScale expenditureLevel, bool showMoraleChange, SimGameState ___simState,
+        public static void Prefix(ref bool __runOriginal, SGCaptainsQuartersStatusScreen __instance, EconomyScale expenditureLevel, bool showMoraleChange, SimGameState ___simState,
           SGDifficultyIndicatorWidget ___ExpenditureLevelIndicatorWidget, LocalizableText ___ExpenditureLevelField, LocalizableText ___SectionOneExpenseLevel,
           LocalizableText ___SectionTwoExpenseLevel, SGFinancialForecastWidget ___FinanceWidget, LocalizableText ___MoraleValueField, SGMoraleBar ___MoralBar,
           Transform ___SectionOneExpensesList, LocalizableText ___SectionOneExpensesField, LocalizableText ___SectionTwoExpensesField, 
           Transform ___SectionTwoExpensesList, LocalizableText ___EndOfQuarterFunds, LocalizableText ___QuarterOperatingExpenses, 
           LocalizableText ___CurrentFunds, List<LocalizableText> ___ExpenditureLvlBtnMoraleFields, List<LocalizableText> ___ExpenditureLvlBtnCostFields)
         {
+          
+          if (!__runOriginal)
+          {
+            return;
+          }
+          
           if (__instance == null || ___simState == null || !Main.settings.enablePilotQuirks)
           {
-            return true;
+            return;
           }
             float expenditureCostModifier = ___simState.GetExpenditureCostModifier(expenditureLevel);
             Traverse methodSetField = Traverse.Create(__instance)
@@ -135,7 +140,7 @@ namespace MechAffinity.Patches
               ++index;
             }
 
-            return false;
+            __runOriginal = false;
         }
       
     }

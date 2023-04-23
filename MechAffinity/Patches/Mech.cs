@@ -4,7 +4,6 @@ using BattleTech.UI;
 using BattleTech.StringInterpolation;
 using BattleTech.UI.TMProWrapper;
 using Localize;
-using Harmony;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
@@ -20,8 +19,13 @@ namespace MechAffinity.Patches
             return Main.settings.enableStablePiloting;
         }
         
-        public static void Prefix(Mech __instance, ref float amt)
+        public static void Prefix(ref bool __runOriginal, Mech __instance, ref float amt)
         {
+            if (!__runOriginal)
+            {
+                return;
+            }
+            
             amt *= StablePilotingManager.Instance.getStabilityModifier(__instance.pilot);
         }
     }

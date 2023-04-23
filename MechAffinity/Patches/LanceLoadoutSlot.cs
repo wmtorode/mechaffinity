@@ -1,6 +1,5 @@
 ﻿using BattleTech;
 using BattleTech.UI;
-using Harmony;
 using System.Collections.Generic;
 using System.Linq;
 using HBS;
@@ -16,10 +15,18 @@ namespace MechAffinity.Patches
             return Main.settings.enablePilotQuirks;
         }
         
-        public static bool Prefix(LanceLoadoutSlot __instance, LanceConfiguratorPanel ___LC, IMechLabDraggableItem item, ref bool __result)
+        public static void Prefix(ref bool __runOriginal, LanceLoadoutSlot __instance, LanceConfiguratorPanel ___LC, IMechLabDraggableItem item, ref bool __result)
         {
+            
+            if (!__runOriginal)
+            {
+                return;
+            }
 
-            if (___LC == null || !___LC.IsSimGame) return true;
+            if (___LC == null || !___LC.IsSimGame)
+            {
+                return;
+            }
             if (item.ItemType == MechLabDraggableItemType.Pilot)
             {
                 List<LanceLoadoutSlot> slots = Traverse.Create(___LC).Field<LanceLoadoutSlot[]>("loadoutSlots").Value.ToList();
@@ -47,11 +54,10 @@ namespace MechAffinity.Patches
                     ___LC.ReturnItem(item);
                     __result = false;
                     GenericPopupBuilder.Create(restriction.errorTitle, restriction.errorMsg).AddFader(new UIColorRef?(LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.PopupBackfill), 0.0f, true).Render();
-                    return false;
+                    __runOriginal = false;
                 }
             }
             
-            return true;
         }
         
     }

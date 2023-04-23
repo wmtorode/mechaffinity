@@ -2,7 +2,6 @@
 using System.Reflection;
 using BattleTech;
 using BattleTech.UI;
-using Harmony;
 
 namespace MechAffinity.Patches
 {
@@ -17,8 +16,13 @@ namespace MechAffinity.Patches
             return Main.settings.enablePilotQuirks;
         }
         
-        public static void Prefix(SGShipModuleUpgradeViewPopulator __instance, ShipModuleUpgrade upgrade)
+        public static void Prefix(ref bool __runOriginal, SGShipModuleUpgradeViewPopulator __instance, ShipModuleUpgrade upgrade)
         {
+            if (!__runOriginal)
+            {
+                return;
+            }
+            
             var sim = UnityGameInstance.BattleTechGame.Simulation;
             float multiplier = PilotQuirkManager.Instance.getArgoUpgradeCostModifier(sim.PilotRoster.ToList(),
                 upgrade.Description.Id, false);

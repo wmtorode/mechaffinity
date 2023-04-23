@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BattleTech;
-using Harmony;
 using MechAffinity.Data;
 
 namespace MechAffinity

@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 using Newtonsoft.Json;
 using MechAffinity.Data;
-using Harmony;
 using System.Reflection;
 using BattleTech;
 using Newtonsoft.Json.Linq;
@@ -124,9 +120,8 @@ namespace MechAffinity
                     modLog.Error?.Write(ex);
                 }
             }
-
-            var harmony = HarmonyInstance.Create("ca.jwolf.MechAffinity");
-            harmony.PatchAll(Assembly.GetExecutingAssembly());
+            
+            Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly(), "ca.jwolf.MechAffinity");
 
         }
     }

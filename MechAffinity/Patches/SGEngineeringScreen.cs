@@ -2,7 +2,6 @@
 using System.Reflection;
 using BattleTech;
 using BattleTech.UI;
-using Harmony;
 
 namespace MechAffinity.Patches
 {
@@ -16,8 +15,13 @@ namespace MechAffinity.Patches
             return Main.settings.enablePilotQuirks;
         }
         
-        public static void Prefix(SGEngineeringScreen __instance)
+        public static void Prefix(ref bool __runOriginal, SGEngineeringScreen __instance)
         {
+            if (!__runOriginal)
+            {
+                return;
+            }
+            
             var sim = UnityGameInstance.BattleTechGame.Simulation;
             ShipModuleUpgrade selectedUpgrade = (ShipModuleUpgrade) Traverse.Create(__instance).Property("SelectedUpgrade").GetValue();
             

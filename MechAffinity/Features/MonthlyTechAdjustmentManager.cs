@@ -1,7 +1,6 @@
 using BattleTech;
 using System.Collections.Generic;
 using System.Linq;
-using Harmony;
 using MechAffinity.Data;
 using MechAffinity.Data.MonthlyTech;
 using Newtonsoft.Json;

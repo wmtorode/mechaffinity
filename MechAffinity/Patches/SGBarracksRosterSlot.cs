@@ -7,7 +7,6 @@ using BattleTech;
 using BattleTech.UI;
 using BattleTech.UI.TMProWrapper;
 using BattleTech.UI.Tooltips;
-using Harmony;
 using MechAffinity;
 using MechAffinity.Data;
 using SVGImporter;

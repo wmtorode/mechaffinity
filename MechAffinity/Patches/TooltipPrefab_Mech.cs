@@ -5,7 +5,6 @@ using BattleTech.StringInterpolation;
 using BattleTech.UI.TMProWrapper;
 using BattleTech.UI.Tooltips;
 using Localize;
-using Harmony;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;

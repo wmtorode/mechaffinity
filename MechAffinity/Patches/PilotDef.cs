@@ -1,5 +1,4 @@
-﻿using Harmony;
-using BattleTech;
+﻿using BattleTech;
 
 namespace MechAffinity.Patches
 {

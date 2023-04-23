@@ -3,7 +3,6 @@ using System.Linq;
 using BattleTech;
 using MechAffinity.Data;
 using Newtonsoft.Json.Linq;
-using Harmony;
 using UnityEngine;
 using UnityEngine.UI;
 using Random = System.Random;
