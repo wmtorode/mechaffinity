@@ -24,9 +24,9 @@ namespace MechAffinity.Patches
             }
             
             var sim = UnityGameInstance.BattleTechGame.Simulation;
-            float multiplier = PilotQuirkManager.Instance.getArgoUpgradeCostModifier(sim.PilotRoster.ToList(),
+            float multiplier = PilotQuirkManager.Instance.getArgoUpgradeCostModifier(sim.PilotRoster.rootList,
                 upgrade.Description.Id, false);
-            float upkeepMultiplier = PilotQuirkManager.Instance.getArgoUpgradeCostModifier(sim.PilotRoster.ToList(),
+            float upkeepMultiplier = PilotQuirkManager.Instance.getArgoUpgradeCostModifier(sim.PilotRoster.rootList,
                 upgrade.Description.Id, true);
 
             originalCost = upgrade.PurchaseCost;

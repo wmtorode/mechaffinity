@@ -127,7 +127,7 @@ namespace MechAffinity
             List<PilotQuirk> pilotQuirks = new List<PilotQuirk>();
             if (pilotDef != null)
             {
-                List<string> tags = pilotDef.PilotTags.ToList();
+                IEnumerable<string> tags = pilotDef.PilotTags;
                 List<string> usedQuirks = new List<string>();
                 foreach (string tag in tags)
                 {
@@ -407,7 +407,7 @@ namespace MechAffinity
         private void processAdditionalTags(PilotDef def, bool isNew)
         {
             if (!isNew) return;
-            List<string> tags = def.PilotTags.ToList();
+            IEnumerable<string> tags = def.PilotTags;
             foreach (string tag in settings.addTags)
             {
                 if (!tags.Contains(tag))

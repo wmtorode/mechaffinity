@@ -27,7 +27,7 @@ namespace MechAffinity.Patches
                 PilotAffinityManager.Instance.setCompanyStats(__instance.CompanyStats);
                 PilotAffinityManager.Instance.setDataManager(__instance.DataManager);
                 
-                List<MechDef> mechs = __instance.DataManager.MechDefs.Select(pair => pair.Value).ToList();
+                var mechs = __instance.DataManager.MechDefs.Select(pair => pair.Value);
                 foreach (MechDef mech in mechs)
                 {
                     PilotAffinityManager.Instance.addToChassisPrefabLut(mech);
@@ -36,7 +36,7 @@ namespace MechAffinity.Patches
             if (Main.settings.enablePilotQuirks)
             {
                 PilotQuirkManager.Instance.setCompanyStats(__instance.CompanyStats);
-                foreach (Pilot pilot in __instance.PilotRoster.ToList())
+                foreach (Pilot pilot in __instance.PilotRoster.rootList)
                 {
                     PilotQuirkManager.Instance.proccessPilot(pilot.pilotDef, true);
                     pilot.FromPilotDef(pilot.pilotDef);
@@ -73,7 +73,7 @@ namespace MechAffinity.Patches
                 PilotAffinityManager.Instance.setCompanyStats(__instance.CompanyStats);
                 PilotAffinityManager.Instance.setDataManager(__instance.DataManager);
                 
-                List<MechDef> mechs = __instance.DataManager.MechDefs.Select(pair => pair.Value).ToList();
+                var mechs = __instance.DataManager.MechDefs.Select(pair => pair.Value);
                 foreach (MechDef mech in mechs)
                 {
                     PilotAffinityManager.Instance.addToChassisPrefabLut(mech);
@@ -324,7 +324,7 @@ namespace MechAffinity.Patches
             
             ShipModuleUpgrade shipModuleUpgrade = __instance.DataManager.ShipUpgradeDefs.Get(__instance.CurrentUpgradeEntry.upgradeID);
 
-            float multiplier = PilotQuirkManager.Instance.getArgoUpgradeCostModifier(__instance.PilotRoster.ToList(),
+            float multiplier = PilotQuirkManager.Instance.getArgoUpgradeCostModifier(__instance.PilotRoster.rootList,
                 shipModuleUpgrade.Description.Id, false);
             
             if (refund)
@@ -363,7 +363,7 @@ namespace MechAffinity.Patches
             int baseMaintenanceCost = __instance.GetShipBaseMaintenanceCost();
             for (int index = 0; index < __instance.ShipUpgrades.Count; ++index)
             {
-                float pilotQurikModifier = PilotQuirkManager.Instance.getArgoUpgradeCostModifier(__instance.PilotRoster.ToList(),
+                float pilotQurikModifier = PilotQuirkManager.Instance.getArgoUpgradeCostModifier(__instance.PilotRoster.rootList,
                         __instance.ShipUpgrades[index].Description.Id, true);
                 float baseCost = (float) __instance.ShipUpgrades[index].AdditionalCost * pilotQurikModifier;
                 baseMaintenanceCost += Mathf.CeilToInt(baseCost * __instance.Constants.CareerMode.ArgoMaintenanceMultiplier);

@@ -502,7 +502,7 @@ namespace MechAffinity
             List<string> possibleTags = new List<string>();
             if (pilot != null)
             {
-                List<string> tags = pilot.pilotDef.PilotTags.ToList();
+                IEnumerable<string> tags = pilot.pilotDef.PilotTags;
                 foreach (string tag in tags)
                 {
                     if (tagsWithAffinities.Contains(tag))
@@ -528,7 +528,7 @@ namespace MechAffinity
         {
             if (pilot != null)
             {
-                List<string> tags = pilot.pilotDef.PilotTags.ToList();
+                IEnumerable<string> tags = pilot.pilotDef.PilotTags;
                 foreach (string tag in tags)
                 {
                     //Main.modLog.Info?.Write($"Processing tag: {tag}");
@@ -606,7 +606,7 @@ namespace MechAffinity
         {
             if (pilot != null)
             {
-                List<string> tags = pilot.pilotDef.PilotTags.ToList();
+                IEnumerable<string> tags = pilot.pilotDef.PilotTags;
                 foreach (string tag in tags)
                 {
                     //Main.modLog.Info?.Write($"Processing tag: {tag}");
@@ -1242,7 +1242,7 @@ namespace MechAffinity
             
             if (pilot != null)
             {
-                List<string> tags = pilot.pilotDef.PilotTags.ToArray().ToList();
+                List<string> tags = pilot.pilotDef.PilotTags.ToList();
                 if (!String.IsNullOrEmpty(settings.debugForceTag))
                 {
                     tags.Add(settings.debugForceTag);

@@ -29,7 +29,7 @@ namespace MechAffinity.Patches
             }
             if (item.ItemType == MechLabDraggableItemType.Pilot)
             {
-                List<LanceLoadoutSlot> slots = __instance.LC.loadoutSlots.ToList();
+                var slots = __instance.LC.loadoutSlots;
                 List<Pilot> pilotsInUse = new List<Pilot>();
                 SGBarracksRosterSlot barracksRosterSlot = item as SGBarracksRosterSlot;
                 pilotsInUse.Add(barracksRosterSlot.Pilot);

@@ -70,7 +70,7 @@ namespace MechAffinity
                 // remove all pilot quirks that generate effects
                 if (Main.settings.enablePilotQuirks)
                 {
-                    foreach (Pilot pilot in simGameState.PilotRoster.ToList())
+                    foreach (Pilot pilot in simGameState.PilotRoster.rootList)
                     {
                         PilotQuirkManager.Instance.proccessPilot(pilot.pilotDef, false);
                     }
@@ -130,7 +130,7 @@ namespace MechAffinity
                         List<string> tagsToIncrement = new List<string>();
                         List<string> usedRestrictions = new List<string>();
                         bool isAllowed = true;
-                        foreach (var tag in value.PilotTags.ToList())
+                        foreach (var tag in value.PilotTags)
                         {
                             foreach (var restriction in Main.pilotSelectSettings.RandomRestrictions)
                             {

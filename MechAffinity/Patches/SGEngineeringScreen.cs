@@ -26,7 +26,7 @@ namespace MechAffinity.Patches
             ShipModuleUpgrade selectedUpgrade = __instance.SelectedUpgrade;
             
             originalCost = selectedUpgrade.PurchaseCost;
-            float multiplier = PilotQuirkManager.Instance.getArgoUpgradeCostModifier(sim.PilotRoster.ToList(),
+            float multiplier = PilotQuirkManager.Instance.getArgoUpgradeCostModifier(sim.PilotRoster.rootList,
                 selectedUpgrade.Description.Id, false);
             selectedUpgrade.PurchaseCost = (int)(originalCost * multiplier);
         }

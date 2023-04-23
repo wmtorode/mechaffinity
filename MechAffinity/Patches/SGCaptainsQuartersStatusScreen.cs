@@ -68,7 +68,7 @@ namespace MechAffinity.Patches
           keyValuePairList.Add(new KeyValuePair<string, int>(key, num2));
           foreach (ShipModuleUpgrade shipUpgrade in __instance.simState.ShipUpgrades)
           {
-            float pilotQurikModifier = PilotQuirkManager.Instance.getArgoUpgradeCostModifier(__instance.simState.PilotRoster.ToList(),
+            float pilotQurikModifier = PilotQuirkManager.Instance.getArgoUpgradeCostModifier(__instance.simState.PilotRoster.rootList,
               shipUpgrade.Description.Id, true);
             float baseCost = (float) shipUpgrade.AdditionalCost * pilotQurikModifier;
             if (__instance.simState.CurDropship == DropshipType.Argo && Mathf.CeilToInt((float) baseCost * __instance.simState.Constants.CareerMode.ArgoMaintenanceMultiplier) > 0)
