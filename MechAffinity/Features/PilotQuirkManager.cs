@@ -29,6 +29,8 @@ namespace MechAffinity
         private Dictionary<string, bool> immortalityCache;
         private PilotQuirkSettings settings;
         private bool moraleModInstanced;
+        private Dictionary<string, float> argoUpgradeBaseCostCache;
+        private Dictionary<string, float> argoUpgradeUpkeepCostCache;
 
         public static PilotQuirkManager Instance
         {
@@ -72,6 +74,9 @@ namespace MechAffinity
             immortalityCache = new Dictionary<string, bool>();
 
             hasInitialized = true;
+
+            argoUpgradeBaseCostCache = new Dictionary<string, float>();
+            argoUpgradeUpkeepCostCache = new Dictionary<string, float>();
         }
         
         public void setCompanyStats(StatCollection stats)
@@ -104,6 +109,13 @@ namespace MechAffinity
         public void forceMoraleInstanced()
         {
             moraleModInstanced = true;
+        }
+
+        public void ResetArgoCostCache()
+        {
+            Main.modLog.Info?.Write("Clearing argo cost caches");
+            argoUpgradeBaseCostCache.Clear();
+            argoUpgradeUpkeepCostCache.Clear();
         }
 
         private List<string> getPooledQuirks(QuirkPool pool)
@@ -763,7 +775,15 @@ namespace MechAffinity
 
         public float getArgoUpgradeCostModifier(List<Pilot> pilots, string upgradeId, bool upkeep)
         {
-            float ret = 1.0f;
+            if (upkeep)
+            {
+                if (argoUpgradeUpkeepCostCache.ContainsKey(upgradeId)) return argoUpgradeUpkeepCostCache[upgradeId];
+            }
+
+            if (!upkeep && argoUpgradeBaseCostCache.ContainsKey(upgradeId)) return argoUpgradeBaseCostCache[upgradeId];
+
+
+                float ret = 1.0f;
             EQuirkEffectType type = EQuirkEffectType.ArgoUpgradeFactor;
             if (upkeep)
             {
@@ -808,7 +828,15 @@ namespace MechAffinity
             {
                 ret = settings.argoMin;
             }
-            if (Main.settings.debug) Main.modLog.Debug?.Write($"Found cost factor multiplier: {ret}");
+            Main.modLog.Info?.Write($"Found cost factor multiplier: {ret} for {upgradeId}, caching");
+            if (upkeep)
+            {
+                argoUpgradeUpkeepCostCache.Add(upgradeId, ret);
+            }
+            else
+            {
+                argoUpgradeBaseCostCache.Add(upgradeId, ret);
+            }
             return ret;
         }
 

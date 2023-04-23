@@ -237,6 +237,7 @@ namespace MechAffinity.Patches
             
             if (def != null)
             {
+                PilotQuirkManager.Instance.ResetArgoCostCache();
                 PilotQuirkManager.Instance.proccessPilot(def, true);
             }
         }
@@ -271,6 +272,7 @@ namespace MechAffinity.Patches
                         __runOriginal = false;
                         return;
                     }
+                    PilotQuirkManager.Instance.ResetArgoCostCache();
                     PilotQuirkManager.Instance.proccessPilot(def, false);
                 }
             }
@@ -298,6 +300,7 @@ namespace MechAffinity.Patches
                 PilotDef def = p.pilotDef;
                 if (def != null)
                 {
+                    PilotQuirkManager.Instance.ResetArgoCostCache();
                     PilotQuirkManager.Instance.proccessPilot(def, false);
                 }
             }
@@ -524,8 +527,11 @@ namespace MechAffinity.Patches
                     {
                         foreach (string addedTag in result.AddedTags)
                         {
-                            if (!tagSet.Contains(addedTag)) 
+                            if (!tagSet.Contains(addedTag))
+                            {
+                                PilotQuirkManager.Instance.ResetArgoCostCache();
                                 PilotQuirkManager.Instance.processTagChange(target, addedTag, true);
+                            }
                         }
                     }
 
@@ -533,8 +539,11 @@ namespace MechAffinity.Patches
                     {
                         foreach (string removedTag in result.RemovedTags)
                         {
-                            if (tagSet.Contains(removedTag)) 
+                            if (tagSet.Contains(removedTag))
+                            {
+                                PilotQuirkManager.Instance.ResetArgoCostCache();
                                 PilotQuirkManager.Instance.processTagChange(target, removedTag, false);
+                            }
                             
                         }
                     }
