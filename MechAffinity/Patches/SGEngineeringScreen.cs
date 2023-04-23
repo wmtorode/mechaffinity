@@ -23,18 +23,18 @@ namespace MechAffinity.Patches
             }
             
             var sim = UnityGameInstance.BattleTechGame.Simulation;
-            ShipModuleUpgrade selectedUpgrade = (ShipModuleUpgrade) Traverse.Create(__instance).Property("SelectedUpgrade").GetValue();
+            ShipModuleUpgrade selectedUpgrade = __instance.SelectedUpgrade;
             
             originalCost = selectedUpgrade.PurchaseCost;
             float multiplier = PilotQuirkManager.Instance.getArgoUpgradeCostModifier(sim.PilotRoster.ToList(),
                 selectedUpgrade.Description.Id, false);
-            Traverse.Create(selectedUpgrade).Property("PurchaseCost").SetValue((int)(originalCost * multiplier));
+            selectedUpgrade.PurchaseCost = (int)(originalCost * multiplier);
         }
         
         public static void Postfix(SGEngineeringScreen __instance)
         {
-            ShipModuleUpgrade selectedUpgrade = (ShipModuleUpgrade) Traverse.Create(__instance).Property("SelectedUpgrade").GetValue();
-            Traverse.Create(selectedUpgrade).Property("PurchaseCost").SetValue(originalCost);
+            ShipModuleUpgrade selectedUpgrade = __instance.SelectedUpgrade;
+            selectedUpgrade.PurchaseCost = originalCost;
         }
     }
 }

@@ -32,14 +32,15 @@ namespace MechAffinity.Patches
             originalCost = upgrade.PurchaseCost;
             originalUpkeep = upgrade.AdditionalCost;
 
-            Traverse.Create(upgrade).Property("PurchaseCost").SetValue((int)(originalCost * multiplier));
-            Traverse.Create(upgrade).Property("AdditionalCost").SetValue((int)(originalUpkeep * upkeepMultiplier));
+            upgrade.PurchaseCost = (int)(originalCost * multiplier);
+            upgrade.AdditionalCost = (int)(originalUpkeep * upkeepMultiplier);
+
         }
         
         public static void Postfix(ShipModuleUpgrade upgrade)
         {
-            Traverse.Create(upgrade).Property("PurchaseCost").SetValue(originalCost);
-            Traverse.Create(upgrade).Property("AdditionalCost").SetValue(originalUpkeep);
+            upgrade.PurchaseCost = originalCost;
+            upgrade.AdditionalCost = originalUpkeep;
         }
     }
 }

@@ -19,14 +19,14 @@ namespace MechAffinity.Patches
         {
             return Main.settings.enablePilotAffinity;
         }
-        public static void Postfix(MechLabStockInfoPopup __instance, MechDef def, LocalizableText ___descriptionText)
+        public static void Postfix(MechLabStockInfoPopup __instance, MechDef def)
         {
             if (def != null)
             {
                 Main.modLog.Info?.Write($"finding mechdef affinity descriptor for {def.Description.UIName}");
                 string affinityDescriptors = PilotAffinityManager.Instance.getMechChassisAffinityDescription(def);
                 //Main.modLog.Info?.Write(affinityDescriptors);
-                ___descriptionText.AppendTextAndRefresh(affinityDescriptors, (object[])Array.Empty<object>());
+                __instance.descriptionText.AppendTextAndRefresh(affinityDescriptors, (object[])Array.Empty<object>());
                 //descriptor.SetValue(__instance, bioText);
                 __instance.ForceRefreshImmediate();
             }

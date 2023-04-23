@@ -14,8 +14,6 @@ namespace MechAffinity.Patches
     [HarmonyPatch(typeof(MechDetails), "SetDescriptions")]
     class MechDetails_SetDescriptions
     {
-        private static FieldInfo descriptor = AccessTools.Field(typeof(MechDetails), "mechDescription");
-        private static FieldInfo mechdef = AccessTools.Field(typeof(MechDetails), "activeMech");
         
         public static bool Prepare()
         {
@@ -23,15 +21,15 @@ namespace MechAffinity.Patches
         }
         public static void Postfix(MechDetails __instance)
         {
-            MechDef mech = (MechDef)mechdef.GetValue(__instance);
+            MechDef mech = __instance.activeMech;
             if (mech != null)
             {
                 Main.modLog.Info?.Write($"finding mechdef affinity descriptor for {mech.Description.UIName}");
                 string affinityDescriptors = PilotAffinityManager.Instance.getMechChassisAffinityDescription(mech);
                 //Main.modLog.Info?.Write(affinityDescriptors);
-                LocalizableText bioText = (LocalizableText)descriptor.GetValue(__instance);
-                bioText.AppendTextAndRefresh(affinityDescriptors, (object[])Array.Empty<object>());
-                descriptor.SetValue(__instance, bioText);           
+                LocalizableText bioText = __instance.mechDescription;
+                bioText.AppendTextAndRefresh(affinityDescriptors, Array.Empty<object>());
+                __instance.mechDescription = bioText;           
             }
             else
             {

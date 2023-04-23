@@ -330,7 +330,7 @@ namespace MechAffinity.Patches
             if (refund)
             {
                 originalCost = shipModuleUpgrade.PurchaseCost;
-                Traverse.Create(shipModuleUpgrade).Property("PurchaseCost").SetValue((int)(originalCost * multiplier));
+                shipModuleUpgrade.PurchaseCost = (int)(originalCost * multiplier);
             }
         }
         public static void Postfix(SimGameState __instance, bool refund)
@@ -338,7 +338,7 @@ namespace MechAffinity.Patches
             if (refund)
             {
                 ShipModuleUpgrade shipModuleUpgrade = __instance.DataManager.ShipUpgradeDefs.Get(__instance.CurrentUpgradeEntry.upgradeID);
-                Traverse.Create(shipModuleUpgrade).Property("PurchaseCost").SetValue(originalCost);
+                shipModuleUpgrade.PurchaseCost = originalCost;
             }
         }
     }
@@ -351,7 +351,7 @@ namespace MechAffinity.Patches
             return Main.settings.enablePilotQuirks;
         }
         
-        public static void Prefix(ref bool __runOriginal, SimGameState __instance, EconomyScale expenditureLevel, bool proRate, int  ___ProRateRefund, ref int __result)
+        public static void Prefix(ref bool __runOriginal, SimGameState __instance, EconomyScale expenditureLevel, bool proRate, ref int __result)
         {
             
             if (!__runOriginal)
@@ -373,7 +373,7 @@ namespace MechAffinity.Patches
             for (int index = 0; index < __instance.PilotRoster.Count; ++index)
                 baseMaintenanceCost += __instance.GetMechWarriorValue(__instance.PilotRoster[index].pilotDef);
             float expenditureCostModifier = __instance.GetExpenditureCostModifier(expenditureLevel);
-            __result = Mathf.CeilToInt((float) (baseMaintenanceCost - (proRate ? ___ProRateRefund : 0)) * expenditureCostModifier);
+            __result = Mathf.CeilToInt((float) (baseMaintenanceCost - (proRate ? __instance.ProRateRefund : 0)) * expenditureCostModifier);
             __runOriginal = false;
         }
     }

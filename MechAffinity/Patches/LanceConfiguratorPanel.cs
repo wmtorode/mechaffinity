@@ -18,8 +18,7 @@ namespace MechAffinity.Patches
             return Main.settings.pilotUiSettings.enableAffinityColour || Main.settings.pilotUiSettings.orderByAffinity;
         }
 
-        public static void Postfix(LanceConfiguratorPanel __instance, IMechLabDraggableItem item,
-            LanceLoadoutSlot[] ___loadoutSlots)
+        public static void Postfix(LanceConfiguratorPanel __instance, IMechLabDraggableItem item)
         {
 
             if (UnityGameInstance.BattleTechGame.Simulation == null) return;
@@ -32,11 +31,8 @@ namespace MechAffinity.Patches
 
                 if (selectedMech == null) return;
 
-                Dictionary<string, SGBarracksRosterSlot> currentRoster =
-                    (Dictionary<string, SGBarracksRosterSlot>)Traverse.Create(__instance.pilotListWidget)
-                        .Field("currentRoster").GetValue();
-
-
+                Dictionary<string, SGBarracksRosterSlot> currentRoster = __instance.pilotListWidget.currentRoster;
+                
                 List<SGBarracksRosterSlot> unselectedPilots = new List<SGBarracksRosterSlot>(currentRoster.Values);
 
                 if (Main.settings.pilotUiSettings.enableAffinityColour)
@@ -46,20 +42,18 @@ namespace MechAffinity.Patches
                     {
                         int deployCount =
                             PilotAffinityManager.Instance.getDeploymentCountWithMech(pilotSlot.Pilot, selectedMech);
-                        LocalizableText expertise = (LocalizableText)Traverse.Create(pilotSlot)
-                            .Field("expertise").GetValue();
+                        LocalizableText expertise = pilotSlot.expertise;
                         PilotUiManager.Instance.AdjustExpertiseTextForAffinity(expertise, deployCount,
                             simGameState.GetPilotFullExpertise(pilotSlot.Pilot));
                     }
 
                     // now do pilots already assigned to a unit
-                    foreach (var pilotSlot in ___loadoutSlots.Where(x => x.SelectedPilot?.Pilot != null)
+                    foreach (var pilotSlot in __instance.loadoutSlots.Where(x => x.SelectedPilot?.Pilot != null)
                                  .Select(x => x.SelectedPilot))
                     {
                         int deployCount =
                             PilotAffinityManager.Instance.getDeploymentCountWithMech(pilotSlot.Pilot, selectedMech);
-                        LocalizableText expertise = (LocalizableText)Traverse.Create(pilotSlot)
-                            .Field("expertise").GetValue();
+                        LocalizableText expertise = pilotSlot.expertise;
                         PilotUiManager.Instance.AdjustExpertiseTextForAffinity(expertise, deployCount,
                             simGameState.GetPilotFullExpertise(pilotSlot.Pilot));
                     }
@@ -70,10 +64,7 @@ namespace MechAffinity.Patches
                     unselectedPilots = unselectedPilots.OrderBy(x => PilotAffinityManager.Instance
                             .getDeploymentCountWithMech(x.Pilot, selectedMech))
                         .ThenByDescending(x => x.Pilot?.Description?.DisplayName).ToList();
-                    Traverse.Create(__instance.pilotListWidget).Method("ApplySort", new object[]
-                    {
-                        unselectedPilots
-                    }).GetValue();
+                    __instance.pilotListWidget.ApplySort(unselectedPilots);
                     __instance.pilotListWidget.ForceRefreshImmediate();
                 }
             }

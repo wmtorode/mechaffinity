@@ -20,7 +20,7 @@ namespace MechAffinity.Patches
             return Main.settings.affinitySettings.showDescriptionsOnChassis && Main.settings.enablePilotAffinity;
         }
 
-        public static void Postfix(TooltipPrefab_Chassis __instance, object data, LocalizableText ___descriptionText)
+        public static void Postfix(TooltipPrefab_Chassis __instance, object data)
         {
 
             if (data is ChassisDef chassisDef)
@@ -28,7 +28,7 @@ namespace MechAffinity.Patches
                 Main.modLog.Info?.Write($"finding chassisdef affinity descriptor for {chassisDef.Description.UIName}");
                 string affinityDescriptors = PilotAffinityManager.Instance.getMechChassisAffinityDescription(chassisDef);
                 //Main.modLog.Info?.Write(affinityDescriptors);
-                ___descriptionText.AppendTextAndRefresh(affinityDescriptors, (object[])Array.Empty<object>());
+                __instance.descriptionText.AppendTextAndRefresh(affinityDescriptors, (object[])Array.Empty<object>());
             }
             else
             {

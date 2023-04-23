@@ -380,8 +380,7 @@ namespace MechAffinity
                         {
                             if (!def.PilotTags.Contains(PqMarkedPrefix + EQuirkEffectType.PilotHealth.ToString()))
                             {
-                                Traverse.Create(def).Property("Health")
-                                    .SetValue((int) (def.Health + (int) effect.modifier));
+                                def.Health += (int)effect.modifier;
                                 Main.modLog.Info?.Write($"adding health to pilot: {def.Description.Callsign}");
                                 if (!proccessTags.Contains(PqMarkedPrefix + EQuirkEffectType.PilotHealth.ToString()))
                                 {
@@ -392,7 +391,7 @@ namespace MechAffinity
                         else
                         {
                             Main.modLog.Info?.Write($"removing health to pilot: {def.Description.Callsign}");
-                            Traverse.Create(def).Property("Health").SetValue((int) (def.Health - (int) effect.modifier));
+                            def.Health -= (int)effect.modifier;
                         }
                         
                     }
@@ -621,18 +620,17 @@ namespace MechAffinity
                 {
                     if (isNew)
                     {
-                        Traverse.Create(pilot.pilotDef).Property("Health")
-                                .SetValue((int) (pilot.pilotDef.Health + (int) effect.modifier));
-                            Main.modLog.Info?.Write($"adding health to pilot: {pilot.pilotDef.Description.Callsign}");
-                            if (!pilot.pilotDef.PilotTags.Contains(PqMarkedPrefix + EQuirkEffectType.PilotHealth.ToString()))
-                            {
-                                pilot.pilotDef.PilotTags.Add(PqMarkedPrefix + EQuirkEffectType.PilotHealth.ToString());
-                            }
+                        pilot.pilotDef.Health += (int)effect.modifier;
+                        Main.modLog.Info?.Write($"adding health to pilot: {pilot.pilotDef.Description.Callsign}");
+                        if (!pilot.pilotDef.PilotTags.Contains(PqMarkedPrefix + EQuirkEffectType.PilotHealth.ToString()))
+                        {
+                            pilot.pilotDef.PilotTags.Add(PqMarkedPrefix + EQuirkEffectType.PilotHealth.ToString());
+                        }
                     }
                     else
                     {
                         Main.modLog.Info?.Write($"removing health to pilot: {pilot.pilotDef.Description.Callsign}");
-                        Traverse.Create(pilot.pilotDef).Property("Health").SetValue((int) (pilot.pilotDef.Health - (int) effect.modifier));
+                        pilot.pilotDef.Health -= (int)effect.modifier;
                     }
                         
                 }

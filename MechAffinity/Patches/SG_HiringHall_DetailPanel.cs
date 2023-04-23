@@ -27,18 +27,18 @@ namespace MechAffinity.Patches
             //because, #HBSWhy
             if (p.pilotDef.Description.Id.StartsWith("pilot_ronin") || p.pilotDef.Description.Id.StartsWith("pilot_backer"))
             {
-                Traverse.Create(p.pilotDef.Description).Property("Details").SetValue(origDesc + PilotQuirkManager.Instance.getRoninHiringHallDescription(p));
+                p.pilotDef.Description.Details = origDesc + PilotQuirkManager.Instance.getRoninHiringHallDescription(p);
             }
             else
             {
-                Traverse.Create(p.pilotDef.Description).Property("Details").SetValue(origDesc + PilotQuirkManager.Instance.getRegularHiringHallDescription(p));
+                p.pilotDef.Description.Details = origDesc + PilotQuirkManager.Instance.getRegularHiringHallDescription(p);
             }
 
         }
 
         public static void Postfix(Pilot p)
         {
-            Traverse.Create(p.pilotDef.Description).Property("Details").SetValue(origDesc);
+            p.pilotDef.Description.Details = origDesc;
         }
     }
 }
