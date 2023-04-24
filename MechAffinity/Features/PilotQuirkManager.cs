@@ -121,6 +121,7 @@ namespace MechAffinity
             Main.modLog.Info?.Write("Clearing argo cost caches");
             argoUpgradeBaseCostCache.Clear();
             argoUpgradeUpkeepCostCache.Clear();
+            pilotStealCache.Clear();
         }
 
         private List<string> getPooledQuirks(QuirkPool pool)

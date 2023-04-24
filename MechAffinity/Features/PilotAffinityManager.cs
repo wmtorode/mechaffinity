@@ -34,6 +34,7 @@ namespace MechAffinity
         private const string MaPilotDeployCountTagMedium = "affinityLevelMedium_";
         private const string MaPilotDeployCountTagHeavy = "affinityLevelHeavy_";
         private const string MaPilotDeployCountTagAssault = "affinityLevelAssault_";
+        private const string MaPilotSharedWeightDeployCountTag = "sharedWeightAffinityLevel_";
         private static PilotAffinityManager _instance;
         private StatCollection companyStats;
         private Dictionary<string, List<AffinityLevel>> chassisAffinities;
@@ -46,7 +47,9 @@ namespace MechAffinity
         private Dictionary<string, string> prefabOverrides;
         private Dictionary<string, DescriptionHolder> levelDescriptors;
         private Dictionary<string, List<string>> pilotNoDeployStatMap;
-        
+
+        private Dictionary<WeightClass, int> sharedClassAffinityCache;
+
         private Dictionary<string, EIdType> overloads;
         private Dictionary<string, string> remappedIds;
         private List<string> tagsWithAffinities;
@@ -80,6 +83,8 @@ namespace MechAffinity
             pilotNoDeployStatMap = new Dictionary<string, List<string>>();
             overloads = new Dictionary<string, EIdType>();
             remappedIds = new Dictionary<string, string>();
+            sharedClassAffinityCache = new Dictionary<WeightClass, int>();
+            
 
             foreach (var affinityDef in affinityDefs)
             {
@@ -191,6 +196,12 @@ namespace MechAffinity
                 }
             }
             hasInitialized = true;
+        }
+
+        public override void ResetEffectCache()
+        {
+            base.ResetEffectCache();
+            sharedClassAffinityCache.Clear();
         }
 
         public void addToChassisPrefabLut(MechDef mech)
@@ -1234,6 +1245,52 @@ namespace MechAffinity
             List<string> possibleTags = getPossibleTaggedAffinities(actor);
             getDeploymentBonus(deployCount, chassisPrefab, statName, possibleQuirks, possibleTags, out bonuses, out effects);
         }
+        
+
+        public void AddSharedAffinity(List<Pilot> pilots)
+        {
+            sharedClassAffinityCache.Clear();
+            foreach (var pilot in pilots)
+            {
+                foreach (var tag in pilot.pilotDef.PilotTags)
+                {
+                    try
+                    {
+                        if (tag.StartsWith(MaPilotSharedWeightDeployCountTag))
+                        {
+                            var splitTag = tag.Split('_');
+                            WeightClass weightClass;
+                            int deployCount;
+                            if (!WeightClass.TryParse(splitTag[1], out weightClass))
+                            {
+                                Main.modLog.Warn?.Write($"Failed to parse weight from tag: {tag}");
+                                continue;
+                            }
+
+                            if (!int.TryParse(splitTag[2], out deployCount))
+                            {
+                                Main.modLog.Warn?.Write($"Failed to parse count from tag: {tag}");
+                                continue;
+                            }
+                            
+                            Main.modLog.Info?.Write($"Adding shared deploy bonus of: {deployCount} for weight class: {weightClass.ToString()}");
+                            if (!sharedClassAffinityCache.ContainsKey(weightClass))
+                            {
+                                sharedClassAffinityCache.Add(weightClass, deployCount);
+                            }
+                            else
+                            {
+                                sharedClassAffinityCache[weightClass] += deployCount;
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Main.modLog.Error?.Write(ex);
+                    }
+                }
+            }
+        }
 
         public int getPilotDeployBonusByTag(Pilot pilot, WeightClass weightClass)
         {
@@ -1290,6 +1347,12 @@ namespace MechAffinity
                             deployCount += deployBonus;
                         }
                     }
+                }
+
+                if (sharedClassAffinityCache.ContainsKey(weightClass))
+                {
+                    Main.modLog.Info?.Write($"Adding: {sharedClassAffinityCache[weightClass]} due to shared deploy count");
+                    deployCount += sharedClassAffinityCache[weightClass];
                 }
             }
             return deployCount;

@@ -89,6 +89,12 @@ namespace MechAffinity.Patches
             if (Main.settings.enablePilotAffinity)
             {
                 PilotAffinityManager.Instance.ResetEffectCache();
+                List<Pilot> pilots = new List<Pilot>();
+                foreach (var slot in __instance.loadoutSlots)
+                {
+                    pilots.Add(slot.SelectedPilot.pilot);
+                }
+                PilotAffinityManager.Instance.AddSharedAffinity(pilots);
             }
 
             if (Main.settings.enablePilotQuirks)

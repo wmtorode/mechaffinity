@@ -3,7 +3,7 @@ using BattleTech.UI;
 using System;
 namespace MechAffinity.Patches;
 
-[HarmonyPatch(typeof(SGRoomController_Ship), "RefreshData", new Type[] { typeof(EconomyScale), typeof(bool) })]
+[HarmonyPatch(typeof(SGRoomController_Ship), "RefreshData")]
 public static class SGRoomController_Ship_RefreshData
 {
     public static bool Prepare()

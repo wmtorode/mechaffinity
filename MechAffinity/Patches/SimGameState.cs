@@ -164,6 +164,17 @@ namespace MechAffinity.Patches
     [HarmonyPatch(typeof(SimGameState), "OnDayPassed")]
     class SimGameState_OnDayPassed
     {
+        public static void Prefix(ref bool __runOriginal, SimGameState __instance)
+        {
+
+            if (!__runOriginal)
+            {
+                return;
+            }
+            
+            PilotQuirkManager.Instance.BlockFinanceScreenUpdate = true;
+        }
+
         public static void Postfix(SimGameState __instance)
         {
             int totalStolen = 0;
