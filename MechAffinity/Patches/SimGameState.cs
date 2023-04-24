@@ -45,6 +45,8 @@ namespace MechAffinity.Patches
                 PilotQuirkManager.Instance.proccessPilot(__instance.Commander.pilotDef, true);
                 __instance.Commander.FromPilotDef(__instance.Commander.pilotDef);
                 PilotQuirkManager.Instance.forceMoraleInstanced();
+                PilotQuirkManager.Instance.BlockFinanceScreenUpdate = false;
+                PilotQuirkManager.Instance.ResetArgoCostCache();
             }
 
             if (Main.settings.enableMonthlyTechAdjustments)
@@ -164,9 +166,8 @@ namespace MechAffinity.Patches
     {
         public static void Postfix(SimGameState __instance)
         {
-            List<Pilot> pilotList = new List<Pilot>((IEnumerable<Pilot>)__instance.PilotRoster);
-            pilotList.Add(__instance.Commander);
-            foreach (Pilot pilot in pilotList)
+            int totalStolen = 0;
+            foreach (Pilot pilot in __instance.PilotRoster.rootList)
             {
                 if (Main.settings.enablePilotAffinity)
                 {
@@ -174,15 +175,38 @@ namespace MechAffinity.Patches
                     if (decayed)
                     {
                         __instance.RoomManager.ShipRoom.AddEventToast(new Text(
-                            string.Format("{0} affinities decayed!", (object)pilot.Callsign),
-                            (object[])Array.Empty<object>()));
+                            string.Format("{0} affinities decayed!", pilot.Callsign),
+                            Array.Empty<object>()));
                     }
                 }
 
                 if (Main.settings.enablePilotQuirks)
                 {
-                    PilotQuirkManager.Instance.stealAmount(pilot, __instance);
+                   totalStolen += PilotQuirkManager.Instance.stealAmount(pilot, __instance);
                 }
+            }
+            // commander is not part of the roaster, adding them to the list of pilots to do in the above loop
+            // is more expensive than to just repeat this code here
+            if (Main.settings.enablePilotAffinity)
+            {
+                bool decayed = PilotAffinityManager.Instance.onSimDayElapsed(__instance.Commander);
+                if (decayed)
+                {
+                    __instance.RoomManager.ShipRoom.AddEventToast(new Text(
+                        string.Format("{0} affinities decayed!", __instance.Commander.Callsign),
+                        Array.Empty<object>()));
+                }
+            }
+
+            if (Main.settings.enablePilotQuirks)
+            {
+                totalStolen += PilotQuirkManager.Instance.stealAmount(__instance.Commander, __instance);
+            }
+
+            if (totalStolen != 0)
+            {
+                PilotQuirkManager.Instance.BlockFinanceScreenUpdate = true;
+                __instance.AddFunds(totalStolen, null, true);
             }
         }
     }

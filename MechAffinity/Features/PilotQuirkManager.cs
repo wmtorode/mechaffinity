@@ -31,6 +31,9 @@ namespace MechAffinity
         private bool moraleModInstanced;
         private Dictionary<string, float> argoUpgradeBaseCostCache;
         private Dictionary<string, float> argoUpgradeUpkeepCostCache;
+        private Dictionary<string, PilotStealChanceCacheEntry> pilotStealCache;
+
+        public bool BlockFinanceScreenUpdate { get; set; }
 
         public static PilotQuirkManager Instance
         {
@@ -77,6 +80,8 @@ namespace MechAffinity
 
             argoUpgradeBaseCostCache = new Dictionary<string, float>();
             argoUpgradeUpkeepCostCache = new Dictionary<string, float>();
+            pilotStealCache = new Dictionary<string, PilotStealChanceCacheEntry>();
+            BlockFinanceScreenUpdate = false;
         }
         
         public void setCompanyStats(StatCollection stats)
@@ -662,42 +667,53 @@ namespace MechAffinity
             }
         }
 
-        public void stealAmount(Pilot pilot, SimGameState sim)
+        public int stealAmount(Pilot pilot, SimGameState sim)
         {
-            int stealChance = 0;
-            int stealAmount = 0;
-            int stealChance2 = 0;
-            int stealAmount2 = 0;
-            List<PilotQuirk> pilotQuirks = getQuirks(pilot);
-            foreach (PilotQuirk quirk in pilotQuirks)
+            int totalStolen = 0;
+
+            PilotStealChanceCacheEntry cacheEntry;
+
+            if (!pilotStealCache.TryGetValue(pilot.pilotDef.Description.Id, out cacheEntry))
             {
-                foreach (QuirkEffect effect in quirk.quirkEffects)
+                Main.modLog.Info?.Write($"Pilot {pilot.Callsign} steal cache miss!");
+                cacheEntry = new PilotStealChanceCacheEntry();
+                List<PilotQuirk> pilotQuirks = getQuirks(pilot);
+                foreach (PilotQuirk quirk in pilotQuirks)
                 {
-                    if (effect.type == EQuirkEffectType.CriminalEffect)
+                    foreach (QuirkEffect effect in quirk.quirkEffects)
                     {
-                        stealChance += (int)effect.modifier;
-                        stealAmount += (int)effect.secondaryModifier;
-                    }
-                    else if (effect.type == EQuirkEffectType.CriminalEffect2)
-                    {
-                        stealChance2 += (int)effect.modifier;
-                        stealAmount2 += (int)effect.secondaryModifier;
+                        if (effect.type == EQuirkEffectType.CriminalEffect)
+                        {
+                            cacheEntry.StealChance += (int)effect.modifier;
+                            cacheEntry.StealAmount += (int)effect.secondaryModifier;
+                        }
+                        else if (effect.type == EQuirkEffectType.CriminalEffect2)
+                        {
+                            cacheEntry.StealChance2 += (int)effect.modifier;
+                            cacheEntry.StealAmount2 += (int)effect.secondaryModifier;
+                        }
                     }
                 }
+                
+                pilotStealCache.Add(pilot.pilotDef.Description.Id, cacheEntry);
             }
+            
+            
             Random random = new Random();
             int roll = random.Next(0, 100);
-            if (roll < stealChance)
+            if (roll < cacheEntry.StealChance)
             {
-                Main.modLog.Info?.Write($"Pilot {pilot.Callsign}, steals: {stealAmount}");
-                 sim.AddFunds(stealAmount * -1, null, true);
+                Main.modLog.Info?.Write($"Pilot {pilot.Callsign}, steals: {cacheEntry.StealAmount}");
+                totalStolen -= cacheEntry.StealAmount;
             }
             roll = random.Next(0, 100);
-            if (roll < stealChance2)
+            if (roll < cacheEntry.StealChance2)
             {
-                Main.modLog.Info?.Write($"Pilot {pilot.Callsign}, steals: {stealAmount2}");
-                sim.AddFunds(stealAmount2 * -1, null, true);
+                Main.modLog.Info?.Write($"Pilot {pilot.Callsign}, steals: {cacheEntry.StealAmount2}");
+                totalStolen -= cacheEntry.StealAmount2;
             }
+
+            return totalStolen;
         }
 
         public bool hasImmortality(PilotDef pilotDef)
