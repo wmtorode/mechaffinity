@@ -92,7 +92,10 @@ namespace MechAffinity.Patches
                 List<Pilot> pilots = new List<Pilot>();
                 foreach (var slot in __instance.loadoutSlots)
                 {
-                    pilots.Add(slot.SelectedPilot.pilot);
+                    if (slot.SelectedPilot != null)
+                    {
+                        pilots.Add(slot.SelectedPilot.pilot);
+                    }
                 }
                 PilotAffinityManager.Instance.AddSharedAffinity(pilots);
             }
