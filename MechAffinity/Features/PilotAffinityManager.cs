@@ -671,14 +671,14 @@ namespace MechAffinity
             }
             string statName = getAffinityStatName(pilot, prefab);
             return getStatDeploymentCountWithMech(statName) + getTaggedDeploymentCountWithMech(pilot, prefab) + 
-                   getPilotDeployBonusByTag(pilot, mechDef.Chassis.weightClass);
+                   getPilotDeployBonusByTag(pilot, mechDef.Chassis.weightClass, true);
         }
 
         public int getDeploymentCountWithMech(Pilot pilot, string prefabId)
         {
             string statName = getAffinityStatName(pilot, prefabId);
             return getStatDeploymentCountWithMech(statName) + getTaggedDeploymentCountWithMech(pilot, prefabId) +
-                   getPilotDeployBonusByTag(pilot, WeightClass.ASSAULT);
+                   getPilotDeployBonusByTag(pilot, WeightClass.ASSAULT, true);
 
         }
 
@@ -1222,7 +1222,7 @@ namespace MechAffinity
         {
             int deployCount = getDeploymentCountWithMech(actor);
             Main.modLog.Info?.Write($"Pilot Natural Affinity: {deployCount}");
-            deployCount += getPilotDeployBonusByTag(actor);
+            deployCount += getPilotDeployBonusByTag(actor, false);
             string chassisPrefab = getPrefabId(actor, EIdType.ChassisId);
             Main.modLog.Info?.Write($"Pilot Total Affinity: {deployCount}");
             if (String.IsNullOrEmpty(chassisPrefab))
@@ -1292,7 +1292,7 @@ namespace MechAffinity
             }
         }
 
-        public int getPilotDeployBonusByTag(Pilot pilot, WeightClass weightClass)
+        public int getPilotDeployBonusByTag(Pilot pilot, WeightClass weightClass, bool isAi)
         {
             int deployCount = 0;
             int deployBonus = 0;
@@ -1349,7 +1349,8 @@ namespace MechAffinity
                     }
                 }
 
-                if (sharedClassAffinityCache.ContainsKey(weightClass))
+                // player only, if you want ai to have more affinity just give it to them
+                if (sharedClassAffinityCache.ContainsKey(weightClass) && !isAi)
                 {
                     Main.modLog.Info?.Write($"Adding: {sharedClassAffinityCache[weightClass]} due to shared deploy count");
                     deployCount += sharedClassAffinityCache[weightClass];
@@ -1358,7 +1359,7 @@ namespace MechAffinity
             return deployCount;
         }
 
-        public int getPilotDeployBonusByTag(AbstractActor actor)
+        public int getPilotDeployBonusByTag(AbstractActor actor, bool isAi)
         {
             
             Pilot pilot = actor.GetPilot();
@@ -1369,12 +1370,12 @@ namespace MechAffinity
                 weightClass = mech.weightClass;
             }
 
-            return getPilotDeployBonusByTag(pilot, weightClass);
+            return getPilotDeployBonusByTag(pilot, weightClass, isAi);
         }
 
         private void getAIBonuses(AbstractActor actor, out Dictionary<EAffinityType, int> bonuses, out List<EffectData> effects)
         {
-            int deployCount = getPilotDeployBonusByTag(actor);
+            int deployCount = getPilotDeployBonusByTag(actor, true);
             string chassisPrefab = getPrefabId(actor, EIdType.ChassisId);
             if (String.IsNullOrEmpty(chassisPrefab))
             {
