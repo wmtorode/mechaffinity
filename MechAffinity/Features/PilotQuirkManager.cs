@@ -32,6 +32,9 @@ namespace MechAffinity
         private Dictionary<string, float> argoUpgradeBaseCostCache;
         private Dictionary<string, float> argoUpgradeUpkeepCostCache;
         private Dictionary<string, PilotStealChanceCacheEntry> pilotStealCache;
+        private List<LanceQuirkDef> lanceQuirks;
+
+        private List<EffectData> lanceWideEffectsCache = new List<EffectData>();
 
         public bool BlockFinanceScreenUpdate { get; set; }
 
@@ -40,12 +43,12 @@ namespace MechAffinity
             get
             {
                 if (_instance == null) _instance = new PilotQuirkManager();
-                if (!_instance.hasInitialized) _instance.initialize(Main.settings.quirkSettings, Main.pilotQuirks);
+                if (!_instance.hasInitialized) _instance.initialize(Main.settings.quirkSettings, Main.pilotQuirks, Main.LanceQuirks);
                 return _instance;
             }
         }
 
-        public void initialize(PilotQuirkSettings pilotQuirkSettings, List<PilotQuirk> pilotQuirks)
+        public void initialize(PilotQuirkSettings pilotQuirkSettings, List<PilotQuirk> pilotQuirks, List<LanceQuirkDef> lanceQuirkDefs)
         {
             if(hasInitialized) return;
             settings = pilotQuirkSettings;
@@ -73,6 +76,8 @@ namespace MechAffinity
             {
                 quirkRestrictions.Add(restriction.restrictionCategory, restriction);
             }
+
+            lanceQuirks = lanceQuirkDefs;
 
             immortalityCache = new Dictionary<string, bool>();
 
@@ -925,6 +930,41 @@ namespace MechAffinity
                 }
             }
             return (QuirkRestriction) null;
+        }
+
+        public void findLanceQuirks(List<Pilot> pilotsInUse)
+        {
+            lanceWideEffectsCache.Clear();
+            HashSet<string> tagsInUse = new HashSet<string>();
+            foreach (var pilot in pilotsInUse)
+            {
+                foreach (var tag in pilot.pilotDef.PilotTags.items)
+                {
+                    tagsInUse.Add(tag);
+                }
+            }
+
+            foreach (var lanceQuirkDef in lanceQuirks)
+            {
+                if (lanceQuirkDef.selector == ELanceQuirkSelector.All)
+                {
+                    bool ok = true;
+                    foreach (var tag in lanceQuirkDef.tags)
+                    {
+                        if (!tagsInUse.Contains(tag))
+                        {
+                            ok = false;
+                            break;
+                        }
+                    }
+
+                    if (ok)
+                    {
+                        Main.modLog.Info?.Write($"Adding Lance quirk: {lanceQuirkDef.quirkName}");
+                        lanceWideEffectsCache.AddRange(lanceQuirkDef.effects);
+                    }
+                }
+            }
         }
     }
 }

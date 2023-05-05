@@ -21,8 +21,10 @@ namespace MechAffinity
         internal static string modDir;
         internal static readonly string AffinitiesDefinitionTypeName = "AffinitiesDef";
         internal static readonly string QuirkDefTypeName = "QuirkDef";
+        internal static readonly string LanceQuirkDefTypeName = "LanceQuirkDef";
         internal static List<AffinityDef> affinityDefs = new List<AffinityDef>();
         internal static List<PilotQuirk> pilotQuirks = new List<PilotQuirk>();
+        internal static List<LanceQuirkDef> LanceQuirks = new List<LanceQuirkDef>();
         public static void FinishedLoading(List<string> loadOrder, Dictionary<string, Dictionary<string, VersionManifestEntry>> customResources)
         {
             if (customResources != null)
@@ -62,6 +64,22 @@ namespace MechAffinity
                             }
                         }
                     }
+                    if (customResource.Key == LanceQuirkDefTypeName)
+                    {
+                        foreach (var quirkDefPath in customResource.Value)
+                        {
+                            try
+                            {
+                                modLog.Info?.Write("Path:" + quirkDefPath.Value.FilePath);
+                                LanceQuirkDef quirkDef = JsonConvert.DeserializeObject<LanceQuirkDef>(File.ReadAllText(quirkDefPath.Value.FilePath));
+                                LanceQuirks.Add(quirkDef);
+                            }
+                            catch (Exception ex)
+                            {
+                                modLog.Error?.Write(ex);
+                            }
+                        }
+                    }
                 }
             }
             try {
@@ -71,7 +89,7 @@ namespace MechAffinity
                         settings.ToLegacy(affinityDefs, pilotQuirks), Formatting.Indented));
                 }
                 if (settings.enablePilotAffinity) PilotAffinityManager.Instance.initialize(settings.affinitySettings, affinityDefs);
-                if (settings.enablePilotQuirks) PilotQuirkManager.Instance.initialize(settings.quirkSettings, pilotQuirks);
+                if (settings.enablePilotQuirks) PilotQuirkManager.Instance.initialize(settings.quirkSettings, pilotQuirks, LanceQuirks);
             }
             catch (Exception ex)
             {
