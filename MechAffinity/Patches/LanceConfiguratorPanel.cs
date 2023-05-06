@@ -86,6 +86,12 @@ namespace MechAffinity.Patches
 
         public static void Postfix(LanceConfiguratorPanel __instance)
         {
+            
+            if (Main.settings.enablePilotQuirks)
+            {
+                PilotQuirkManager.Instance.ResetEffectCache();
+            }
+            
             if (Main.settings.enablePilotAffinity)
             {
                 PilotAffinityManager.Instance.ResetEffectCache();
@@ -98,12 +104,14 @@ namespace MechAffinity.Patches
                     }
                 }
                 PilotAffinityManager.Instance.AddSharedAffinity(pilots);
+
+                if (Main.settings.enablePilotQuirks)
+                {
+                    PilotQuirkManager.Instance.FindLanceQuirks(pilots);
+                }
             }
 
-            if (Main.settings.enablePilotQuirks)
-            {
-                PilotQuirkManager.Instance.ResetEffectCache();
-            }
+            
         }
     }
 }

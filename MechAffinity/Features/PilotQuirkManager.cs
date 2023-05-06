@@ -78,6 +78,15 @@ namespace MechAffinity
             }
 
             lanceQuirks = lanceQuirkDefs;
+            foreach (LanceQuirkDef lanceQuirk in lanceQuirks)
+            {
+                foreach (JObject jObject in lanceQuirk.effectData)
+                {
+                    EffectData effectData = new EffectData();
+                    effectData.FromJSON(jObject.ToString());
+                    lanceQuirk.effects.Add(effectData);
+                }
+            }
 
             immortalityCache = new Dictionary<string, bool>();
 
@@ -310,6 +319,12 @@ namespace MechAffinity
                 {
                     effects.Add(effect);
                 }
+            }
+
+            // add any lancewide effects for the player
+            if (actor.team != null && actor.team.IsLocalPlayer)
+            {
+                effects.AddRange(lanceWideEffectsCache);
             }
 
         }
@@ -932,7 +947,7 @@ namespace MechAffinity
             return (QuirkRestriction) null;
         }
 
-        public void findLanceQuirks(List<Pilot> pilotsInUse)
+        public void FindLanceQuirks(List<Pilot> pilotsInUse)
         {
             lanceWideEffectsCache.Clear();
             HashSet<string> tagsInUse = new HashSet<string>();
