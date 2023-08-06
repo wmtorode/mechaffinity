@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using MechAffinity.Data;
 using System.Reflection;
 using BattleTech;
+using MechAffinity.Data.PilotManagement;
 using Newtonsoft.Json.Linq;
 
 namespace MechAffinity
@@ -22,9 +23,11 @@ namespace MechAffinity
         internal static readonly string AffinitiesDefinitionTypeName = "AffinitiesDef";
         internal static readonly string QuirkDefTypeName = "QuirkDef";
         internal static readonly string LanceQuirkDefTypeName = "LanceQuirkDef";
+        internal static readonly string PilotRequirementsDefTypeName = "PilotRequirementsDef";
         internal static List<AffinityDef> affinityDefs = new List<AffinityDef>();
         internal static List<PilotQuirk> pilotQuirks = new List<PilotQuirk>();
         internal static List<LanceQuirkDef> LanceQuirks = new List<LanceQuirkDef>();
+        internal static List<PilotRequirementsDef> PilotRequirementsDefs = new List<PilotRequirementsDef>();
         public static void FinishedLoading(List<string> loadOrder, Dictionary<string, Dictionary<string, VersionManifestEntry>> customResources)
         {
             if (customResources != null)
@@ -73,6 +76,22 @@ namespace MechAffinity
                                 modLog.Info?.Write("Path:" + quirkDefPath.Value.FilePath);
                                 LanceQuirkDef quirkDef = JsonConvert.DeserializeObject<LanceQuirkDef>(File.ReadAllText(quirkDefPath.Value.FilePath));
                                 LanceQuirks.Add(quirkDef);
+                            }
+                            catch (Exception ex)
+                            {
+                                modLog.Error?.Write(ex);
+                            }
+                        }
+                    }
+                    if (customResource.Key == PilotRequirementsDefTypeName)
+                    {
+                        foreach (var requirementsDefPath in customResource.Value)
+                        {
+                            try
+                            {
+                                modLog.Info?.Write("Path:" + requirementsDefPath.Value.FilePath);
+                                PilotRequirementsDef requirementsDef = JsonConvert.DeserializeObject<PilotRequirementsDef>(File.ReadAllText(requirementsDefPath.Value.FilePath));
+                                PilotRequirementsDefs.Add(requirementsDef);
                             }
                             catch (Exception ex)
                             {

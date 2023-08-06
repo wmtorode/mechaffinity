@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using MechAffinity.Data.MonthlyTech;
+using MechAffinity.Data.PilotManagement;
 using Newtonsoft.Json;
 
 namespace MechAffinity.Data
@@ -19,6 +20,7 @@ namespace MechAffinity.Data
         public bool enableMonthlyMoraleReset = false;
         public bool enableStablePiloting = false;
         public bool enableMonthlyTechAdjustments = false;
+        public bool enablePilotManagement = false;
         
         
         // Feature Settings
@@ -29,6 +31,7 @@ namespace MechAffinity.Data
         public StablePilotingSettings stablePilotingSettings = new StablePilotingSettings();
         public PilotUiSettings pilotUiSettings = new PilotUiSettings();
         public MonthlyTechSettings monthlyTechSettings = new MonthlyTechSettings();
+        public PilotManagementSettings pilotManagementSettings = new PilotManagementSettings();
         
         // Legacy Settings Debug data
         public LegacyData legacyData = new LegacyData();
