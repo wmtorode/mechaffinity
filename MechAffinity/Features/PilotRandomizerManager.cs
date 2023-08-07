@@ -176,6 +176,17 @@ namespace MechAffinity
                             if (!isAllowed) break;
 
                         }
+                        
+                        if (Main.settings.enablePilotManagement)
+                        {
+                            string rejectMsg;
+                            if (!PilotManagementManager.Instance.IsPilotAvailable(value, simGameState.CurSystem,
+                                    simGameState, true, true, out rejectMsg))
+                            {
+                                isAllowed = false;
+                                Main.modLog.Debug?.Write($"Rejecting pilot: {value.Description.Callsign}, {rejectMsg}");
+                            }
+                        }
 
                         // pilot isn't allowed, move on to the next
                         if (!isAllowed) continue;

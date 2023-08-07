@@ -66,4 +66,61 @@ namespace MechAffinity.Patches
             tooltip.SetDefaultStateData(TooltipUtilities.GetStateDataFromObject(descriptionDef));
         }
     }
+    
+    [HarmonyPatch(typeof(SGBarracksRosterSlot), "RefreshCostColorAndAvailability")]
+    public static class SGBarracksRosterSlot_RefreshCostColorAndAvailability
+    {
+        public static bool Prepare()
+        {
+            return Main.settings.enablePilotManagement;
+        }
+        public static void Prefix(ref bool __runOriginal, SGBarracksRosterSlot __instance)
+        {
+            
+            if (!__runOriginal)
+            {
+                return;
+            }
+
+            __runOriginal = false;
+            
+            int reputationModifier = __instance.simState.CurSystem.GetPurchaseCostAfterReputationModifier(__instance.simState.GetMechWarriorHiringCost(__instance.pilot.pilotDef));
+            __instance.costText.SetText(SimGameState.GetCBillString(reputationModifier), Array.Empty<object>());
+            if (reputationModifier <= __instance.simState.Funds)
+                __instance.costTextColor.SetUIColor(UIColor.White);
+            else
+                __instance.costTextColor.SetUIColor(UIColor.Red);
+            bool mrbRating = __instance.simState.CanMechWarriorBeHiredAccordingToMRBRating(__instance.pilot);
+            bool morale = __instance.simState.CanMechWarriorBeHiredAccordingToMorale(__instance.pilot);
+            string notAvailableReason;
+            bool available = PilotManagementManager.Instance.IsPilotAvailable(__instance.pilot.pilotDef,
+                __instance.simState.CurSystem, __instance.simState, false, true, out notAvailableReason);
+            if (!mrbRating || !morale || !available)
+            {
+                if (!available)
+                {
+                    var descriptionDef = new BaseDescriptionDef("CantHire", "Pilot Will Not Work For You", notAvailableReason, null);
+                    __instance.cantBuyMRBOverlay.SetActive(true);
+                    __instance.cantBuyToolTip.SetDefaultStateData(TooltipUtilities.GetStateDataFromObject(descriptionDef));
+                }
+                else
+                {
+                    HBSTooltipStateData defaultStateData = new HBSTooltipStateData();
+                    if (!mrbRating & morale)
+                        defaultStateData.SetContextString("DM.BaseDescriptionDefs[ConceptMechWarriorMRBPTooLow]");
+                    else if (mrbRating && !morale)
+                        defaultStateData.SetContextString("DM.BaseDescriptionDefs[ConceptMechWarriorMoraleTooLow]");
+                    else
+                        defaultStateData.SetContextString(
+                            "DM.BaseDescriptionDefs[ConceptMechWarriorMRBAndMoraleTooLow]");
+                    __instance.cantBuyMRBOverlay.SetActive(true);
+                    __instance.cantBuyToolTip.SetDefaultStateData(defaultStateData);
+                }
+            }
+            else
+                __instance.cantBuyMRBOverlay.SetActive(false);
+            
+            
+        }
+    }
 }

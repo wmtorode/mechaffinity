@@ -587,5 +587,44 @@ namespace MechAffinity.Patches
             }
         }
     }
+    
+    [HarmonyPatch(typeof(SimGameState), "GetUnusedRonin")]
+    [HarmonyPriority(Priority.First)]
+    class SimGameState_GetUnusedRonin
+    {
+        public static bool Prepare()
+        {
+            return Main.settings.enablePilotManagement;
+        }
+        public static void Prefix(ref bool __runOriginal, SimGameState __instance, ref PilotDef __result)
+        {
+            
+            if (!__runOriginal)
+            {
+                return;
+            }
+
+            __runOriginal = false;
+            
+            List<PilotDef> list = new List<PilotDef>((IEnumerable<PilotDef>) __instance.RoninPilots);
+            list.Shuffle<PilotDef>();
+            string reasonForRemoval;
+            while (list.Count > 0)
+            {
+                if (!__instance.usedRoninIDs.Contains(list[0].Description.Id) && __instance.IsRoninWhitelisted(list[0]) 
+                                                                              && PilotManagementManager.Instance.IsPilotAvailable(list[0], 
+                                                                                  __instance.CurSystem, __instance, true, false, out reasonForRemoval))
+                {
+                    __result = list[0];
+                    return;
+                }
+
+                list.RemoveAt(0);
+            }
+            __result = null;
+            
+            
+        }
+    }
 
 }
