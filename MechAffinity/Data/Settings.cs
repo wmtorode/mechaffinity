@@ -21,8 +21,7 @@ namespace MechAffinity.Data
         public bool enableStablePiloting = false;
         public bool enableMonthlyTechAdjustments = false;
         public bool enablePilotManagement = false;
-        
-        
+
         // Feature Settings
         // Note: Monthly Morale has no settings, its handled by the Quirk Manager
         // but has no settings other than if its enabled or disabled

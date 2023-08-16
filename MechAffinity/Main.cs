@@ -90,7 +90,10 @@ namespace MechAffinity
                             try
                             {
                                 modLog.Info?.Write("Path:" + requirementsDefPath.Value.FilePath);
-                                PilotRequirementsDef requirementsDef = JsonConvert.DeserializeObject<PilotRequirementsDef>(File.ReadAllText(requirementsDefPath.Value.FilePath));
+                                // HBS was silly with TagSets and one of the deserialized fields needed is private, so have to use their silly Deserializer instead of a proper json one
+                                // PilotRequirementsDef requirementsDef = JsonConvert.DeserializeObject<PilotRequirementsDef>(File.ReadAllText(requirementsDefPath.Value.FilePath));
+                                PilotRequirementsDef requirementsDef = new PilotRequirementsDef();
+                                requirementsDef.FromJSON(File.ReadAllText(requirementsDefPath.Value.FilePath));
                                 PilotRequirementsDefs.Add(requirementsDef);
                             }
                             catch (Exception ex)

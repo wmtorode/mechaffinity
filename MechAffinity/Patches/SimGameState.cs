@@ -605,25 +605,11 @@ namespace MechAffinity.Patches
             }
 
             __runOriginal = false;
-            
-            List<PilotDef> list = new List<PilotDef>((IEnumerable<PilotDef>) __instance.RoninPilots);
-            list.Shuffle<PilotDef>();
-            string reasonForRemoval;
-            while (list.Count > 0)
-            {
-                if (!__instance.usedRoninIDs.Contains(list[0].Description.Id) && __instance.IsRoninWhitelisted(list[0]) 
-                                                                              && PilotManagementManager.Instance.IsPilotAvailable(list[0], 
-                                                                                  __instance.CurSystem, __instance, true, false, out reasonForRemoval))
-                {
-                    __result = list[0];
-                    return;
-                }
+            Main.modLog.Debug?.Write($"Called GetUnusedRonin!");
 
-                list.RemoveAt(0);
-            }
-            __result = null;
-            
-            
+            __result = PilotManagementManager.Instance.GetRandomRonin(__instance);
+
+
         }
     }
 
