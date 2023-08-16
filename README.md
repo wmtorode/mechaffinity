@@ -10,6 +10,7 @@ High Level Feature Set (all can be enabled or disabled as needed):
 - Reset Morale on a monthly basis
 - Allow for new careers to pick guaranteed Ronin and/or random Ronin pilots
 - New Combat Effects
+- Have Requirements/Anti-Requirements for Ronin
 
 As a framework-style mod, MechAffinity is highly configurable and is primarily designed to be integrated into modpacks like BattleTech Advanced 3062 (BTA), RogueTech (RT) or BattleTech Extended Commander's Edition (BEX/BEX:CE) and is a core piece of all of them.
 This documentation is therefore aimed at modpack creator's who already have a decent understanding of various concepts like status effects, creating JSON files and tinkering with settings. However, MechAffinity is fully capable of being used stand-alone
@@ -44,11 +45,13 @@ example:
   "enableMonthlyMoraleReset": false,
   "enableStablePiloting": false,
   "enableMonthlyTechAdjustments": false,
+  "enablePilotManagement": false,
   "affinitySettings": {},
   "quirkSettings": {},
   "stablePilotingSettings": {},
   "pilotUiSettings": {},
   "monthlyTechSettings": {},
+  "pilotManagementSettings": {},
   "legacyData": {}
 }
 ```
@@ -60,11 +63,13 @@ example:
 - `enableMonthlyMoraleReset`: when `true` morale will be reset on the start of each month and then recalculated based on argo upgrades and pilot quirks
 - `enableMonthlyTechAdjustments`: when `true` the argo funding levels will also incorporate mech/medtech buffs/maluses as part of their funding level features
 - `enableStablePiloting`: when `true` enables 'Stable Piloting' features
+- `enablePilotManagement`: when `true` enables pilot management features features
 - `affinitySettings` : an [Affinity Settings](#affinity-settings) Object, this controls all settings for Affinity features
 - `quirkSettings` : a [Pilot Quirk Settings](#pilot-quirk-settings) Object, this controls all settings for Pilot Quirks features
 - `stablePilotingSettings` : a [Stable Piloting Settings](#stable-piloting-settings) object for controlling Stable Piloting features
 - `pilotUiSettings`: a [Pilot UI Settings](#pilot-ui-settings) Object, this controls all settings and configuration for Pilot UI features
 - `monthlyTechSettings`: a [Monthly Tech Adjust Settings](#monthly-tech-settings) Object, this controls all settings for the Monthly Tech Adjust features
+- `pilotManagementSettings`: a [Pilot Management Settings](#pilot-management-settings) Object, this controls all settings for Pilot Management features
 - `legacyData` : a `Legacy Data Settings` object, controls various options for outputting legacy versions of the settings file for compatibility with some third party tools
 
 ## Mech-Pilot Affinity
@@ -1015,6 +1020,56 @@ These settings control the 'Monthly Tech Adjustment' feature set.
 - `xxxMedModifier`: the buff/malus to the MechTech at the corresponding funding level, positive is a buff, negative is a malus. Note that this an adjustment from the baseline value, not an stacking modifier. This means if Spartan provides a -4 malus, taking Spartan for 2 straight months will still only be a -4 penalty, like wise with buffs
 - `UiFontSize`: the fontsize of various parts of the financial report will not scale with additional text being added to the fields, to fix this we can scale the fontsize down to allow it to fit better. the default of 28 seems pretty good but is adjustable if needed. Note: vanilla's default size for these fields is 30 for comparision.
 
+## Pilot Management Features
+
+Pilot management allows you to add some additional flavour to your ronin, such as adding requirements for pilots to be hireable. This includes things like only allowing them to show up on certain worlds or worlds owned by certain factions. It may require you to
+have one or more friends of this pilot on your crew already or they may refuse to work with other pilots if you have them.
+
+### Pilot Management Settings
+
+**These settings only apply when `enablePilotManagement` is true**
+
+These settings control the 'Pilot Management' feature set.
+
+```json
+{
+   "roninBlacklistTag": "",
+    "enablePilotGenTesting": false,
+    "enableRoninBlacklisting": false,
+    "forcedRoninSelectionIds": []
+  }
+```
+
+- `enableRoninBlacklisting`: when set to `true` any pilot with the `roninBlacklistTag` will be prevented from entering the hiring halls
+- `enablePilotGenTesting`: when `true` override the pilot generator to account for pilots in `forcedRoninSelectionIds`, this should only be enabled for testing
+- `forcedRoninSelectionIds`: a list of pilot IDs that will be given preference when generating a ronin pilot for the hiring halls. This is very useful for testing, but should not be used when not testing
+
+### PilotRequirementsDef Objects
+
+These objects are used to create restrictions for pilots
+
+```json
+{
+  "TagId": "",
+  "HiringRequirements": [],
+  "HiringVisibilityRequirements": [],
+  "RequiredSystemCoreIds": [],
+  "RequiredSystemOwner": [],
+  "RequiredPilotIds": [],
+  "ConflictingPilotIds": []
+}
+```
+
+- `TagId`: a pilot tag ID, any pilot with this tag will be subject to these restrictions
+- `HiringRequirements`: a list of `RequirementDefs` (see contract requirements lists for examples) that a pilot must meet to be hire-able. Pilots failing these requirements will be able to enter the hiring halls but will not be able to be hired.
+- `HiringVisibilityRequirements`: a list of `RequirementDefs` that a pilot must meet to enter the hiring hall. Pilots failing these requirements, will not be eligible to be in the hiring hall at all.
+- `RequiredSystemCoreIds`: a list of starsystemDef Core IDs, these are the only worlds a pilot may be found in the hiring halls of, if empty the pilot may be found on any world.
+- `RequiredSystemOwner`: a list of faction Names, a pilot will only be eligible to appear in the hiring hall if the faction who controls this system is in this list, if empty all factions are allowed.
+- `RequiredPilotIds`: a list of pilot IDs that you are required to have in your current pilot roster to hire this pilot. All pilots in this list must be owned.
+- `ConflictingPilotIds`: a list of pilot IDs. If you have any of these pilots in your current roster, this pilot will not be hire-able
+
+**Note: For RequirementDefs, only the Commander, Company & StarSystem scopes are implemented**
+
 ## Pilot UI Modifications
 
 Mech Affinity allows you to differentiate various pilots by altering their pilot icons in a similar manner to how vanilla Ronin or Kickstarter back pilots are distinguished.
@@ -1123,6 +1178,15 @@ example:
   "nature": "Buff"
 }
 ```
+
+## Custom Resources
+
+The following Custom Resource Types are used by this mod:
+
+- AffinitiesDef
+- QuirkDef
+- LanceQuirkDef
+- PilotRequirementsDef
 
 ## Upgrading from 1.3.0 or earlier
 
