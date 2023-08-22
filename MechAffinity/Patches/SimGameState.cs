@@ -282,12 +282,14 @@ namespace MechAffinity.Patches
         new Type[] {typeof(Pilot), typeof(bool), typeof(string), typeof(string)})]
     public static class SimGameState_KillPilot
     {
+        private static List<Pilot> pilotsToDismiss;
         public static bool Prepare()
         {
-            return Main.settings.enablePilotQuirks;
+            return Main.settings.enablePilotQuirks || Main.settings.enablePilotManagement;
         }
         public static void Prefix(ref bool __runOriginal, SimGameState __instance, Pilot p, ref bool __result)
         {
+            pilotsToDismiss = new List<Pilot>();
             
             if (!__runOriginal)
             {
@@ -299,28 +301,62 @@ namespace MechAffinity.Patches
                 PilotDef def = p.pilotDef;
                 if (def != null)
                 {
-                    // if the pilot is supposed to be killed, but is immortal, dont kill them
-                    if (PilotQuirkManager.Instance.hasImmortality(def))
+                    if (Main.settings.enablePilotQuirks)
                     {
-                        Main.modLog.Info?.Write($"Preventing death of pilot: {def.Description.Callsign}");
-                        __result = true;
-                        __runOriginal = false;
-                        return;
+                        // if the pilot is supposed to be killed, but is immortal, dont kill them
+                        if (PilotQuirkManager.Instance.hasImmortality(def))
+                        {
+                            Main.modLog.Info?.Write($"Preventing death of pilot: {def.Description.Callsign}");
+                            __result = true;
+                            __runOriginal = false;
+                            return;
+                        }
+
+                        PilotQuirkManager.Instance.ResetArgoCostCache();
+                        PilotQuirkManager.Instance.proccessPilot(def, false);
                     }
-                    PilotQuirkManager.Instance.ResetArgoCostCache();
-                    PilotQuirkManager.Instance.proccessPilot(def, false);
+
+                    if (Main.settings.enablePilotManagement)
+                    {
+                        pilotsToDismiss =
+                            PilotManagementManager.Instance.PilotsThatMustLeave(def, __instance.PilotRoster.rootList);
+                    }
                 }
             }
             
+        }
+        
+        public static void Postfix(SimGameState __instance, Pilot p, ref bool __result)
+        {
+            if (!Main.settings.enablePilotManagement)
+            {
+                return;
+            }
+
+            string interruptMsg = "";
+            foreach (var pilot in pilotsToDismiss)
+            {
+                __instance.DismissPilot(pilot);
+                interruptMsg +=
+                    $"{pilot.Callsign} has left your company because {p.Callsign} is no longer under your employ\n";
+            }
+
+            if (!string.IsNullOrEmpty(interruptMsg))
+            {
+                __instance.interruptQueue.QueueGenericPopup("Pilot(s) have left your company", interruptMsg);
+            }
+
         }
     }
     
     [HarmonyPatch(typeof(SimGameState), "DismissPilot", new Type[] {typeof(Pilot)})]
     public static class SimGameState_DismissPilot
     {
+        private static List<Pilot> pilotsToDismiss;
+        
         public static bool Prepare()
         {
-            return Main.settings.enablePilotQuirks;
+            return Main.settings.enablePilotQuirks  || Main.settings.enablePilotManagement;;
         }
         public static void Prefix(ref bool __runOriginal, SimGameState __instance, Pilot p)
         {
@@ -335,8 +371,13 @@ namespace MechAffinity.Patches
                 PilotDef def = p.pilotDef;
                 if (def != null)
                 {
-                    PilotQuirkManager.Instance.ResetArgoCostCache();
-                    PilotQuirkManager.Instance.proccessPilot(def, false);
+                    if (Main.settings.enablePilotQuirks)
+                    {
+                        PilotQuirkManager.Instance.ResetArgoCostCache();
+                        PilotQuirkManager.Instance.proccessPilot(def, false);
+                    }
+                    
+                    if (Main.settings.enablePilotManagement)
                 }
             }
         }

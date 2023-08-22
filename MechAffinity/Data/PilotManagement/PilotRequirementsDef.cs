@@ -14,6 +14,8 @@ public class PilotRequirementsDef
     public List<string> RequiredSystemOwner = new List<string>();
     public List<string> RequiredPilotIds = new List<string>();
     public List<string> ConflictingPilotIds = new List<string>();
+    public Dictionary<string, int> RequiredPilotTags = new Dictionary<string, int>();
+    public bool LeaveIfRequiredPilotsLost = true;
     
     public void FromJSON(string json)
     {

@@ -115,6 +115,37 @@ public class PilotManagementManager
         return null;
     }
 
+    public List<Pilot> PilotsThatMustLeave(PilotDef pilotLeaving, List<Pilot> currentRoster)
+    {
+        HashSet<Pilot> pilotsThatAlsoLeave = new HashSet<Pilot>();
+
+        foreach (var pilot in currentRoster)
+        {
+            if (pilot.Description.Id == pilotLeaving.Description.Id)
+            {
+                continue;
+            }
+            foreach (var tag in pilot.pilotDef.PilotTags)
+            {
+                PilotRequirementsDef requirementsDef;
+                if (requirementsMap.TryGetValue(tag, out requirementsDef))
+                {
+                    if (requirementsDef.RequiredPilotIds.Count > 0)
+                    {
+                        if (requirementsDef.RequiredPilotIds.Contains(pilotLeaving.Description.Id))
+                        {
+                            Main.modLog.Info?.Write($"Pilot: {pilot.Callsign} must leave company because {pilotLeaving.Description.Callsign} is leaving or dead");
+                            pilotsThatAlsoLeave.Add(pilot);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        return pilotsThatAlsoLeave.ToList();
+    }
+
     public bool IsPilotAvailable(PilotDef pilotDef, StarSystem starSystem, SimGameState simGame, bool checkVisibility, bool checkHiring, out string reasonForNotAvailable)
     {
         if (settings.enableRoninBlacklisting && pilotDef.PilotTags.Contains(settings.roninBlacklistTag))
