@@ -352,7 +352,6 @@ namespace MechAffinity.Patches
     [HarmonyPatch(typeof(SimGameState), "DismissPilot", new Type[] {typeof(Pilot)})]
     public static class SimGameState_DismissPilot
     {
-        private static List<Pilot> pilotsToDismiss;
         
         public static bool Prepare()
         {
@@ -376,8 +375,28 @@ namespace MechAffinity.Patches
                         PilotQuirkManager.Instance.ResetArgoCostCache();
                         PilotQuirkManager.Instance.proccessPilot(def, false);
                     }
-                    
+
                     if (Main.settings.enablePilotManagement)
+                    {
+                        string interruptMsg = "";
+                        var otherPilotsToDismiss =
+                            PilotManagementManager.Instance.PilotsThatMustLeave(def, __instance.PilotRoster.rootList);
+                        foreach (var pilot in otherPilotsToDismiss)
+                        {
+                            __instance.PilotRoster.Remove(pilot);
+                            interruptMsg +=
+                                $"{pilot.Callsign} has left your company because {p.Callsign} is no longer under your employ\n";
+                            if (Main.settings.enablePilotQuirks)
+                            {
+                                PilotQuirkManager.Instance.proccessPilot(pilot.pilotDef, false);
+                            }
+                        }
+                        
+                        if (!string.IsNullOrEmpty(interruptMsg))
+                        {
+                            __instance.interruptQueue.QueueGenericPopup("Pilot(s) have left your company", interruptMsg);
+                        }
+                    }
                 }
             }
         }
