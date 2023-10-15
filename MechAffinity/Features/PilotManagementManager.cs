@@ -17,6 +17,8 @@ public class PilotManagementManager
     private Dictionary<string, PilotRequirementsDef> requirementsMap;
     private PilotManagementSettings settings;
     private bool hasInitialized = false;
+    private StatCollection companyStats;
+    private const string MaPilotCount = "MaPilotCount";
 
     public static PilotManagementManager Instance
     {
@@ -40,6 +42,21 @@ public class PilotManagementManager
         }
 
         hasInitialized = true;
+    }
+    
+    public void setCompanyStats(StatCollection stats)
+    {
+        companyStats = stats;
+        
+        if (!companyStats.ContainsStatistic(MaPilotCount))
+        {
+            companyStats.AddStatistic<int>(MaPilotCount, 0);
+        }
+    }
+
+    public void setPilotCountStat(int pilotCount)
+    {
+        companyStats.Set<int>(MaPilotCount, pilotCount);
     }
 
     private bool CheckRequirement(RequirementDef requirementDef, StarSystem starSystem, SimGameState simGameState)
