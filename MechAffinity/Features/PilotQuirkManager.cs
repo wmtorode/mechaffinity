@@ -140,18 +140,7 @@ namespace MechAffinity
 
         private List<string> getPooledQuirks(QuirkPool pool)
         {
-            List<string> choosenQuirks = new List<string>();
-            Random random = new Random();
-            while (choosenQuirks.Count < pool.quirksToPick)
-            {
-                string quirk = pool.quirksAvailable[random.Next(pool.quirksAvailable.Count)];
-                if (!choosenQuirks.Contains(quirk))
-                {
-                    choosenQuirks.Add(quirk);
-                }
-            }
-
-            return choosenQuirks;
+            return pool.GetQuirks();
         }
         
         private List<PilotQuirk> getQuirks(PilotDef pilotDef, bool usePools = false, bool restrictedOnly = false)

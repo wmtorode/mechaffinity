@@ -608,12 +608,18 @@ A quirk pool provides a way to randomly assign quirks to a pilot based on the pr
 {
   "tag" : "",
   "quirksToPick": 0,
-  "quirksAvailable" : []
+  "quirksAvailable" : [],
+  "defaultQuirkWeight": 3,
+  "weightedQuirks": {
+    "exampleQuirk" : 2
+  }
 }
 ```
 - `tag` : the tag that activates this quirk pool
 - `quirksToPick` : the number of quirks to select from this pool
-- `quirksAvailable` : a list of quirk tags this pool can select
+- `quirksAvailable` : a list of quirk tags this pool can select that use the default weight for selection
+- `defaultQuirkWeight` : the default weighting that is used for all quirks in the `quirksAvailable` list
+- `weightedQuirks`: a dictionary of quirks to weights. quirks in this list must not be in the `quirksAvailable` list. all quirks in this dictionary will use the weight specified, allowing them to be more common, or rare than quirks in the main list. 
 
 #### PilotTooltipTag objects
 ```json
