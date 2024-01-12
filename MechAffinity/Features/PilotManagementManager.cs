@@ -198,10 +198,26 @@ public class PilotManagementManager
                         return false;
                     }
                     
+                    if (!String.IsNullOrEmpty(requirementsDef.RequiredSystemCoreIdPrefix) && !starSystem.Def.CoreSystemID.StartsWith(requirementsDef.RequiredSystemCoreIdPrefix, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        reasonForNotAvailable =
+                            $"Pilot: {pilotDef.Description.Callsign} is not available on this system";
+                        Main.modLog.Debug?.Write(reasonForNotAvailable);
+                        return false;
+                    }
+                    
                     if (requirementsDef.RequiredSystemOwner.Count > 0 && !requirementsDef.RequiredSystemOwner.Contains(starSystem.OwnerValue.Name))
                     {
                         reasonForNotAvailable =
                             $"Pilot: {pilotDef.Description.Callsign} is only available on systems controlled by {requirementsDef.RequiredSystemOwner}";
+                        Main.modLog.Debug?.Write(reasonForNotAvailable);
+                        return false;
+                    }
+                    
+                    if (requirementsDef.AntiSystemOwner.Count > 0 && requirementsDef.AntiSystemOwner.Contains(starSystem.OwnerValue.Name))
+                    {
+                        reasonForNotAvailable =
+                            $"Pilot: {pilotDef.Description.Callsign} is not available on systems controlled by {requirementsDef.AntiSystemOwner}";
                         Main.modLog.Debug?.Write(reasonForNotAvailable);
                         return false;
                     }

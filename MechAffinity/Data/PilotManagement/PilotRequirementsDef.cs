@@ -11,7 +11,9 @@ public class PilotRequirementsDef
     public List<RequirementDef> HiringRequirements = new List<RequirementDef>();
     public List<RequirementDef> HiringVisibilityRequirements = new List<RequirementDef>();
     public List<string> RequiredSystemCoreIds = new List<string>();
+    public string RequiredSystemCoreIdPrefix = "";
     public List<string> RequiredSystemOwner = new List<string>();
+    public List<string> AntiSystemOwner = new List<string>();
     public List<string> RequiredPilotIds = new List<string>();
     public List<string> ConflictingPilotIds = new List<string>();
     public Dictionary<string, int> RequiredPilotTags = new Dictionary<string, int>();

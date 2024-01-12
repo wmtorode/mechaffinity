@@ -1062,7 +1062,9 @@ These objects are used to create restrictions for pilots
   "RequiredSystemCoreIds": [],
   "RequiredSystemOwner": [],
   "RequiredPilotIds": [],
-  "ConflictingPilotIds": []
+  "ConflictingPilotIds": [],
+  "AntiSystemOwner": [],
+  "RequiredSystemCoreIdPrefix": ""
 }
 ```
 
@@ -1073,6 +1075,8 @@ These objects are used to create restrictions for pilots
 - `RequiredSystemOwner`: a list of faction Names, a pilot will only be eligible to appear in the hiring hall if the faction who controls this system is in this list, if empty all factions are allowed.
 - `RequiredPilotIds`: a list of pilot IDs that you are required to have in your current pilot roster to hire this pilot. All pilots in this list must be owned.
 - `ConflictingPilotIds`: a list of pilot IDs. If you have any of these pilots in your current roster, this pilot will not be hire-able
+- `AntiSystemOwner`: a list of faction Names, a pilot will not be eligible to appear in the hiring hall if the faction that controls this system is in this list, if empty no factions are restricted in this fashion
+- `RequiredSystemCoreIdPrefix`: a string. When not empty the pilot will only appear on worlds whose Core ID starts with this prefix string. This is useful when restricting a pilot to something like jump point worlds
 
 **Note: For RequirementDefs, only the Commander, Company & StarSystem scopes are implemented**
 
