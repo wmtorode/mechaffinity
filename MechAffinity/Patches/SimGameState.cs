@@ -276,9 +276,13 @@ namespace MechAffinity.Patches
             }
         }
         
-        public static void Postfix(SimGameState __instance)
+        public static void Postfix(SimGameState __instance, PilotDef def)
         {
             PilotManagementManager.Instance.setPilotCountStat(__instance.PilotRoster.Count);
+            if (Main.settings.enablePilotManagement)
+            {
+                PilotManagementManager.Instance.processHiredPilot(def);
+            }
         }
     }
 
@@ -338,8 +342,10 @@ namespace MechAffinity.Patches
             {
                 return;
             }
+            
+            PilotManagementManager.Instance.processKilledPilot(p.pilotDef);
 
-            string interruptMsg = "";
+                string interruptMsg = "";
             foreach (var pilot in pilotsToDismiss)
             {
                 __instance.DismissPilot(pilot);
@@ -385,6 +391,9 @@ namespace MechAffinity.Patches
                     if (Main.settings.enablePilotManagement)
                     {
                         string interruptMsg = "";
+                        
+                        PilotManagementManager.Instance.processFiredPilot(p.pilotDef);
+                        
                         var otherPilotsToDismiss =
                             PilotManagementManager.Instance.PilotsThatMustLeave(def, __instance.PilotRoster.rootList);
                         foreach (var pilot in otherPilotsToDismiss)

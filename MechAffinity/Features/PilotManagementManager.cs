@@ -19,6 +19,9 @@ public class PilotManagementManager
     private bool hasInitialized = false;
     private StatCollection companyStats;
     private const string MaPilotCount = "MaPilotCount";
+    private const string MaPilotHiredPrefix = "hasPilot_";
+    private const string MaPilotFiredPrefix = "firedPilot_";
+    private const string MaPilotKilledPrefix = "killedPilot_";
 
     public static PilotManagementManager Instance
     {
@@ -57,6 +60,49 @@ public class PilotManagementManager
     public void setPilotCountStat(int pilotCount)
     {
         companyStats.Set<int>(MaPilotCount, pilotCount);
+    }
+
+    public void processHiredPilot(PilotDef pilotDef)
+    {
+        if (string.IsNullOrEmpty(settings.statOnHireTag)) return;
+        if (pilotDef.PilotTags.Contains(settings.statOnHireTag))
+        {
+            companyStats.AddStatistic<bool>($"{MaPilotHiredPrefix}{pilotDef.Description.Id}", true);
+        }
+    }
+
+    public void processFiredPilot(PilotDef pilotDef)
+    {
+        
+        if (companyStats.ContainsStatistic($"{MaPilotHiredPrefix}{pilotDef.Description.Id}"))
+        {
+            companyStats.RemoveStatistic($"{MaPilotHiredPrefix}{pilotDef.Description.Id}");
+        }
+        
+        if (!string.IsNullOrEmpty(settings.statOnFireTag))
+        {
+            if (pilotDef.PilotTags.Contains(settings.statOnFireTag))
+            {
+                companyStats.AddStatistic<bool>($"{MaPilotFiredPrefix}{pilotDef.Description.Id}", true);
+            }
+        }
+    }
+    
+    public void processKilledPilot(PilotDef pilotDef)
+    {
+        
+        if (companyStats.ContainsStatistic($"{MaPilotHiredPrefix}{pilotDef.Description.Id}"))
+        {
+            companyStats.RemoveStatistic($"{MaPilotHiredPrefix}{pilotDef.Description.Id}");
+        }
+        
+        if (!string.IsNullOrEmpty(settings.statOnKilledTag))
+        {
+            if (pilotDef.PilotTags.Contains(settings.statOnKilledTag))
+            {
+                companyStats.AddStatistic<bool>($"{MaPilotKilledPrefix}{pilotDef.Description.Id}", true);
+            }
+        }
     }
 
     private bool CheckRequirement(RequirementDef requirementDef, StarSystem starSystem, SimGameState simGameState)
