@@ -1052,9 +1052,9 @@ These settings control the 'Pilot Management' feature set.
 - `enableRoninBlacklisting`: when set to `true` any pilot with the `roninBlacklistTag` will be prevented from entering the hiring halls
 - `enablePilotGenTesting`: when `true` override the pilot generator to account for pilots in `forcedRoninSelectionIds`, this should only be enabled for testing
 - `forcedRoninSelectionIds`: a list of pilot IDs that will be given preference when generating a ronin pilot for the hiring halls. This is very useful for testing, but should not be used when not testing
-- `statOnHireTag`: a custom tag, when a pilot carrying this tag is hired a new company stat `hasPilot_{pilotID}` will be created. This is useful for triggering events that require a particular pilot. when the pilot is killed or fired this stat will be removed.
-- `statOnFireTag`: a custom tag, when a pilot carrying this tag is fired a new company stat `firedPilot_{pilotID}` will be created. This is useful for triggering events that require a particular pilot.
-- `statOnKilledTag`: a custom tag, when a pilot carrying this tag is killed a new company stat `killedPilot_{pilotID}` will be created. This is useful for triggering events that require a particular pilot.
+- `statOnHireTag`: a custom tag, when a pilot carrying this tag is hired a new company tag `hasPilot_{pilotID}` will be created. This is useful for triggering events that require a particular pilot. when the pilot is killed or fired this stat will be removed.
+- `statOnFireTag`: a custom tag, when a pilot carrying this tag is fired a new company tag `firedPilot_{pilotID}` will be created. This is useful for triggering events that require a particular pilot.
+- `statOnKilledTag`: a custom tag, when a pilot carrying this tag is killed a new company tag `killedPilot_{pilotID}` will be created. This is useful for triggering events that require a particular pilot.
 
 
 ### PilotRequirementsDef Objects

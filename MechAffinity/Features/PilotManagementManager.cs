@@ -18,6 +18,7 @@ public class PilotManagementManager
     private PilotManagementSettings settings;
     private bool hasInitialized = false;
     private StatCollection companyStats;
+    private SimGameState _simGame;
     private const string MaPilotCount = "MaPilotCount";
     private const string MaPilotHiredPrefix = "hasPilot_";
     private const string MaPilotFiredPrefix = "firedPilot_";
@@ -47,6 +48,11 @@ public class PilotManagementManager
         hasInitialized = true;
     }
     
+    public void setSimGameState(SimGameState simGameState)
+    {
+        _simGame = simGameState;
+    }
+    
     public void setCompanyStats(StatCollection stats)
     {
         companyStats = stats;
@@ -64,43 +70,44 @@ public class PilotManagementManager
 
     public void processHiredPilot(PilotDef pilotDef)
     {
+        if (_simGame == null) return;
         if (string.IsNullOrEmpty(settings.statOnHireTag)) return;
         if (pilotDef.PilotTags.Contains(settings.statOnHireTag))
         {
-            companyStats.AddStatistic<bool>($"{MaPilotHiredPrefix}{pilotDef.Description.Id}", true);
+            _simGame.companyTags.Add($"{MaPilotHiredPrefix}{pilotDef.Description.Id}");
         }
     }
 
     public void processFiredPilot(PilotDef pilotDef)
     {
-        
-        if (companyStats.ContainsStatistic($"{MaPilotHiredPrefix}{pilotDef.Description.Id}"))
+        if (_simGame == null) return;
+        if (_simGame.companyTags.Contains($"{MaPilotHiredPrefix}{pilotDef.Description.Id}"))
         {
-            companyStats.RemoveStatistic($"{MaPilotHiredPrefix}{pilotDef.Description.Id}");
+            _simGame.companyTags.Remove($"{MaPilotHiredPrefix}{pilotDef.Description.Id}");
         }
         
         if (!string.IsNullOrEmpty(settings.statOnFireTag))
         {
             if (pilotDef.PilotTags.Contains(settings.statOnFireTag))
             {
-                companyStats.AddStatistic<bool>($"{MaPilotFiredPrefix}{pilotDef.Description.Id}", true);
+                _simGame.companyTags.Add($"{MaPilotFiredPrefix}{pilotDef.Description.Id}");
             }
         }
     }
     
     public void processKilledPilot(PilotDef pilotDef)
     {
-        
-        if (companyStats.ContainsStatistic($"{MaPilotHiredPrefix}{pilotDef.Description.Id}"))
+        if (_simGame == null) return;
+        if (_simGame.companyTags.Contains($"{MaPilotHiredPrefix}{pilotDef.Description.Id}"))
         {
-            companyStats.RemoveStatistic($"{MaPilotHiredPrefix}{pilotDef.Description.Id}");
+            _simGame.companyTags.Remove($"{MaPilotHiredPrefix}{pilotDef.Description.Id}");
         }
         
         if (!string.IsNullOrEmpty(settings.statOnKilledTag))
         {
             if (pilotDef.PilotTags.Contains(settings.statOnKilledTag))
             {
-                companyStats.AddStatistic<bool>($"{MaPilotKilledPrefix}{pilotDef.Description.Id}", true);
+                _simGame.companyTags.Add($"{MaPilotKilledPrefix}{pilotDef.Description.Id}");
             }
         }
     }

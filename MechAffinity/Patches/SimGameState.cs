@@ -54,6 +54,7 @@ namespace MechAffinity.Patches
                 MonthlyTechAdjustmentManager.Instance.setCompanyStats(__instance.CompanyStats, __instance);
             }
             PilotManagementManager.Instance.setCompanyStats(__instance.CompanyStats);
+            PilotManagementManager.Instance.setSimGameState(__instance);
             PilotManagementManager.Instance.setPilotCountStat(__instance.PilotRoster.Count);
         }
     }
@@ -97,6 +98,7 @@ namespace MechAffinity.Patches
                 MonthlyTechAdjustmentManager.Instance.setCompanyStats(__instance.CompanyStats, __instance);
             }
             PilotManagementManager.Instance.setCompanyStats(__instance.CompanyStats);
+            PilotManagementManager.Instance.setSimGameState(__instance);
 
 
         }
