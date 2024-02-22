@@ -224,6 +224,11 @@ namespace MechAffinity.Patches
                 PilotQuirkManager.Instance.BlockFinanceScreenUpdate = true;
                 __instance.AddFunds(totalStolen, null, true);
             }
+
+            if (Main.settings.enablePilotManagement)
+            {
+                PilotManagementManager.Instance.UpdateSpawnModifiers();
+            }
         }
     }
 
@@ -688,8 +693,8 @@ namespace MechAffinity.Patches
 
             __runOriginal = false;
             Main.modLog.Debug?.Write($"Called GetUnusedRonin!");
-
-            __result = PilotManagementManager.Instance.GetRandomRonin(__instance);
+            bool spawnFailed;
+            __result = PilotManagementManager.Instance.GetRandomRonin(__instance, null, out spawnFailed);
 
 
         }

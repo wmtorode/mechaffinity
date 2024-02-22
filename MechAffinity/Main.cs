@@ -24,10 +24,13 @@ namespace MechAffinity
         internal static readonly string QuirkDefTypeName = "QuirkDef";
         internal static readonly string LanceQuirkDefTypeName = "LanceQuirkDef";
         internal static readonly string PilotRequirementsDefTypeName = "PilotRequirementsDef";
+        internal static readonly string RoninSpawnModifierDefTypeName = "RoninSpawnModifierDef";
         internal static List<AffinityDef> affinityDefs = new List<AffinityDef>();
         internal static List<PilotQuirk> pilotQuirks = new List<PilotQuirk>();
         internal static List<LanceQuirkDef> LanceQuirks = new List<LanceQuirkDef>();
         internal static List<PilotRequirementsDef> PilotRequirementsDefs = new List<PilotRequirementsDef>();
+        internal static List<RoninSpawnModifierDef> RoninSpawnModifiers = new List<RoninSpawnModifierDef>();
+
         public static void FinishedLoading(List<string> loadOrder, Dictionary<string, Dictionary<string, VersionManifestEntry>> customResources)
         {
             if (customResources != null)
@@ -76,6 +79,22 @@ namespace MechAffinity
                                 modLog.Info?.Write("Path:" + quirkDefPath.Value.FilePath);
                                 LanceQuirkDef quirkDef = JsonConvert.DeserializeObject<LanceQuirkDef>(File.ReadAllText(quirkDefPath.Value.FilePath));
                                 LanceQuirks.Add(quirkDef);
+                            }
+                            catch (Exception ex)
+                            {
+                                modLog.Error?.Write(ex);
+                            }
+                        }
+                    }
+                    if (customResource.Key == RoninSpawnModifierDefTypeName)
+                    {
+                        foreach (var roninSpawnDef in customResource.Value)
+                        {
+                            try
+                            {
+                                modLog.Info?.Write("Path:" + roninSpawnDef.Value.FilePath);
+                                RoninSpawnModifierDef spawnDef = JsonConvert.DeserializeObject<RoninSpawnModifierDef>(File.ReadAllText(roninSpawnDef.Value.FilePath));
+                                RoninSpawnModifiers.Add(spawnDef);
                             }
                             catch (Exception ex)
                             {

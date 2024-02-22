@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using BattleTech;
 using BattleTech.Data;
+using FluffyUnderware.DevTools;
 using HBS.Collections;
 using MechAffinity.Data;
 using MechAffinity.Data.PilotManagement;
+using Org.BouncyCastle.Security;
 using SVGImporter;
 
 namespace MechAffinity;
@@ -15,26 +17,37 @@ public class PilotManagementManager
     private static PilotManagementManager _instance;
         
     private Dictionary<string, PilotRequirementsDef> requirementsMap;
+    private List<RoninSpawnModifierDef> SpawnModifiers;
+    private RoninSpawnModifierDef _defaultSpawnModifierDef;
     private PilotManagementSettings settings;
     private bool hasInitialized = false;
     private StatCollection companyStats;
     private SimGameState _simGame;
     private const string MaPilotCount = "MaPilotCount";
+    
     private const string MaPilotHiredPrefix = "hasPilot_";
     private const string MaPilotFiredPrefix = "firedPilot_";
     private const string MaPilotKilledPrefix = "killedPilot_";
+
+    private const string MaFiredModifierPrefix = "MaFiredModifier_";
+    private const string MaFiredModifierRecoveryPrefix = "MaFiredRecovery_";
+    private const string MaKilledModifierPrefix = "MaKilledModifier_";
+    private const string MaKilledModifierRecoveryPrefix = "MaKilledRecovery_";
+
+    private const string MaRoninFired = "MaRoninFired";
+    private const string MaRoninKilled = "MaRoninKilled";
 
     public static PilotManagementManager Instance
     {
         get
         {
             if (_instance == null) _instance = new PilotManagementManager();
-            if (!_instance.hasInitialized) _instance.initialize(Main.settings.pilotManagementSettings, Main.PilotRequirementsDefs);
+            if (!_instance.hasInitialized) _instance.initialize(Main.settings.pilotManagementSettings, Main.PilotRequirementsDefs, Main.RoninSpawnModifiers);
             return _instance;
         }
     }
 
-    public void initialize(PilotManagementSettings pilotUiSettings, List<PilotRequirementsDef> requirementsDefs)
+    public void initialize(PilotManagementSettings pilotUiSettings, List<PilotRequirementsDef> requirementsDefs, List<RoninSpawnModifierDef> roninSpawnModifiers)
     {
         if(hasInitialized) return;
         requirementsMap = new Dictionary<string, PilotRequirementsDef>();
@@ -45,7 +58,155 @@ public class PilotManagementManager
             requirementsMap.Add(requirementsDef.TagId, requirementsDef);
         }
 
+        _defaultSpawnModifierDef = new RoninSpawnModifierDef();
+        SpawnModifiers = new List<RoninSpawnModifierDef>();
+        foreach (var spawnModifier in roninSpawnModifiers)
+        {
+            if (spawnModifier.IsDefault)
+            {
+                _defaultSpawnModifierDef = spawnModifier;
+            }
+            SpawnModifiers.Add(spawnModifier);
+        }
+
         hasInitialized = true;
+    }
+
+    private string KilledModifierStatName(RoninSpawnModifierDef spawnModifierDef)
+    {
+        return $"{MaKilledModifierPrefix}{spawnModifierDef.Id}";
+    }
+    
+    private string KilledRecoveryStatName(RoninSpawnModifierDef spawnModifierDef)
+    {
+        return $"{MaKilledModifierRecoveryPrefix}{spawnModifierDef.Id}";
+    }
+    
+    private string FiredModifierStatName(RoninSpawnModifierDef spawnModifierDef)
+    {
+        return $"{MaFiredModifierPrefix}{spawnModifierDef.Id}";
+    }
+    
+    private string FiredRecoveryStatName(RoninSpawnModifierDef spawnModifierDef)
+    {
+        return $"{MaFiredModifierRecoveryPrefix}{spawnModifierDef.Id}";
+    }
+    
+    private int FiredRecoveryStat(RoninSpawnModifierDef spawnModifierDef)
+    {
+        return companyStats.GetValue<int>(FiredRecoveryStatName(spawnModifierDef));
+    }
+    
+    private int KilledRecoveryStat(RoninSpawnModifierDef spawnModifierDef)
+    {
+        return companyStats.GetValue<int>(KilledRecoveryStatName(spawnModifierDef));
+    }
+    
+    private void SetFiredRecoveryStat(RoninSpawnModifierDef spawnModifierDef, int value)
+    { 
+        companyStats.Set<int>(FiredRecoveryStatName(spawnModifierDef), value);
+    }
+    
+    private void SetKilledRecoveryStat(RoninSpawnModifierDef spawnModifierDef, int value)
+    {
+        companyStats.Set<int>(KilledRecoveryStatName(spawnModifierDef), value);
+    }
+
+    private int KilledSpawnModifier(RoninSpawnModifierDef spawnModifierDef)
+    {
+        return companyStats.GetValue<int>(KilledModifierStatName(spawnModifierDef));
+    }
+    
+    private void SetKilledSpawnModifier(RoninSpawnModifierDef spawnModifierDef, int value)
+    {
+        string statName = KilledModifierStatName(spawnModifierDef);
+        string recoveryStat = KilledRecoveryStatName(spawnModifierDef);
+        int roninKilled = RoninKilled;
+        if (roninKilled < spawnModifierDef.KilledThreshold) return;
+        if (roninKilled > spawnModifierDef.KilledCap)
+        {
+            Main.modLog.Debug?.Write(
+                $"Setting spawn mod: {statName} to capped value {spawnModifierDef.KilledCappedModifier}");
+            companyStats.Set<int>(statName, spawnModifierDef.KilledCappedModifier);
+        }
+        else
+        {
+            if (value < spawnModifierDef.KilledFloor)
+            {
+                Main.modLog.Debug?.Write(
+                    $"Setting spawn mod: {statName} to floored value {spawnModifierDef.KilledFloor}");
+                companyStats.Set<int>(statName, spawnModifierDef.KilledFloor);
+            }
+            else
+            {
+                if (value > spawnModifierDef.DefaultKilledModifier)
+                {
+                    companyStats.Set(statName, spawnModifierDef.DefaultKilledModifier);
+                }
+                else
+                {
+                    companyStats.Set<int>(statName, value);
+                }
+            }
+            
+        }
+        
+        companyStats.Set(recoveryStat, spawnModifierDef.KilledRecoveryDays);
+    }
+    
+    private int FiredSpawnModifier(RoninSpawnModifierDef spawnModifierDef)
+    {
+        return companyStats.GetValue<int>(FiredModifierStatName(spawnModifierDef));
+    }
+    
+    private void SetFiredSpawnModifier(RoninSpawnModifierDef spawnModifierDef, int value)
+    {
+        string statName = FiredModifierStatName(spawnModifierDef);
+        string recoveryStat = FiredRecoveryStatName(spawnModifierDef);
+        int roninFired = RoninFired;
+        if (roninFired <= spawnModifierDef.FiredThreshold) return;
+        if (roninFired >= spawnModifierDef.FiredCap)
+        {
+            Main.modLog.Debug?.Write(
+                $"Setting spawn mod: {statName} to capped value {spawnModifierDef.FiredCappedModifier}");
+            companyStats.Set<int>(statName, spawnModifierDef.FiredCappedModifier);
+        }
+        else
+        {
+            if (value < spawnModifierDef.FiredFloor)
+            {
+                Main.modLog.Debug?.Write(
+                    $"Setting spawn mod: {statName} to floored value {spawnModifierDef.FiredFloor}");
+                companyStats.Set<int>(statName, spawnModifierDef.FiredFloor);
+            }
+            else
+            {
+                if (value > spawnModifierDef.DefaultFiredModifier)
+                {
+                    companyStats.Set(statName, spawnModifierDef.DefaultFiredModifier);
+                }
+                else
+                {
+                    companyStats.Set<int>(statName, value);
+                }
+            }
+        }
+        
+        companyStats.Set(recoveryStat, spawnModifierDef.FiredRecoveryDays);
+    }
+
+    public RoninSpawnModifierDef FindModifier(PilotDef pilotDef)
+    {
+        foreach (var modifier in SpawnModifiers)
+        {
+            if (modifier.ApplicableTags.Count == 0) continue; // This is the Default modifier
+            foreach (var tag in pilotDef.PilotTags)
+            {
+                if (modifier.ApplicableTags.Contains(tag)) return modifier;
+            }
+        }
+
+        return _defaultSpawnModifierDef;
     }
     
     public void setSimGameState(SimGameState simGameState)
@@ -61,6 +222,64 @@ public class PilotManagementManager
         {
             companyStats.AddStatistic<int>(MaPilotCount, 0);
         }
+        if (!companyStats.ContainsStatistic(MaRoninFired))
+        {
+            companyStats.AddStatistic<int>(MaRoninFired, 0);
+        }
+        if (!companyStats.ContainsStatistic(MaRoninKilled))
+        {
+            companyStats.AddStatistic<int>(MaRoninKilled, 0);
+        }
+        
+        foreach (var spawnModifier in SpawnModifiers)
+        {
+            var firedStat = FiredModifierStatName(spawnModifier);
+            var firedRecoveryStat = FiredRecoveryStatName(spawnModifier);
+            var killedStat = KilledModifierStatName(spawnModifier);
+            var killedRecoveryStat = KilledRecoveryStatName(spawnModifier);
+            if (!companyStats.ContainsStatistic(firedStat))
+            {
+                companyStats.AddStatistic(firedStat, spawnModifier.DefaultFiredModifier);
+            }
+            if (!companyStats.ContainsStatistic(firedRecoveryStat))
+            {
+                companyStats.AddStatistic(firedRecoveryStat, 0);
+            }
+            if (!companyStats.ContainsStatistic(killedStat))
+            {
+                companyStats.AddStatistic(killedStat, spawnModifier.DefaultKilledModifier);
+            }
+            if (!companyStats.ContainsStatistic(killedRecoveryStat))
+            {
+                companyStats.AddStatistic(killedRecoveryStat, 0);
+            }
+        }
+    }
+
+    private int RoninFired
+    {
+        get
+        {
+            return companyStats.GetValue<int>(MaRoninFired);
+        }
+
+        set
+        {
+            companyStats.Set<int>(MaRoninFired, value);
+        }
+    }
+    
+    private int RoninKilled
+    {
+        get
+        {
+            return companyStats.GetValue<int>(MaRoninKilled);
+        }
+
+        set
+        {
+            companyStats.Set<int>(MaRoninKilled, value);
+        }
     }
 
     public void setPilotCountStat(int pilotCount)
@@ -71,10 +290,70 @@ public class PilotManagementManager
     public void processHiredPilot(PilotDef pilotDef)
     {
         if (_simGame == null) return;
-        if (string.IsNullOrEmpty(settings.statOnHireTag)) return;
-        if (pilotDef.PilotTags.Contains(settings.statOnHireTag))
+        if (string.IsNullOrEmpty(settings.StatOnHireTag)) return;
+        if (pilotDef.PilotTags.Contains(settings.StatOnHireTag))
         {
             _simGame.companyTags.Add($"{MaPilotHiredPrefix}{pilotDef.Description.Id}");
+        }
+    }
+
+    public void UpdateSpawnModifiers()
+    {
+        if (!settings.EnableSpawnModifiers) return;
+        
+        foreach (var spawnModifier in SpawnModifiers)
+        {
+            
+            var firedModifier = FiredSpawnModifier(spawnModifier);
+            var killedModifier = KilledSpawnModifier(spawnModifier);
+
+            if (spawnModifier.DefaultFiredModifier > firedModifier)
+            {
+                var firedRecoveryStat = FiredRecoveryStat(spawnModifier);
+                firedRecoveryStat--;
+                if (firedRecoveryStat <= 0)
+                {
+                    SetFiredSpawnModifier(spawnModifier, firedModifier + spawnModifier.FiredProgression);
+                }
+                else
+                {
+                    SetFiredRecoveryStat(spawnModifier, firedRecoveryStat);
+                }
+            }
+
+            if (spawnModifier.DefaultKilledModifier > killedModifier)
+            {
+                var killedRecoveryStat = KilledRecoveryStat(spawnModifier);
+                killedRecoveryStat--;
+                if (killedRecoveryStat <= 0)
+                {
+                    SetKilledSpawnModifier(spawnModifier, killedModifier + spawnModifier.KilledProgression);
+                }
+                else
+                {
+                    SetKilledRecoveryStat(spawnModifier, killedRecoveryStat);
+                }
+            }
+        }
+    }
+
+    private void UpdatedFiredModifiers()
+    {
+        foreach (var spawnModifier in SpawnModifiers)
+        {
+            var modifier = FiredSpawnModifier(spawnModifier);
+            modifier -= spawnModifier.FiredProgression;
+            SetFiredSpawnModifier(spawnModifier, modifier);
+        }
+    }
+
+    private void UpdateKilledModifiers()
+    {
+        foreach (var spawnModifier in SpawnModifiers)
+        {
+            var modifier = KilledSpawnModifier(spawnModifier);
+            modifier -= spawnModifier.KilledProgression;
+            SetKilledSpawnModifier(spawnModifier, modifier);
         }
     }
 
@@ -86,11 +365,50 @@ public class PilotManagementManager
             _simGame.companyTags.Remove($"{MaPilotHiredPrefix}{pilotDef.Description.Id}");
         }
         
-        if (!string.IsNullOrEmpty(settings.statOnFireTag))
+        if (!string.IsNullOrEmpty(settings.StatOnFireTag))
         {
-            if (pilotDef.PilotTags.Contains(settings.statOnFireTag))
+            if (pilotDef.PilotTags.Contains(settings.StatOnFireTag))
             {
                 _simGame.companyTags.Add($"{MaPilotFiredPrefix}{pilotDef.Description.Id}");
+            }
+        }
+
+        if (pilotDef.IsRonin)
+        {
+            RoninFired++;
+            if (settings.EnableSpawnModifiers)
+            {
+                UpdatedFiredModifiers();
+            }
+        }
+
+        if (settings.CanRepoolRonin && pilotDef.IsRonin)
+        {
+            bool canRepool = true;
+            
+            // some ronin can never be re-added to the ronin pool
+            foreach (var tag in pilotDef.PilotTags)
+            {
+                if (settings.ExcludeRePoolingTags.Contains(tag))
+                {
+                    canRepool = false;
+                    break;
+                }
+            }
+
+            // experienced ronin should also not be re-added
+            if (pilotDef.MissionsPiloted > settings.RepoolImmuneDeployments)
+            {
+                canRepool = false;
+            }
+
+            // if roll was successful and the pilot is eligible for re-pooling
+            // then remove them from the used ronin list, allowing them to be selected again
+            Random random = new Random();
+            int roll = random.Next(0, 100);
+            if (canRepool && roll < settings.RepoolRoninChance)
+            {
+                _simGame.usedRoninIDs.Remove(pilotDef.Description.Id);
             }
         }
     }
@@ -103,13 +421,50 @@ public class PilotManagementManager
             _simGame.companyTags.Remove($"{MaPilotHiredPrefix}{pilotDef.Description.Id}");
         }
         
-        if (!string.IsNullOrEmpty(settings.statOnKilledTag))
+        if (!string.IsNullOrEmpty(settings.StatOnKilledTag))
         {
-            if (pilotDef.PilotTags.Contains(settings.statOnKilledTag))
+            if (pilotDef.PilotTags.Contains(settings.StatOnKilledTag))
             {
                 _simGame.companyTags.Add($"{MaPilotKilledPrefix}{pilotDef.Description.Id}");
             }
         }
+        
+        if (pilotDef.IsRonin)
+        {
+            RoninKilled++;
+            if (settings.EnableSpawnModifiers)
+            {
+                UpdateKilledModifiers();
+            }
+        }
+    }
+
+    private bool CanSpawn(PilotDef pilotDef)
+    {
+        if (!settings.EnableSpawnModifiers) return true;
+        
+        var spawnModifier = FindModifier(pilotDef);
+        
+        var firedRoll = _simGame.NetworkRandom.Int(0, 100);
+        var killedRoll = _simGame.NetworkRandom.Int(0, 100);
+
+        var firedRate = FiredSpawnModifier(spawnModifier);
+        var killedRate = KilledSpawnModifier(spawnModifier);
+
+        if (firedRoll >= firedRate)
+        {
+            Main.modLog.Info?.Write($"Pilot: {pilotDef.Description.Callsign} cannot spawn, failed fired roll: {firedRoll}/{firedRate}");
+            return false;
+        }
+        
+        if (killedRoll >= killedRate)
+        {
+            Main.modLog.Info?.Write($"Pilot: {pilotDef.Description.Callsign} cannot spawn, failed killed roll: {killedRoll}/{killedRate}");
+            return false;
+        }
+
+        return true;
+
     }
 
     private bool CheckRequirement(RequirementDef requirementDef, StarSystem starSystem, SimGameState simGameState)
@@ -144,12 +499,12 @@ public class PilotManagementManager
         list.Shuffle();
         
         // This is mostly intended for testing
-        if (settings.forcedRoninSelectionIds.Count > 0)
+        if (settings.ForcedRoninSelectionIds.Count > 0)
         {
 
             foreach (var pilotDef in new List<PilotDef>(list))
             {
-                if (settings.forcedRoninSelectionIds.Contains(pilotDef.Description.Id))
+                if (settings.ForcedRoninSelectionIds.Contains(pilotDef.Description.Id))
                 {
                     list.Remove(pilotDef);
                     list.Insert(0,pilotDef);
@@ -166,10 +521,11 @@ public class PilotManagementManager
         return currentPilots.Contains(pilotDef);
     }
 
-    public PilotDef GetRandomRonin(SimGameState sim, List<PilotDef> currentRonin = null)
+    public PilotDef GetRandomRonin(SimGameState sim, List<PilotDef> currentRonin, out bool spawnRollFailed)
     {
         List<PilotDef> list = GetShuffledRonin(sim);
         Main.modLog.Debug?.Write($"Have: {list.Count} Ronin to try");
+        spawnRollFailed = false;
         string reasonForRemoval;
         while (list.Count > 0)
         {
@@ -177,6 +533,11 @@ public class PilotManagementManager
                                                                    && IsPilotAvailable(list[0], 
                                                                        sim.CurSystem, sim, true, false, out reasonForRemoval) && !AlreadyPicked(list[0], currentRonin))
             {
+                if (!CanSpawn(list[0]))
+                {
+                    spawnRollFailed = true;
+                    return null;
+                }
                 return list[0];
             }
             Main.modLog.Debug?.Write($"Rejecting: {list[0].Description.Callsign}");
@@ -218,7 +579,7 @@ public class PilotManagementManager
 
     public bool IsPilotAvailable(PilotDef pilotDef, StarSystem starSystem, SimGameState simGame, bool checkVisibility, bool checkHiring, out string reasonForNotAvailable)
     {
-        if (settings.enableRoninBlacklisting && pilotDef.PilotTags.Contains(settings.roninBlacklistTag))
+        if (settings.EnableRoninBlacklisting && pilotDef.PilotTags.Contains(settings.RoninBlacklistTag))
         {
             reasonForNotAvailable = $"Pilot: {pilotDef.Description.Callsign} is blacklisted";
             Main.modLog.Debug?.Write(reasonForNotAvailable);
