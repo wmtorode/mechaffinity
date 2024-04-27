@@ -447,7 +447,7 @@ namespace MechAffinity
                 {
                     foreach (var component in mechDef.Inventory)
                     {
-                        if (component.Flags<CCFlags>().Default)
+                        if (component.Def.CCFlags().Default)
                         {
                             defaults.Add(component.ComponentDefID);
                         }

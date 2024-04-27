@@ -31,7 +31,7 @@ namespace MechAffinity
         private bool moraleModInstanced;
         private Dictionary<string, float> argoUpgradeBaseCostCache;
         private Dictionary<string, float> argoUpgradeUpkeepCostCache;
-        private Dictionary<string, PilotStealChanceCacheEntry> pilotStealCache;
+        private Dictionary<string, PilotStealCache> pilotStealCache;
         private List<LanceQuirkDef> lanceQuirks;
 
         private List<EffectData> lanceWideEffectsCache = new List<EffectData>();
@@ -94,7 +94,7 @@ namespace MechAffinity
 
             argoUpgradeBaseCostCache = new Dictionary<string, float>();
             argoUpgradeUpkeepCostCache = new Dictionary<string, float>();
-            pilotStealCache = new Dictionary<string, PilotStealChanceCacheEntry>();
+            pilotStealCache = new Dictionary<string, PilotStealCache>();
             BlockFinanceScreenUpdate = false;
         }
         
@@ -692,48 +692,52 @@ namespace MechAffinity
         {
             int totalStolen = 0;
 
-            PilotStealChanceCacheEntry cacheEntry;
+            PilotStealCache cacheEntry;
 
             if (!pilotStealCache.TryGetValue(pilot.pilotDef.Description.Id, out cacheEntry))
             {
+                cacheEntry = new PilotStealCache();
                 Main.modLog.Info?.Write($"Pilot {pilot.Callsign} steal cache miss!");
-                cacheEntry = new PilotStealChanceCacheEntry();
+                var entry = new PilotStealChanceCacheEntry();
                 List<PilotQuirk> pilotQuirks = getQuirks(pilot);
                 foreach (PilotQuirk quirk in pilotQuirks)
                 {
+                    bool quirkFound = false;
                     foreach (QuirkEffect effect in quirk.quirkEffects)
                     {
                         if (effect.type == EQuirkEffectType.CriminalEffect)
                         {
-                            cacheEntry.StealChance += (int)effect.modifier;
-                            cacheEntry.StealAmount += (int)effect.secondaryModifier;
+                            entry.StealChance += (int)effect.modifier;
+                            entry.StealAmount += (int)effect.secondaryModifier;
+                            quirkFound = true;
                         }
                         else if (effect.type == EQuirkEffectType.CriminalEffect2)
                         {
-                            cacheEntry.StealChance2 += (int)effect.modifier;
-                            cacheEntry.StealAmount2 += (int)effect.secondaryModifier;
+                            entry.StealChance2 += (int)effect.modifier;
+                            entry.StealAmount2 += (int)effect.secondaryModifier;
+                            quirkFound = true;
                         }
                     }
+                    if (quirkFound) cacheEntry.StealChanceCacheEntries.Add(entry);
                 }
-                
                 pilotStealCache.Add(pilot.pilotDef.Description.Id, cacheEntry);
             }
             
-            
-            Random random = new Random();
-            int roll = random.Next(0, 100);
-            if (roll < cacheEntry.StealChance)
+            int roll = sim.NetworkRandom.random.Next(0, 100);
+            int roll2 = sim.NetworkRandom.random.Next(0, 100);
+            foreach (var chance in cacheEntry.StealChanceCacheEntries)
             {
-                Main.modLog.Info?.Write($"Pilot {pilot.Callsign}, steals: {cacheEntry.StealAmount}");
-                totalStolen -= cacheEntry.StealAmount;
+                if (roll < chance.StealChance)
+                {
+                    Main.modLog.Info?.Write($"Pilot {pilot.Callsign}, steals: {chance.StealAmount}");
+                    totalStolen -= chance.StealAmount;
+                }
+                if (roll2 < chance.StealChance2)
+                {
+                    Main.modLog.Info?.Write($"Pilot {pilot.Callsign}, steals: {chance.StealAmount2}");
+                    totalStolen -= chance.StealAmount2;
+                }
             }
-            roll = random.Next(0, 100);
-            if (roll < cacheEntry.StealChance2)
-            {
-                Main.modLog.Info?.Write($"Pilot {pilot.Callsign}, steals: {cacheEntry.StealAmount2}");
-                totalStolen -= cacheEntry.StealAmount2;
-            }
-
             return totalStolen;
         }
 
