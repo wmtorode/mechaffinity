@@ -26,7 +26,7 @@ namespace MechAffinity.Patches
             {
                 PilotAffinityManager.Instance.setCompanyStats(__instance.CompanyStats);
                 PilotAffinityManager.Instance.setDataManager(__instance.DataManager);
-                
+
                 var mechs = __instance.DataManager.MechDefs.Select(pair => pair.Value);
                 foreach (MechDef mech in mechs)
                 {
@@ -53,6 +53,9 @@ namespace MechAffinity.Patches
             {
                 MonthlyTechAdjustmentManager.Instance.setCompanyStats(__instance.CompanyStats, __instance);
             }
+            PilotManagementManager.Instance.setCompanyStats(__instance.CompanyStats);
+            PilotManagementManager.Instance.setSimGameState(__instance);
+            PilotManagementManager.Instance.setPilotCountStat(__instance.PilotRoster.Count);
         }
     }
     
@@ -94,6 +97,8 @@ namespace MechAffinity.Patches
             {
                 MonthlyTechAdjustmentManager.Instance.setCompanyStats(__instance.CompanyStats, __instance);
             }
+            PilotManagementManager.Instance.setCompanyStats(__instance.CompanyStats);
+            PilotManagementManager.Instance.setSimGameState(__instance);
 
 
         }
@@ -219,6 +224,11 @@ namespace MechAffinity.Patches
                 PilotQuirkManager.Instance.BlockFinanceScreenUpdate = true;
                 __instance.AddFunds(totalStolen, null, true);
             }
+
+            if (Main.settings.enablePilotManagement)
+            {
+                PilotManagementManager.Instance.UpdateSpawnModifiers();
+            }
         }
     }
 
@@ -258,10 +268,6 @@ namespace MechAffinity.Patches
     [HarmonyPatch(typeof(SimGameState), "AddPilotToRoster", typeof(PilotDef), typeof(bool), typeof(bool))]
     class SimGameState_AddPilotToRoster
     {
-        public static bool Prepare()
-        {
-            return Main.settings.enablePilotQuirks;
-        }
         public static void Prefix(ref bool __runOriginal, SimGameState __instance, PilotDef def, bool updatePilotDiscardPile = false)
         {
             
@@ -270,10 +276,19 @@ namespace MechAffinity.Patches
                 return;
             }
             
-            if (def != null)
+            if (def != null && Main.settings.enablePilotAffinity)
             {
                 PilotQuirkManager.Instance.ResetArgoCostCache();
                 PilotQuirkManager.Instance.proccessPilot(def, true);
+            }
+        }
+        
+        public static void Postfix(SimGameState __instance, PilotDef def)
+        {
+            PilotManagementManager.Instance.setPilotCountStat(__instance.PilotRoster.Count);
+            if (Main.settings.enablePilotManagement)
+            {
+                PilotManagementManager.Instance.processHiredPilot(def);
             }
         }
     }
@@ -328,12 +343,16 @@ namespace MechAffinity.Patches
         
         public static void Postfix(SimGameState __instance, Pilot p, ref bool __result)
         {
+            PilotManagementManager.Instance.setPilotCountStat(__instance.PilotRoster.Count);
+            
             if (!Main.settings.enablePilotManagement)
             {
                 return;
             }
+            
+            PilotManagementManager.Instance.processKilledPilot(p.pilotDef);
 
-            string interruptMsg = "";
+                string interruptMsg = "";
             foreach (var pilot in pilotsToDismiss)
             {
                 __instance.DismissPilot(pilot);
@@ -379,6 +398,9 @@ namespace MechAffinity.Patches
                     if (Main.settings.enablePilotManagement)
                     {
                         string interruptMsg = "";
+                        
+                        PilotManagementManager.Instance.processFiredPilot(p.pilotDef);
+                        
                         var otherPilotsToDismiss =
                             PilotManagementManager.Instance.PilotsThatMustLeave(def, __instance.PilotRoster.rootList);
                         foreach (var pilot in otherPilotsToDismiss)
@@ -399,6 +421,11 @@ namespace MechAffinity.Patches
                     }
                 }
             }
+        }
+        
+        public static void Postfix(SimGameState __instance)
+        {
+            PilotManagementManager.Instance.setPilotCountStat(__instance.PilotRoster.Count);
         }
     }
     
@@ -666,8 +693,8 @@ namespace MechAffinity.Patches
 
             __runOriginal = false;
             Main.modLog.Debug?.Write($"Called GetUnusedRonin!");
-
-            __result = PilotManagementManager.Instance.GetRandomRonin(__instance);
+            bool spawnFailed;
+            __result = PilotManagementManager.Instance.GetRandomRonin(__instance, null, out spawnFailed);
 
 
         }

@@ -608,12 +608,18 @@ A quirk pool provides a way to randomly assign quirks to a pilot based on the pr
 {
   "tag" : "",
   "quirksToPick": 0,
-  "quirksAvailable" : []
+  "quirksAvailable" : [],
+  "defaultQuirkWeight": 3,
+  "weightedQuirks": {
+    "exampleQuirk" : 2
+  }
 }
 ```
 - `tag` : the tag that activates this quirk pool
 - `quirksToPick` : the number of quirks to select from this pool
-- `quirksAvailable` : a list of quirk tags this pool can select
+- `quirksAvailable` : a list of quirk tags this pool can select that use the default weight for selection
+- `defaultQuirkWeight` : the default weighting that is used for all quirks in the `quirksAvailable` list
+- `weightedQuirks`: a dictionary of quirks to weights. quirks in this list must not be in the `quirksAvailable` list. all quirks in this dictionary will use the weight specified, allowing them to be more common, or rare than quirks in the main list. 
 
 #### PilotTooltipTag objects
 ```json
@@ -1033,20 +1039,37 @@ These settings control the 'Pilot Management' feature set.
 
 ```json
 {
-   "roninBlacklistTag": "",
-    "enablePilotGenTesting": false,
-    "enableRoninBlacklisting": false,
-    "forcedRoninSelectionIds": []
+    "RoninBlacklistTag": "",
+    "StatOnHireTag": "",
+    "StatOnFireTag": "",
+    "StatOnKilledTag": "",
+    "EnablePilotGenTesting": false,
+    "EnableRoninBlacklisting": false,
+    "ForcedRoninSelectionIds": [],
+    "CanRepoolRonin": false,
+    "RepoolRoninChance": 0,
+    "RepoolImmuneDeployments": 0,
+    "EnableSpawnModifiers": false,
+    "ExcludeRePoolingTags": []
   }
 ```
 
-- `enableRoninBlacklisting`: when set to `true` any pilot with the `roninBlacklistTag` will be prevented from entering the hiring halls
-- `enablePilotGenTesting`: when `true` override the pilot generator to account for pilots in `forcedRoninSelectionIds`, this should only be enabled for testing
-- `forcedRoninSelectionIds`: a list of pilot IDs that will be given preference when generating a ronin pilot for the hiring halls. This is very useful for testing, but should not be used when not testing
+- `EnableRoninBlacklisting`: when set to `true` any pilot with the `RoninBlacklistTag` will be prevented from entering the hiring halls
+- `EnablePilotGenTesting`: when `true` override the pilot generator to account for pilots in `ForcedRoninSelectionIds`, this should only be enabled for testing
+- `ForcedRoninSelectionIds`: a list of pilot IDs that will be given preference when generating a ronin pilot for the hiring halls. This is very useful for testing, but should not be used when not testing
+- `StatOnHireTag`: a custom tag, when a pilot carrying this tag is hired a new company tag `hasPilot_{pilotID}` will be created. This is useful for triggering events that require a particular pilot. when the pilot is killed or fired this stat will be removed.
+- `StatOnFireTag`: a custom tag, when a pilot carrying this tag is fired a new company tag `firedPilot_{pilotID}` will be created. This is useful for triggering events that require a particular pilot.
+- `StatOnKilledTag`: a custom tag, when a pilot carrying this tag is killed a new company tag `killedPilot_{pilotID}` will be created. This is useful for triggering events that require a particular pilot.
+- `CanRepoolRonin`: when enabled, Ronin that are fired, can under some conditions be re-added to the list of available ronin, allowing them to appear once more in the hiring halls. Note: Any experience or skills the pilot may have gained under their former employment will not persist
+- `RepoolRoninChance`: the chance (as an integer) for a fired Ronin to be returned to the available ronin list. Valid range is 0 - 100% (requires repooling to be enabled)
+- `RepoolImmuneDeployments`: ronin who have successfully deployed more than this are immune from being returned to the available ronin list
+- `ExcludeRePoolingTags`: a list of pilot tags, any pilot with one or more of these tags can never be returned to the available ronin list
+- `EnableSpawnModifiers`: when true, spawn chance modifications loaded by `RoninSpawnModifierDefs` will be used
+
 
 ### PilotRequirementsDef Objects
 
-These objects are used to create restrictions for pilots
+These objects are used to create restrictions for where and when pilots can be hired
 
 ```json
 {
@@ -1056,7 +1079,9 @@ These objects are used to create restrictions for pilots
   "RequiredSystemCoreIds": [],
   "RequiredSystemOwner": [],
   "RequiredPilotIds": [],
-  "ConflictingPilotIds": []
+  "ConflictingPilotIds": [],
+  "AntiSystemOwner": [],
+  "RequiredSystemCoreIdPrefix": ""
 }
 ```
 
@@ -1067,8 +1092,56 @@ These objects are used to create restrictions for pilots
 - `RequiredSystemOwner`: a list of faction Names, a pilot will only be eligible to appear in the hiring hall if the faction who controls this system is in this list, if empty all factions are allowed.
 - `RequiredPilotIds`: a list of pilot IDs that you are required to have in your current pilot roster to hire this pilot. All pilots in this list must be owned.
 - `ConflictingPilotIds`: a list of pilot IDs. If you have any of these pilots in your current roster, this pilot will not be hire-able
+- `AntiSystemOwner`: a list of faction Names, a pilot will not be eligible to appear in the hiring hall if the faction that controls this system is in this list, if empty no factions are restricted in this fashion
+- `RequiredSystemCoreIdPrefix`: a string. When not empty the pilot will only appear on worlds whose Core ID starts with this prefix string. This is useful when restricting a pilot to something like jump point worlds
 
 **Note: For RequirementDefs, only the Commander, Company & StarSystem scopes are implemented**
+
+### RoninSpawnModifierDefs Objects
+
+These files are used to modify the chances of certain ronin from appearing in the hiring halls based on the number of ronin you have fired or had die as members of your company. The idea is that
+Ronin are elite pilots whose skills are in demand. If a potential employer is known to not offer stable employment or is imfamous amongst the ronin, there is less of a chance they will be willing to work for you.
+
+When a ronin subject to this restriction is drawn for the hiring halls, 2 rolls will be made, one against the penalties for the number of ronin you have fired and the other for the number killed. Failing either of these rolls
+will result in the ronin not spawning in the halls, instead being replaced by a proc-gen pilot.
+
+```json
+{
+  "Id": "Default",
+  "IsDefault": false,
+  "ApplicableTags": [],
+  "FiredThreshold": 10,
+  "KilledThreshold": 10,
+  "DefaultFiredModifier": 100,
+  "DefaultKilledModifier": 100,
+  "FiredProgression": 5,
+  "KilledProgression": 5,
+  "FiredRecoveryDays": 5,
+  "KilledRecoveryDays": 5,
+  "FiredFloor": 0,
+  "KilledFloor": 0,
+  "FiredCap": 10000,
+  "KilledCap": 10000,
+  "FiredCappedModifier": 50,
+  "KilledCappedModifier": 50
+}
+```
+
+- `Id`: an ID for this modifier, must have a unique ID from all other spawn modifiers
+- `IsDefault`: when true, this set of modifiers will apply to all ronin not covered by another modifier set, if no modifier set has this field set, then the defaults seen above will be used for defaults.
+- `ApplicableTags`: ronin carrying any of these tags will be subject to this set of modifiers. If `IsDefault` is set this field is ignored
+- `FiredThreshold`: The number of ronin you may fire before penalties begin to incur. Note: This includes all ronin, not just those subject to this modifier
+- `KilledThreshold`: The number of ronin you may kill before penalties begin to incur. Note: This includes all ronin, not just those subject to this modifier
+- `DefaultFiredModifier`: The default percentage chance a ronin subject to this restriction will have to spawn when selected for the hiring halls based on the number. The number of ronin fired will decrease this chance.
+- `DefaultKilledModifier`: The default percentage chance a ronin subject to this restriction will have to spawn when selected for the hiring halls based on the number. The number of ronin killed will decrease this chance.
+- `FiredProgression`: For each pilot fired over the fired threshold `DefaultFiredModifier` will be reduced by this much. likewise when the modifier recovers, it will recover by this much each step.
+- `KilledProgression`: For each pilot killed over the killed threshold `DefaultKilledModifier` will be reduced by this much. likewise when the modifier recovers, it will recover by this much each step.
+- `FiredRecoveryDays`: the number of days the firing penalty will be applied for. Note: if another firing penalty is incurred during this time, this value is reset.
+- `KilledRecoveryDays`: the number of days the killed penalty will be applied for. Note: if another killed penalty is incurred during this time, this value is reset.
+- `FiredFloor`: The minimum value `DefaultFiredModifier` can be reduced to by firing penalties. Note: This can be negative to inflict very long penalties if desired
+- `KilledFloor`: The minimum value `DefaultKilledModifier` can be reduced to by killing penalties. Note: This can be negative to inflict very long penalties if desired
+- `FiredCap`: After firing this many ronin `DefaultFiredModifier` and any penalties is replaced with `FiredCappedModifier` and will no longer change, this penalty is permanent
+- `KilledCap`: After killing this many ronin `DefaultKilledModifier` and any penalties is replaced with `KilledCappedModifier` and will no longer change, this penalty is permanent
 
 ## Pilot UI Modifications
 
@@ -1187,6 +1260,7 @@ The following Custom Resource Types are used by this mod:
 - QuirkDef
 - LanceQuirkDef
 - PilotRequirementsDef
+- RoninSpawnModifierDef
 
 ## Upgrading from 1.3.0 or earlier
 

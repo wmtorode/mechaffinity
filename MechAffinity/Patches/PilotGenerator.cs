@@ -10,7 +10,7 @@ class PilotGenerator_GeneratePilots
 {
     public static bool Prepare()
     {
-        return Main.settings.enablePilotManagement && Main.settings.pilotManagementSettings.enablePilotGenTesting;
+        return Main.settings.enablePilotManagement;
     }
     public static void Prefix(ref bool __runOriginal, PilotGenerator __instance, int numPilots, int systemDifficulty, float roninChance, ref List<PilotDef> __result, out List<PilotDef> roninList)
     {
@@ -35,12 +35,17 @@ class PilotGenerator_GeneratePilots
         Main.modLog.Debug?.Write($"Attempting to Generate: {numPilots}!");
         roninList = new List<PilotDef>();
         roninChance = Mathf.Clamp01(roninChance);
+        if (Main.settings.pilotManagementSettings.OverideRoninRate & roninChance > 0f)
+        {
+            roninChance = Main.settings.pilotManagementSettings.RoninRate;
+        }
         List<PilotDef> pilots = new List<PilotDef>();
         for (int index = 0; index < numPilots; ++index)
         {
             if (__instance.Sim.NetworkRandom.Float() <= roninChance)
             {
-                PilotDef unusedRonin = PilotManagementManager.Instance.GetRandomRonin(__instance.Sim, roninList);
+                bool spawnRollFailed;
+                PilotDef unusedRonin = PilotManagementManager.Instance.GetRandomRonin(__instance.Sim, roninList, out spawnRollFailed);
                 if (unusedRonin != null)
                 {
                     Main.modLog.Debug?.Write($"Got Pilot: {unusedRonin.Description.Callsign}");
@@ -48,6 +53,13 @@ class PilotGenerator_GeneratePilots
                 }
                 else
                 {
+                    // if no ronin was given because a modifier roll failed, then allow more ronin to possibly roll
+                    // because the pool is not empty
+                    if (spawnRollFailed)
+                    {
+                        pilots.Add(__instance.GenerateRandomPilot(systemDifficulty));
+                        continue;
+                    }
                     roninChance = -1f;
                     --index;
                 }
