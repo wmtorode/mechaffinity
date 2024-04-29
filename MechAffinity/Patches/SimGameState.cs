@@ -335,6 +335,7 @@ namespace MechAffinity.Patches
                     {
                         pilotsToDismiss =
                             PilotManagementManager.Instance.PilotsThatMustLeave(def, __instance.PilotRoster.rootList);
+                        PilotManagementManager.Instance.processKilledPilot(p.pilotDef);
                     }
                 }
             }
@@ -349,15 +350,19 @@ namespace MechAffinity.Patches
             {
                 return;
             }
-            
-            PilotManagementManager.Instance.processKilledPilot(p.pilotDef);
 
-                string interruptMsg = "";
+            string callsign = "UKNOWN PILOT!";
+            if (p != null && p.pilotDef != null)
+            {
+                callsign = p.Callsign;
+            }
+            
+            string interruptMsg = "";
             foreach (var pilot in pilotsToDismiss)
             {
                 __instance.DismissPilot(pilot);
                 interruptMsg +=
-                    $"{pilot.Callsign} has left your company because {p.Callsign} is no longer under your employ\n";
+                    $"{pilot.Callsign} has left your company because {callsign} is no longer under your employ\n";
             }
 
             if (!string.IsNullOrEmpty(interruptMsg))
