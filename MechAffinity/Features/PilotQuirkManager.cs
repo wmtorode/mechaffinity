@@ -687,11 +687,11 @@ namespace MechAffinity
             {
                 cacheEntry = new PilotStealCache();
                 Main.modLog.Info?.Write($"Pilot {pilot.Callsign} steal cache miss!");
-                var entry = new PilotStealChanceCacheEntry();
                 List<PilotQuirk> pilotQuirks = getQuirks(pilot);
                 foreach (PilotQuirk quirk in pilotQuirks)
                 {
                     bool quirkFound = false;
+                    var entry = new PilotStealChanceCacheEntry();
                     foreach (QuirkEffect effect in quirk.quirkEffects)
                     {
                         if (effect.type == EQuirkEffectType.CriminalEffect)
