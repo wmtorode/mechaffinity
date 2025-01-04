@@ -1015,16 +1015,107 @@ These settings control the 'Monthly Tech Adjustment' feature set.
   "SpartanMechModifier": -4,
   "RestrictedMechModifier": -2,
   "NormalMechModifier": 0,
-  "GenerousMechModifier": 8,
+  "GenerousMechModifier": 1,
   "ExtravagantMechModifier": 2,
-  "UiFontSize": 28
+  "UiFontSize": 28,
+  "UseEnhancedFormulas": false,
+  "ModifiersFirst": true,
+  "DefaultMedTechModifier": 0,
+  "DefaultMechTechModifier": 0,
+  "DefaultMedTechMultiplier": 1.0,
+  "DefaultMechTechMultiplier": 1.0,
+  "SpartanMedMultiplier": 1.0,
+  "RestrictedMedMultiplier": 1.0,
+  "NormalMedMultiplier": 1.0,
+  "GenerousMedMultiplier": 1.0,
+  "ExtravagantMedMultiplier": 1.0,
+  "SpartanMechMultiplier": 1.0,
+  "RestrictedMechMultiplier": 1.0,
+  "NormalMechMultiplier": 1.0,
+  "GenerousMechMultiplier": 1.0,
+  "ExtravagantMechMultiplier": 1.0
 }
 
 ```
 
-- `xxxMedModifier`: the buff/malus to the MedTech at the corresponding funding level, positive is a buff, negative is a malus. Note that this an adjustment from the baseline value, not an stacking modifier. This means if Spartan provides a -4 malus, taking Spartan for 2 straight months will still only be a -4 penalty, like wise with buffs
-- `xxxMedModifier`: the buff/malus to the MechTech at the corresponding funding level, positive is a buff, negative is a malus. Note that this an adjustment from the baseline value, not an stacking modifier. This means if Spartan provides a -4 malus, taking Spartan for 2 straight months will still only be a -4 penalty, like wise with buffs
 - `UiFontSize`: the fontsize of various parts of the financial report will not scale with additional text being added to the fields, to fix this we can scale the fontsize down to allow it to fit better. the default of 28 seems pretty good but is adjustable if needed. Note: vanilla's default size for these fields is 30 for comparision.
+
+### When `UseEnhancedFormulas` is false:
+
+- `xxxMedModifier`: the buff/malus to the MedTech at the corresponding funding level, positive is a buff, negative is a malus. Note that this an adjustment from the baseline value, not an stacking modifier. This means if Spartan provides a -4 malus, taking Spartan for 2 straight months will still only be a -4 penalty, like wise with buffs
+- `xxxMechModifier`: the buff/malus to the MechTech at the corresponding funding level, positive is a buff, negative is a malus. Note that this an adjustment from the baseline value, not an stacking modifier. This means if Spartan provides a -4 malus, taking Spartan for 2 straight months will still only be a -4 penalty, like wise with buffs
+
+Med/MechTech Skill for the month = BaseSkill + xxxModifier
+
+ex. you have 10 MechTech and select `Spartan` Funding level, which has a `-4` Modifier:
+10 + (-4) = 6
+your MechTech skill for this month is now 6
+
+### When `UseEnhancedFormulas` is true:
+
+the Ehnanced Formula uses your current Mech/MedTech Skill to determine the buff/malus for the month based on your funding level, allowing it to scale with your company as it improves
+
+- `xxxMedModifier`: the default buff/malus to the MedTech at the corresponding funding level
+- `xxxMechModifier`: the default buff/malus to the MechTech at the corresponding funding level
+- `xxxMedMultiplier`: the default buff/malus multiplier to the MedTech at the corresponding funding level
+- `xxxMechMultiplier`: the default buff/malus to the multiplier MechTech at the corresponding funding level
+
+Note: These as the **default** values, and are baked into the save so that they can be modified
+
+ex. you have 10 MechTech and select `Spartan` Funding level, which currently has a `+2` Modifier and a `-0.5` Multiplier
+
+#### When `ModifiersFirst` is true
+
+Med/MechTech Skill for the month = BaseSkill + ((BaseSkill + xxxModifier) * xxxMultiplier)
+ MechTech = 10 + ((10 +2) * -0.5)
+ MechTech = 10 + (12 * -0.5)
+ MechTech = 10 + (-6)
+ MechTech = 4
+ your MechTech Skill for this month is now 4
+
+#### When `ModifiersFirst` is false
+
+Med/MechTech Skill for the month = BaseSkill + ((BaseSkill * xxxMultiplier) + xxxModifier)
+MechTech = 10 + ((10 * -0.5) + 2)
+MechTech = 10 + (-5 + 2)
+MechTech = 10 + (-3)
+MechTech = 7
+your MechTech Skill for this month is now 7
+
+When using Enhanced formulas, events or argo upgrades can modify the bonus/malus modifiers and multipliers by updating the following stats in the company stat collection:
+```
+MT_MedTechFlatModifier_Extravagant
+MT_MedTechFlatModifier_Generous
+MT_MedTechFlatModifier_Global
+MT_MedTechFlatModifier_Normal
+MT_MedTechFlatModifier_Restrictive
+MT_MedTechFlatModifier_Spartan
+
+MT_MedTechMultiplier_Extravagant
+MT_MedTechMultiplier_Generous
+MT_MedTechMultiplier_Global
+MT_MedTechMultiplier_Normal
+MT_MedTechMultiplier_Restrictive
+MT_MedTechMultiplier_Spartan
+
+MT_MechTechFlatModifier_Extravagant
+MT_MechTechFlatModifier_Generous
+MT_MechTechFlatModifier_Global
+MT_MechTechFlatModifier_Normal
+MT_MechTechFlatModifier_Restrictive
+MT_MechTechFlatModifier_Spartan
+
+MT_MechTechMultiplier_Extravagant
+MT_MechTechMultiplier_Generous
+MT_MechTechMultiplier_Global
+MT_MechTechMultiplier_Normal
+MT_MechTechMultiplier_Restrictive
+MT_MechTechMultiplier_Spartan
+
+```
+
+
+
 
 ## Pilot Management Features
 
