@@ -1047,9 +1047,11 @@ These settings control the 'Monthly Tech Adjustment' feature set.
 
 Med/MechTech Skill for the month = BaseSkill + xxxModifier
 
+```
 ex. you have 10 MechTech and select `Spartan` Funding level, which has a `-4` Modifier:
 10 + (-4) = 6
 your MechTech skill for this month is now 6
+```
 
 ### When `UseEnhancedFormulas` is true:
 
@@ -1066,21 +1068,25 @@ ex. you have 10 MechTech and select `Spartan` Funding level, which currently has
 
 #### When `ModifiersFirst` is true
 
+```
 Med/MechTech Skill for the month = BaseSkill + ((BaseSkill + xxxModifier) * xxxMultiplier)
  MechTech = 10 + ((10 +2) * -0.5)
  MechTech = 10 + (12 * -0.5)
  MechTech = 10 + (-6)
  MechTech = 4
  your MechTech Skill for this month is now 4
+ ```
 
 #### When `ModifiersFirst` is false
 
+```
 Med/MechTech Skill for the month = BaseSkill + ((BaseSkill * xxxMultiplier) + xxxModifier)
 MechTech = 10 + ((10 * -0.5) + 2)
 MechTech = 10 + (-5 + 2)
 MechTech = 10 + (-3)
 MechTech = 7
 your MechTech Skill for this month is now 7
+```
 
 When using Enhanced formulas, events or argo upgrades can modify the bonus/malus modifiers and multipliers by updating the following stats in the company stat collection:
 ```
