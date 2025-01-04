@@ -59,39 +59,46 @@ namespace MechAffinity
                 companyStats.AddStatistic<int>(MedTechModifier, 0);
             }
 
-            List<EconomyScale?> economyScales = new List<EconomyScale?>()
+            if (settings.UseEnhancedFormulas)
             {
-                EconomyScale.Spartan,
-                EconomyScale.Restrictive,
-                EconomyScale.Normal,
-                EconomyScale.Generous,
-                EconomyScale.Extravagant
-            };
+                List<EconomyScale?> economyScales = new List<EconomyScale?>()
+                {
+                    EconomyScale.Spartan,
+                    EconomyScale.Restrictive,
+                    EconomyScale.Normal,
+                    EconomyScale.Generous,
+                    EconomyScale.Extravagant
+                };
 
-            foreach (EconomyScale? economyScale in economyScales)
-            {
-                if (!companyStats.ContainsStatistic(GetMechTechMultiplierStatId(economyScale)))
+                foreach (EconomyScale? economyScale in economyScales)
                 {
-                    companyStats.AddStatistic(GetMechTechMultiplierStatId(economyScale), GetMechTechDefaultMultiplier(economyScale));
+                    if (!companyStats.ContainsStatistic(GetMechTechMultiplierStatId(economyScale)))
+                    {
+                        companyStats.AddStatistic(GetMechTechMultiplierStatId(economyScale),
+                            GetMechTechDefaultMultiplier(economyScale));
+                    }
+
+                    if (!companyStats.ContainsStatistic(GetMechTechFlatStatId(economyScale)))
+                    {
+                        companyStats.AddStatistic(GetMechTechFlatStatId(economyScale),
+                            GetMechTechDefaultModifier(economyScale));
+                    }
+
+                    if (!companyStats.ContainsStatistic(GetMedTechMultiplierStatId(economyScale)))
+                    {
+                        companyStats.AddStatistic(GetMedTechMultiplierStatId(economyScale),
+                            GetMedTechDefaultMultiplier(economyScale));
+                    }
+
+                    if (!companyStats.ContainsStatistic(GetMedTechFlatStatId(economyScale)))
+                    {
+                        companyStats.AddStatistic(GetMedTechFlatStatId(economyScale),
+                            GetMedTechDefaultModifier(economyScale));
+                    }
+
                 }
-                
-                if (!companyStats.ContainsStatistic(GetMechTechFlatStatId(economyScale)))
-                {
-                    companyStats.AddStatistic(GetMechTechFlatStatId(economyScale), GetMechTechDefaultModifier(economyScale));
-                }
-                
-                if (!companyStats.ContainsStatistic(GetMedTechMultiplierStatId(economyScale)))
-                {
-                    companyStats.AddStatistic(GetMedTechMultiplierStatId(economyScale), GetMedTechDefaultMultiplier(economyScale));
-                }
-                
-                if (!companyStats.ContainsStatistic(GetMedTechFlatStatId(economyScale)))
-                {
-                    companyStats.AddStatistic(GetMedTechFlatStatId(economyScale), GetMedTechDefaultModifier(economyScale));
-                }
-                
             }
-            
+
             if (sim.CompanyTags.Any(x => x.StartsWith(MTMASaveTagPrefix)))
             {
                 LegacyMtmaSave legacyMtmaSave = JsonConvert.DeserializeObject<LegacyMtmaSave>(sim.CompanyTags.First(x => x.StartsWith(MTMASaveTagPrefix)).Substring(4));
