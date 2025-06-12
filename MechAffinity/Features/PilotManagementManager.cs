@@ -561,7 +561,7 @@ public class PilotManagementManager
                 PilotRequirementsDef requirementsDef;
                 if (requirementsMap.TryGetValue(tag, out requirementsDef))
                 {
-                    if (requirementsDef.RequiredPilotIds.Count > 0)
+                    if (requirementsDef.RequiredPilotIds.Count > 0  && requirementsDef.LeaveIfRequiredPilotsLost)
                     {
                         if (requirementsDef.RequiredPilotIds.Contains(pilotLeaving.Description.Id))
                         {

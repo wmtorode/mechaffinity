@@ -1178,7 +1178,8 @@ These objects are used to create restrictions for where and when pilots can be h
   "RequiredPilotIds": [],
   "ConflictingPilotIds": [],
   "AntiSystemOwner": [],
-  "RequiredSystemCoreIdPrefix": ""
+  "RequiredSystemCoreIdPrefix": "",
+  "LeaveIfRequiredPilotsLost": true
 }
 ```
 
@@ -1191,6 +1192,7 @@ These objects are used to create restrictions for where and when pilots can be h
 - `ConflictingPilotIds`: a list of pilot IDs. If you have any of these pilots in your current roster, this pilot will not be hire-able
 - `AntiSystemOwner`: a list of faction Names, a pilot will not be eligible to appear in the hiring hall if the faction that controls this system is in this list, if empty no factions are restricted in this fashion
 - `RequiredSystemCoreIdPrefix`: a string. When not empty the pilot will only appear on worlds whose Core ID starts with this prefix string. This is useful when restricting a pilot to something like jump point worlds
+- `LeaveIfRequiredPilotsLost`: a boolean, when true the pilot will leave if any required pilots leave the company or are killed. Defaults to true
 
 **Note: For RequirementDefs, only the Commander, Company & StarSystem scopes are implemented**
 
