@@ -1140,6 +1140,7 @@ These settings control the 'Pilot Management' feature set.
     "StatOnHireTag": "",
     "StatOnFireTag": "",
     "StatOnKilledTag": "",
+    "StatOnBenchedTag": "",
     "EnablePilotGenTesting": false,
     "EnableRoninBlacklisting": false,
     "ForcedRoninSelectionIds": [],
@@ -1162,6 +1163,7 @@ These settings control the 'Pilot Management' feature set.
 - `RepoolImmuneDeployments`: ronin who have successfully deployed more than this are immune from being returned to the available ronin list
 - `ExcludeRePoolingTags`: a list of pilot tags, any pilot with one or more of these tags can never be returned to the available ronin list
 - `EnableSpawnModifiers`: when true, spawn chance modifications loaded by `RoninSpawnModifierDefs` will be used
+- `StatOnBenchedTag`: a custom tag, when a pilot carrying this tag is hired a new stat `PilotBenched_{pilotID}` will be created. This stat will track how many times the pilot has been consecutively benched in a row. This stat is reset to 0 when the pilot takes part in a contract. This is useful for events.
 
 
 ### PilotRequirementsDef Objects

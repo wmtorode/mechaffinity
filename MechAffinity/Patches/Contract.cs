@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using BattleTech;
 using BattleTech.UI;
 using BattleTech.StringInterpolation;
@@ -51,9 +52,11 @@ namespace MechAffinity.Patches
             {
                 int FlatBonus = 0;
                 float PercentageBonus = 1.0f;
+                var droppedPilots = new List<PilotDef>();
                 foreach (UnitResult unitResult in __instance.PlayerUnitResults)
                 {
                     PilotQuirkManager.Instance.additionalCbills(unitResult.pilot.pilotDef, ref FlatBonus, ref PercentageBonus);
+                    droppedPilots.Add(unitResult.pilot.pilotDef);
                 }
 
                 int Payout = __instance.MoneyResults;
@@ -79,6 +82,16 @@ namespace MechAffinity.Patches
                 }
                 
                 PilotQuirkManager.Instance.ResetEffectCache();
+            }
+
+            if (Main.settings.enablePilotManagement)
+            {
+                var droppedPilots = new List<PilotDef>();
+                foreach (UnitResult unitResult in __instance.PlayerUnitResults)
+                {
+                    droppedPilots.Add(unitResult.pilot.pilotDef);
+                }
+                PilotManagementManager.Instance.ProcessBenchedPilots(droppedPilots);
             }
             
         }

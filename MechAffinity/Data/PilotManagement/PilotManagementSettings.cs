@@ -12,6 +12,7 @@ public class PilotManagementSettings
     public string StatOnHireTag = "";
     public string StatOnFireTag = "";
     public string StatOnKilledTag = "";
+    public string StatOnBenchedTag = "";
     public List<string> ForcedRoninSelectionIds = new List<string>();
     public List<string> ExcludeRePoolingTags = new List<string>();
     public bool CanRepoolRonin = false;

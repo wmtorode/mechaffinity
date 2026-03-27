@@ -28,6 +28,7 @@ public class PilotManagementManager
     private const string MaPilotHiredPrefix = "hasPilot_";
     private const string MaPilotFiredPrefix = "firedPilot_";
     private const string MaPilotKilledPrefix = "killedPilot_";
+    private const string MaPilotBenchedStatPrefix = "PilotBenched_";
 
     private const string MaFiredModifierPrefix = "MaFiredModifier_";
     private const string MaFiredModifierRecoveryPrefix = "MaFiredRecovery_";
@@ -212,6 +213,16 @@ public class PilotManagementManager
     public void setSimGameState(SimGameState simGameState)
     {
         _simGame = simGameState;
+
+        // process existing pilots
+        foreach (var pilot in _simGame.PilotRoster.rootList)
+        {
+            if (pilot.pilotDef.PilotTags.Contains(settings.StatOnBenchedTag) && !companyStats.ContainsStatistic($"{MaPilotBenchedStatPrefix}{pilot.pilotDef.Description.Id}"))
+            {
+                companyStats.AddStatistic($"{MaPilotBenchedStatPrefix}{pilot.pilotDef.Description.Id}", 0);
+            }
+        }
+        
     }
     
     public void setCompanyStats(StatCollection stats)
@@ -295,6 +306,10 @@ public class PilotManagementManager
         {
             _simGame.companyTags.Add($"{MaPilotHiredPrefix}{pilotDef.Description.Id}");
         }
+        if (pilotDef.PilotTags.Contains(settings.StatOnBenchedTag) && !companyStats.ContainsStatistic($"{MaPilotBenchedStatPrefix}{pilotDef.Description.Id}"))
+        {
+            companyStats.AddStatistic($"{MaPilotBenchedStatPrefix}{pilotDef.Description.Id}", 0);
+        }
     }
 
     public void UpdateSpawnModifiers()
@@ -364,6 +379,10 @@ public class PilotManagementManager
         {
             _simGame.companyTags.Remove($"{MaPilotHiredPrefix}{pilotDef.Description.Id}");
         }
+        if (companyStats.ContainsStatistic($"{MaPilotBenchedStatPrefix}{pilotDef.Description.Id}"))
+        {
+            companyStats.Set($"{MaPilotBenchedStatPrefix}{pilotDef.Description.Id}", 0);
+        }
         
         if (!string.IsNullOrEmpty(settings.StatOnFireTag))
         {
@@ -420,6 +439,10 @@ public class PilotManagementManager
         {
             _simGame.companyTags.Remove($"{MaPilotHiredPrefix}{pilotDef.Description.Id}");
         }
+        if (companyStats.ContainsStatistic($"{MaPilotBenchedStatPrefix}{pilotDef.Description.Id}"))
+        {
+            companyStats.Set($"{MaPilotBenchedStatPrefix}{pilotDef.Description.Id}", 0);
+        }
         
         if (!string.IsNullOrEmpty(settings.StatOnKilledTag))
         {
@@ -435,6 +458,33 @@ public class PilotManagementManager
             if (settings.EnableSpawnModifiers)
             {
                 UpdateKilledModifiers();
+            }
+        }
+    }
+
+    public void ProcessBenchedPilots(List<PilotDef> pilotsWhoDropped)
+    {
+        if (_simGame == null) return;
+        var possibleBenchWarmerPilots = _simGame.PilotRoster.rootList.Where(p => p.pilotDef.PilotTags.Contains(settings.StatOnBenchedTag)).ToList();
+        var droppedPilotIds = pilotsWhoDropped.Select(p => p.Description.Id).ToList();
+        
+        foreach (var pilot in possibleBenchWarmerPilots)
+        {
+            if (!droppedPilotIds.Contains(pilot.pilotDef.Description.Id))
+            {
+                if(!_simGame.companyStats.ContainsStatistic($"{MaPilotBenchedStatPrefix}{pilot.pilotDef.Description.Id}"))
+                {
+                    _simGame.companyStats.AddStatistic($"{MaPilotBenchedStatPrefix}{pilot.pilotDef.Description.Id}", 0);
+                }
+                var currentBenchedCount = _simGame.companyStats.GetValue<int>($"{MaPilotBenchedStatPrefix}{pilot.pilotDef.Description.Id}");
+                _simGame.companyStats.Set($"{MaPilotBenchedStatPrefix}{pilot.pilotDef.Description.Id}", currentBenchedCount + 1);
+            }
+            else
+            {
+                if(_simGame.companyStats.ContainsStatistic($"{MaPilotBenchedStatPrefix}{pilot.pilotDef.Description.Id}"))
+                {
+                    _simGame.companyStats.Set($"{MaPilotBenchedStatPrefix}{pilot.pilotDef.Description.Id}", 0);
+                }
             }
         }
     }
