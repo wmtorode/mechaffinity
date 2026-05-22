@@ -23,6 +23,11 @@ namespace MechAffinity
 
         protected void applyStatusEffects(AbstractActor actor, List<EffectData> effects)
         {
+            
+            // battle royale does team switching fuckery in order to get the required number of opposing opfor
+            // without a guard we will keep apply effects on every team swap, which can be 5 or 6 times within a single round
+            if (spawnedActors.Contains(actor)) return;
+            
             List<PilotDelayedEffects> delayedEffectsFromActor = new List<PilotDelayedEffects>();
             foreach (EffectData statusEffect in effects)
             {
