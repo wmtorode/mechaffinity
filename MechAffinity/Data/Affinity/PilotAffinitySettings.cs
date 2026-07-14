@@ -18,6 +18,7 @@ namespace MechAffinity.Data
         public int topAffinitiesInTooltipCount = 3;
         public bool showQuirks = false;
         public bool treatDefaultsAsFixed = false;
+        public bool useAssemblyVariantAsName = false;
         public List<AffinityGroup> affinityGroups = new List<AffinityGroup>();
         public List<PrefabOverride> prefabOverrides = new List<PrefabOverride>();
     }

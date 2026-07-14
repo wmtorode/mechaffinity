@@ -105,6 +105,7 @@ the settings file or can be tracked by stats that in-game events or argo upgrade
   "topAffinitiesInTooltipCount": 3,
   "showQuirks": false,
   "treatDefaultsAsFixed" : false,
+  "useAssemblyVariantAsName": false
   "affinityGroups": [],
   "prefabOverrides": []
 }
@@ -128,6 +129,7 @@ setting value will always be used
 - `affinityGroups` : a list of [AffinityGroup](#affinitygroup-objects) objects. These allow you to treat a group of prefabs/assembly IDs as a single ID
 - `prefabOverrides`: a list of [PrefabOveride](#prefaboveride-objects) objects. These allow you to correct UI display issues caused by some of the game's "Dummy Units"
 - `treatDefaultsAsFixed` : when true, mech defaults (like FCS, sensors, etc...) will be treated as fixed equipment for the purposes of quirk affinities. This setting can only be used with CustomComponents support enabled
+- `useAssemblyVariantAsName` : when true, the assembly variant will be used as the name for the mech in the pilot dossier and pilot tooltip. Only available when compiled with CustomSalvage support.
 
 #### AffinityGroup objects
 

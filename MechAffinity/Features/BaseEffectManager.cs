@@ -31,7 +31,7 @@ namespace MechAffinity
             List<PilotDelayedEffects> delayedEffectsFromActor = new List<PilotDelayedEffects>();
             foreach (EffectData statusEffect in effects)
             {
-                string effectId = $"PassiveEffect_{actor.GUID}_{UidManager.Uid}";
+                string effectId = $"PassiveEffectMA_{actor.GUID}_{UidManager.Uid}";
                 switch (statusEffect.targetingData.effectTriggerType)
                 {
                     case EffectTriggerType.Passive:

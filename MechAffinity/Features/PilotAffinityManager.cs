@@ -210,11 +210,12 @@ namespace MechAffinity
             string variantId = getPrefabId(mech, EIdType.AssemblyVariant);
             string prefabId = getPrefabId(mech, EIdType.PrefabId);
             string chassisId = getPrefabId(mech, EIdType.ChassisId);
-            chassisPrefabLut[variantId] = mech.Chassis.Description.Name;
-            chassisPrefabLut[chassisId] = mech.Chassis.Description.Name;
+            string unitName = GetMechName(mech);
+            chassisPrefabLut[variantId] = unitName;
+            chassisPrefabLut[chassisId] = unitName;
             if (variantId != prefabId)
             {
-                chassisPrefabLut[prefabId] = mech.Chassis.Description.Name;
+                chassisPrefabLut[prefabId] = unitName;
             }
             //Main.modLog.Info?.Write($"adding to lut {prefabId} => {mech.Chassis.Description.Name}");
         }
@@ -311,6 +312,47 @@ namespace MechAffinity
         {
             string pilotId = statName.Split('=')[1];
             return $"{MaDaysElapsedModStat}{pilotId}";
+        }
+
+        private string GetMechName(MechDef mech)
+        {
+            
+            #if USE_CS_CC && USE_LT
+            if (mech.IsVehicle())
+            {
+                if (dataManager == null)
+                {
+                    setDataManager(null);
+                }
+                VehicleDef vehicle = dataManager.VehicleDefs.Get(mech.Description.Id);
+                return GetMechName(vehicle);
+            }
+                    
+            
+            #endif
+            #if USE_CS_CC
+                if (settings.useAssemblyVariantAsName)
+                {
+                    if (mech.Chassis.Is<AssemblyVariant>(out var a) && !string.IsNullOrEmpty(a.PrefabID))
+                        return a.PrefabID;
+                }
+            #endif
+            
+            return mech.Chassis.Description.Name;
+        }
+
+        private string GetMechName(VehicleDef vehicle)
+        {
+
+            #if USE_CS_CC && USE_LT
+                if (settings.useAssemblyVariantAsName)
+                {
+                    if (vehicle.Chassis.Is<AssemblyVariant>(out var a) && !string.IsNullOrEmpty(a.PrefabID))
+                        return a.PrefabID;
+                }
+            #endif
+            
+            return vehicle.Chassis.Description.Name;
         }
 
         private string getPrefabIdInternal(ChassisDef chassis, EIdType idType)
@@ -591,7 +633,7 @@ namespace MechAffinity
                     prefabId = getPrefabId(result.mech, EIdType.AssemblyVariant);
                 }
             }
-            chassisPrefabLut[prefabId] = result.mech.Chassis.Description.Name;
+            chassisPrefabLut[prefabId] = GetMechName(result.mech);
             string statName = $"{MaDeploymentStat}{result.pilot.pilotDef.Description.Id}={prefabId}";
             return statName;
         }
