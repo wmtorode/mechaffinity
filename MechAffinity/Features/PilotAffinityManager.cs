@@ -35,6 +35,7 @@ namespace MechAffinity
         private const string MaPilotDeployCountTagHeavy = "affinityLevelHeavy_";
         private const string MaPilotDeployCountTagAssault = "affinityLevelAssault_";
         private const string MaPilotSharedWeightDeployCountTag = "sharedWeightAffinityLevel_";
+        internal const string MaDoNotProcessTag = "MaDoNotProcess";
         private static PilotAffinityManager _instance;
         private StatCollection companyStats;
         private Dictionary<string, List<AffinityLevel>> chassisAffinities;

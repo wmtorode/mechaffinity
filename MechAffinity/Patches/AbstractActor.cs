@@ -49,6 +49,12 @@ namespace MechAffinity.Patches
     {
         public static void Postfix(AbstractActor __instance)
         {
+
+            if (__instance.GetTags().Contains(PilotAffinityManager.MaDoNotProcessTag))
+            {
+                return;
+            }
+            
             if (Main.settings.enablePilotAffinity) PilotAffinityManager.Instance.applyBonuses(__instance);
             
             if (Main.settings.enablePilotQuirks) PilotQuirkManager.Instance.applyBonuses(__instance);
