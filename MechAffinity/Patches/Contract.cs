@@ -125,8 +125,15 @@ namespace MechAffinity.Patches
             if (additionalSalvagePicks != 0)
             {
                 // BT Salavage Screen UI cannot handle more than 7 priority picks, do not allow more
-                __instance.FinalPrioritySalvageCount = Math.Max(
-                    Math.Min(__instance.FinalPrioritySalvageCount + additionalSalvagePicks, 7), 0);
+                if (Main.settings.quirkSettings.enforceVanillaSalvageLimit)
+                {
+                    __instance.FinalPrioritySalvageCount = Math.Max(
+                        Math.Min(__instance.FinalPrioritySalvageCount + additionalSalvagePicks, 7), 0);
+                }
+                else
+                {
+                    __instance.FinalPrioritySalvageCount += additionalSalvagePicks;
+                }
             }
             
             Main.modLog.Info?.Write($"Generating Salvage picks Finish: {__instance.FinalPrioritySalvageCount}/{__instance.FinalSalvageCount}");

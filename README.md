@@ -581,6 +581,7 @@ Quirks may have their various features adjusted using the below settings.
   "playerQuirkPools": false,
   "argoAdditive": true,
   "argoMultiAutoAdjust": true,
+  "enforceVanillaSalvageLimit": true,
   "argoMin": 0.0,
   "quirkPools":[],
   "tooltipTags":[],
@@ -599,6 +600,7 @@ Quirks may have their various features adjusted using the below settings.
 - `addTags` : a list of pilot tags. When Quirks are enabled, these tags will be automatically added to any pilot in your roster
 - `tagUpdates`: a list of [TagUpdate](#tageupdate-objects) objects. These can be used to roll out updates to existing pilots in the players roster without a save break.
 - `restrictions`: a list of [QuirkRestriction](#quirkrestriction-objects) objects. These can be used to keep powerful quirks from being overused
+- `enforceVanillaSalvageLimit`: when true enforce vanilla's hard limit of 7 salvage picks, when false no cap is enforced. **Warning: going above this without another mod that fixes this limit will cause a crash**
 
 #### QuirkPool objects
 

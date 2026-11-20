@@ -9,6 +9,7 @@ namespace MechAffinity.Data
         public bool argoAdditive = true;
         public bool argoMultiAutoAdjust = true;
         public float argoMin = 0.0f;
+        public bool enforceVanillaSalvageLimit = true;
         
         public List<QuirkPool> quirkPools = new List<QuirkPool>();
         public List<PilotTooltipTag> tooltipTags = new List<PilotTooltipTag>();
